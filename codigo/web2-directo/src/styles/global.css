@@ -82,22 +82,8 @@ a:hover { color: var(--active); }
 @keyframes failsafe-show { to { visibility: visible; } }
 @keyframes failsafe-light { to { filter: none; } }
 
-/* Foto que se enciende al entrar en pantalla (solo escritorio: en la tira móvil nunca hay fotos apagadas).
-   Parte de brillo 0,6 sin tocar la saturación y dura 0,5 s. */
-@media (min-width: 1024px) {
-  .motion [data-reveal] img {
-    filter: brightness(0.6);
-    animation: failsafe-light 0s 2s forwards;
-  }
-  .motion [data-reveal].is-revealed img {
-    animation: encender 0.5s var(--ease-out) forwards;
-  }
-  .motion [data-reveal].no-anim img { animation: none; filter: none; }
-}
-@keyframes encender {
-  from { filter: brightness(0.6); }
-  to { filter: none; }
-}
+/* Sin efectos sobre las fotos (decisión de Álvaro): ni filtros, ni oscurecido de entrada, ni WebGL encima.
+   La foto se ve siempre con sus colores originales. */
 
 /* View transition setlist → evento */
 ::view-transition-group(photo) {

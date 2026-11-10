@@ -9,7 +9,7 @@
  *
  *  · Fuente: el ORIGINAL tal cual sale de Lightroom (src/content/eventos/<slug>/NN.jpg, sin reducir).
  *  · Versiones para la web: JPEG calidad 95, color a resolución completa (4:4:4), progresivo (mozjpeg),
- *    reducción en luz lineal (gamma) con Lanczos, orientación EXIF aplicada y perfil sRGB incrustado.
+ *    reducción a 16 bits por canal con Lanczos (sin gamma: a 8 bits aplastaba los negros), orientación EXIF aplicada y perfil sRGB incrustado.
  *    Anchos: 640, 800, 1080, 1280, 1600, 2000, 2400 y 3200 px (solo los menores que el original). El navegador elige
  *    según el tamaño en pantalla × densidad de píxeles, así nunca se ve una foto estirada.
  *  · Original: NN-original.jpg = el archivo original byte a byte (sin recomprimir). Si pasa de 24 MiB
@@ -32,7 +32,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const SRC = path.join(ROOT, 'src/content/eventos');
 const CACHE = path.join(ROOT, 'node_modules/.astro/fotos');
 const OUT = path.join(ROOT, 'public/fotos');
-const VERSION = 'v1-q95-444-gamma'; // cambiar para forzar regenerar todo
+const VERSION = 'v2-q95-444-rgb16'; // cambiar para forzar regenerar todo
 
 sharp.concurrency(Math.max(1, Math.min(4, os.cpus().length)));
 
@@ -61,8 +61,11 @@ async function one(slug, file) {
     jobs.push(
       sharp(src, { limitInputPixels: false })
         .rotate()
-        .gamma(2.2) // reducción en luz lineal: las luces y los brillos no se apagan al reducir
+        // 16 bits por canal durante la reducción: sin escalones ni manchas en negros y degradados.
+        // OJO: no usar .gamma(): sharp la aplica a 8 bits y aplasta las sombras (bug visto el 10/11/2026).
+        .pipelineColourspace('rgb16')
         .resize({ width, kernel: 'lanczos3', withoutEnlargement: true })
+        .toColourspace('srgb')
         .withIccProfile('srgb')
         .keepExif()
         .jpeg(jpegOpts(QUALITY))
