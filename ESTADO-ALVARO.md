@@ -1,5 +1,5 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 10/11/2026 (chat inicial de construcción)._ Actualizar al final de cada chat.
+_Última actualización: 10/11/2026 (chat inicial de construcción)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 
 ## 1. Álvaro (datos confirmados)
 - 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha.

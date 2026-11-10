@@ -20,7 +20,7 @@ Aquí están las 4 webs completas, lo necesario para publicarlas en Cloudflare y
 4. `web4-viaje`: «A través del visor», intro de cámara y viaje 3D.
 
 ## Cómo usarlo
-- **Proyecto de Claude:** sube `ESTADO-ALVARO.md` y, si quieres, `PROMPT-ORIGINAL.md`, y pega `INSTRUCCIONES-PROYECTO.md`. Cuando un chat tenga que tocar código, dale el enlace de este repo: https://github.com/Javimati/proyecto-paraguayo
+- **Proyecto de Claude:** pega en sus instrucciones el texto corto que hay al principio de `INSTRUCCIONES-PROYECTO.md`, o el archivo entero. Todo lo demás se lee de este repo. Cuando un chat tenga que tocar código, dale el enlace de este repo: https://github.com/Javimati/proyecto-paraguayo
 - **Ver una web en tu PC:** abre la carpeta `codigo/webN-…` en una terminal y escribe `npm install` y luego `npm run dev`. Necesitas Node 22.
 - **Publicar:** sigue `LEEME-DESPLIEGUE.md`. Lo recomendado es GitHub + Cloudflare Pages, con build `npm run build`, salida `dist` y `NODE_VERSION=22`.
 - **Las fotos son de muestra** (PROVISIONAL) salvo el retrato. Las reales están en `C:\Users\USUARIO\Desktop\FIESTAS Y MÚSICA\` y se importan en la web 2 con `npm run photos:import` (ver ESTADO §4).
