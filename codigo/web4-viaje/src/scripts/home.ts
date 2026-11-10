@@ -79,8 +79,16 @@ function createProgress() {
   };
 }
 
+/** El botón dice lo que hace: «Sin animación» (pasa a la vista plana) o «Con animación» (vuelve al 3D) */
 function setPressed(is2d: boolean) {
-  btn?.setAttribute('aria-pressed', String(is2d));
+  if (!btn) return;
+  // la etiqueta ya dice el estado al que se pasa: sin aria-pressed (un conmutador no debe cambiar de nombre)
+  btn.removeAttribute('aria-pressed');
+  btn.dataset.view = is2d ? '2d' : '3d';
+  const label = btn.querySelector('.index-btn__label');
+  const d = btn.dataset;
+  if (label) label.textContent = (is2d ? d.animated : d.plain) ?? label.textContent;
+  btn.title = (is2d ? d.animatedHint : d.plainHint) ?? btn.title;
 }
 
 function to2D(opts: { focus?: boolean; remember?: boolean } = {}) {
@@ -224,9 +232,11 @@ if (!capable) {
   introRoot.replaceChildren();
   // Sin botón de alternar: «Índice» lleva al índice de capítulos
   btn?.removeAttribute('aria-pressed');
+  if (btn) btn.title = btn.dataset.index ?? btn.title;
 } else if (store.get('vista-2d') === '1') {
   html.classList.remove('intro-on', 'intro-pre');
   setPressed(true);
 } else {
+  setPressed(false);
   enter3D(store.get('intro-visto') !== '1');
 }

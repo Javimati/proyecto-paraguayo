@@ -29,7 +29,7 @@ for cap in sorted(os.listdir(src_root)):
 keep = {}
 for k, vs in avail.items():
     ws = sorted(vs)
-    small = ws[0]
+    small = 480 if 480 in vs else ws[0]  # la textura lejana del viaje 3D usa 480
     big = max([w for w in ws if w <= MAXPX] or [small])
     keep[k] = {small: vs[small], big: vs[big]}
 

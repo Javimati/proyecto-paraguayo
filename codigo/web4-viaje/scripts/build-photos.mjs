@@ -27,7 +27,7 @@ import path from 'node:path';
 import os from 'node:os';
 import sharp from 'sharp';
 
-export const WIDTHS = [640, 800, 1080, 1280, 1600, 2000, 2400, 3200];
+export const WIDTHS = [320, 480, 640, 800, 1080, 1280, 1600, 2000, 2400, 3200];
 const QUALITY = 95;
 const MAX_ORIGINAL = 24 * 1024 * 1024;
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');

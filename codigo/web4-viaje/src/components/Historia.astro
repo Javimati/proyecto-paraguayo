@@ -19,7 +19,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 // Foto del visor en el hero: la primera destacada (o la primera de todas)
 const all = chapters.flatMap((c) => c.photos);
-const hero = all.find((p) => p.featured) ?? all[0];
+// el visor es horizontal (3:2): la primera destacada horizontal
+const hero = all.find((p) => p.featured && p.w > p.h) ?? all.find((p) => p.w > p.h) ?? all[0];
 
 /** Hueco de cada foto en la retícula (patrón de 4) y su `sizes` real */
 function slot(p: PhotoView, i: number) {
@@ -274,6 +275,12 @@ function slot(p: PhotoView, i: number) {
   .index__title {
     margin-bottom: 18px;
     font-weight: 400;
+  }
+  /* El índice y los capítulos no se pintan (ni cargan sus fotos) hasta acercarse: la foto del visor (LCP) va sola */
+  .index,
+  .chapter {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
   }
   .index__list {
     display: grid;

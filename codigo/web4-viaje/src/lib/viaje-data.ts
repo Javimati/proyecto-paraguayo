@@ -20,9 +20,9 @@ export type ViajeData = {
       src: string;
       srcSmall: string;
       /** todas las versiones nativas (ancho real → URL), la última es el original */
-      srcset: string;
+      srcset?: string;
       variants: [number, string][];
-      original: string;
+      original?: string;
       w: number;
       h: number;
       alt: string;
@@ -33,6 +33,8 @@ export type ViajeData = {
 };
 
 export type PhotoView = ViajeData['chapters'][number]['photos'][number] & {
+  srcset: string;
+  original: string;
   srcMid: string;
   raw: RawPhoto;
   chapterId: string;
@@ -112,13 +114,12 @@ export async function getViajeData(lang: Lang): Promise<ViajeData> {
       kicker: c.kicker,
       title: c.title,
       text: c.text,
-      photos: c.photos.map(({ id, src, srcSmall, srcset, variants, original, w, h, alt, caption, dominant }) => ({
+      photos: c.photos.map(({ id, src, srcSmall, variants, w, h, alt, caption, dominant }) => ({
         id,
         src,
         srcSmall,
-        srcset,
+        // srcset y original se reconstruyen en el cliente a partir de variants (HTML más ligero)
         variants,
-        original,
         w,
         h,
         alt,

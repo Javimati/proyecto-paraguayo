@@ -13,7 +13,10 @@ const { lang } = Astro.props;
 const t = T[lang];
 const es = lang === 'es';
 const views = await getChapterViews(lang);
-const picks = views.flatMap((c) => c.photos).filter((p) => p.featured);
+const featured = views.flatMap((c) => c.photos).filter((p) => p.featured);
+// la primera, horizontal: es la foto LCP y una vertical pesa el doble al mismo ancho
+const firstH = featured.findIndex((p) => p.w > p.h);
+const picks = firstH > 0 ? [featured[firstH], ...featured.filter((_, i) => i !== firstH)] : featured;
 const provisional = views.some((c) => c.provisional);
 const site = Astro.site!;
 const jsonld = picks.map((p) => ({
@@ -131,6 +134,11 @@ const jsonld = picks.map((p) => ({
   .ed__prov {
     color: var(--tenue);
     margin-bottom: 20px;
+  }
+  /* después de la primera, cada foto se pinta (y se descarga) al acercarse: la primera (LCP) va sola */
+  .ed__grid > li:nth-child(n + 2) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 520px;
   }
   .ed__grid {
     display: grid;

@@ -125,7 +125,8 @@ export function buildLayout(data: ViajeData, opts: { perChapter: number; thumbs:
     const preset: Preset = mobile ? 'axis' : PRESETS[ci % PRESETS.length];
     const all = ch.photos;
     const main = all.slice(0, Math.max(1, opts.perChapter));
-    const extra = opts.thumbs && preset === 'wall' ? all.slice(main.length, main.length + 12) : [];
+    // el resto de fotos del capítulo: satélites sin parada (se abren en el lightbox). Cada decorado los coloca a su manera
+    const extra = opts.thumbs ? all.slice(main.length, main.length + (preset === 'carousel' ? 24 : 16)) : [];
     const r = rand(ci * 31 + 7);
     const anchor = new Vector3(mobile ? 0 : Math.sin(ci * 1.7) * 10, 0, anchorZ);
     const firstStop = stops.length;
@@ -232,6 +233,20 @@ export function buildLayout(data: ViajeData, opts: { perChapter: number; thumbs:
         });
         if (j === 0) hero = i;
       });
+      // telón: el resto del concierto colgado en lo alto, detrás del escenario (dos filas escalonadas)
+      if (extra.length) {
+        const perRow = Math.ceil(extra.length / 2);
+        const tw = Math.max(n * 4.3 + 2, 10) / perRow;
+        extra.forEach((p, j) => {
+          const row = Math.floor(j / perRow);
+          const col = j % perRow;
+          const rowN = row === 0 ? perRow : extra.length - perRow;
+          const { width, height } = size(p, 1.75, tw - 0.35);
+          const x = (col - (rowN - 1) / 2) * tw + (row ? tw * 0.5 : 0) * 0;
+          const pos = anchor.clone().add(new Vector3(x, 4.2 - row * 2.15, -10.5 - row * 0.6));
+          add({ ...base, photo: p, role: 'thumb', pos, quat: new Quaternion(), normal: zFront.clone(), width, height, isStop: false });
+        });
+      }
       anchorZ -= 40;
     } else if (preset === 'carousel') {
       // los eventos: un círculo de fotos alrededor de la cámara que gira con el scroll
@@ -246,7 +261,18 @@ export function buildLayout(data: ViajeData, opts: { perChapter: number; thumbs:
         const i = add({ ...base, photo: p, role: j === 0 ? 'hero' : 'sat', pos, quat: quatFromNormal(nrm), normal: nrm, width, height, isStop: true });
         if (j === 0) hero = i;
       });
-      anchorZ -= 38;
+      // anillo exterior: el resto de la fiesta alrededor, a dos alturas y desfasado (se ve entre las fotos del anillo interior)
+      const ne = extra.length;
+      const R2 = 10.8;
+      extra.forEach((p, j) => {
+        const tier = j % 2;
+        const a = ((j + 0.5) / ne) * Math.PI * 2 + tier * (Math.PI / Math.max(ne, 1));
+        const pos = center!.clone().add(new Vector3(Math.sin(a) * R2, tier ? -1.15 : 1.75, -Math.cos(a) * R2));
+        const nrm = center!.clone().sub(pos).setY(0).normalize();
+        const { width, height } = size(p, 1.9, 2.9);
+        add({ ...base, photo: p, role: 'thumb', pos, quat: quatFromNormal(nrm), normal: nrm, width, height, isStop: false });
+      });
+      anchorZ -= 44;
     } else {
       // lo que viene: un plano sin revelar que se revela al llegar
       main.forEach((p, j) => {

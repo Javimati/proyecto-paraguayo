@@ -171,6 +171,12 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   }
 
   const { root, data, tier } = o;
+  for (const ch of data.chapters)
+    for (const ph of ch.photos)
+      if (ph.variants?.length) {
+        ph.srcset ??= ph.variants.map(([w, u]) => `${u} ${w}w`).join(', ');
+        ph.original ??= ph.variants[ph.variants.length - 1][1];
+      }
   const high = tier === 'high';
   const touch = matchMedia('(hover: none)').matches;
   const mobile = touch || innerWidth / Math.max(innerHeight, 1) < 1;
@@ -570,8 +576,13 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       const aspect = cv.width / cv.height;
       const right = new Vector3(1, 0, 0).applyQuaternion(hero.quat);
       if (mobile) {
-        const w = Math.min(hero.width * 1.1, 2.3);
-        const h = w / aspect;
+        let w = Math.min(hero.width * 1.1, 2.3);
+        let h = w / aspect;
+        // los títulos cortos no crecen sin límite: alto máximo para que no se metan bajo la cabecera
+        if (h > 0.36) {
+          h = 0.36;
+          w = h * aspect;
+        }
         mesh.scale.set(w, h, 1);
         mesh.position.copy(hero.pos).add(new Vector3(0, hero.height / 2 + h * 0.75 + 0.05, -0.05));
       } else {
@@ -855,7 +866,8 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     const W = s.width + FRAME * 2;
     const H = s.height + FRAME * 2;
     const isHero = s.role === 'hero';
-    const d = mobile ? fitDist(W, H, 0.6, 0.86) : fitDist(W, H, isHero ? 0.56 : 0.68, isHero ? 0.52 : 0.74);
+    // móvil: las verticales algo más pequeñas para que el título del capítulo quepa encima, bajo la cabecera
+    const d = mobile ? fitDist(W, H, H > W ? (isHero ? 0.46 : 0.54) : 0.6, 0.86) : fitDist(W, H, isHero ? 0.56 : 0.68, isHero ? 0.52 : 0.74);
     out.p.copy(s.pos).addScaledVector(s.normal, d).add(s.camOffset);
     out.l.copy(s.pos).addScaledVector(s.camOffset, 0.15);
     const right = tmpA.crossVectors(s.normal, UP).normalize().negate(); // derecha de pantalla
@@ -1997,6 +2009,12 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       },
       stops: nStops,
       open: (i: number) => openIndex(i),
+      state: () => ({ restW, cs, ts, csV, vel, lastInput, focus, introK, started, lbOpen, lbT, mosaic }),
+      photo: (i: number) => {
+        const p = photos[i];
+        const u = p.mesh.material.uniforms;
+        return { vis: p.mesh.visible, reveal: u.uReveal.value, fade: u.uFade.value, lum: u.uLum.value, soft: u.uSoft.value, hasTex: u.uHasTex.value, revealT: p.revealT, fadeIn: p.fadeIn, role: p.slot.role, stop: p.slot.stop, transparent: p.mesh.material.transparent, ro: p.mesh.renderOrder };
+      },
       cam: () => [camera.position.x, camera.position.y, camera.position.z, camLook.x, camLook.y, camLook.z],
       street: () => street?.debug,
       zones: zones.map((z) => [z.firstStop, z.lastStop]),

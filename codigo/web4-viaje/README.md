@@ -11,7 +11,7 @@ misma historia en 2D para móviles modestos, lectores de pantalla y quien prefie
    - Para ver la versión 2D: `?tier=none`.
 
 ## Cambiar fotos y textos
-Cada capítulo es una carpeta en `src/content/fotos/` (`01-desde-arganda`, `02-la-calle`…) con sus fotos y un
+Cada capítulo es una carpeta en `src/content/fotos/` (`01-desde-madrid`, `02-la-calle`, `03-la-noche`, `04-supernoventeros`, `05-fiesta-naranja`, `06-lo-que-viene`) con sus fotos y un
 `index.md`:
 ```yaml
 n: 2                        # orden del capítulo
@@ -32,7 +32,7 @@ photos:
   (capítulo = `2`, `02-la-calle` o `la-calle`). Copia los JPEG **originales byte a byte**, sin reducir ni recomprimir,
   ordenados por fecha EXIF, y deja pies/alt como TODO. `place` y `date` son opcionales: no se inventan.
 - **Versiones web:** `scripts/build-photos.mjs` (se ejecuta solo con `npm run build`/`dev`) genera JPEG calidad 95 con
-  color 4:4:4 a 640–3200 px + el original (`public/fotos/`, fuera del repo). Cada pantalla recibe su densidad real
+  color 4:4:4 a 320–3200 px + el original (`public/fotos/`, fuera del repo). Cada pantalla recibe su densidad real
   (srcset/sizes). En el viaje 3D, cuando la cámara se para ante una foto o se abre el lightbox, encima del lienzo se
   pone la foto real del navegador encajada a píxel físico (`src/experience/native.ts`); las texturas 3D se eligen por
   su tamaño real en pantalla y las lejanas se liberan.
@@ -60,6 +60,6 @@ photos:
 Alternativa sin GitHub: `npm run build` y arrastra la carpeta `dist` en Cloudflare Pages → Upload assets.
 
 ## Pendiente (TODO visible en la web)
-Fotos reales (originales, con `photos:import`) y sus pies · textos de los capítulos · bio de 60–90 palabras · cámara y objetivos (opcional) · PDF de
-portfolio y CV · dominio. Las 49 fotos actuales son de muestra generadas y están marcadas como PROVISIONAL.
+Pies definitivos de las fotos · textos de los capítulos · bio de 60–90 palabras · cámara y objetivos (opcional) · PDF de
+portfolio y CV · dominio. Las 63 fotos ya son las reales (originales); faltan lugares, fechas y textos de capítulo (TODO visibles). El primer build genera las versiones en ~10 min.
 Nota: las versiones web conservan el EXIF (autor, copyright) y llevan perfil sRGB incrustado; el original se sirve tal cual.

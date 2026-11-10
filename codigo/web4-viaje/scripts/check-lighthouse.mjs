@@ -5,6 +5,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { gzipSync } from 'node:zlib';
 const run = promisify(execFile);
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
@@ -13,8 +14,16 @@ const server = createServer(async (req, res) => {
   let p = join(DIST, decodeURIComponent(new URL(req.url, 'http://x').pathname));
   try {
     if ((await stat(p)).isDirectory()) p = join(p, 'index.html');
-    res.writeHead(200, { 'content-type': TYPES[extname(p)] ?? 'application/octet-stream' });
-    res.end(await readFile(p));
+    // como Cloudflare Pages: texto comprimido (sin esto Lighthouse simula un HTML varias veces más pesado)
+    const type = TYPES[extname(p)] ?? 'application/octet-stream';
+    const body = await readFile(p);
+    if (/^(text|application\/(json|xml)|image\/svg)/.test(type) && /\bgzip\b/.test(req.headers['accept-encoding'] ?? '')) {
+      res.writeHead(200, { 'content-type': type, 'content-encoding': 'gzip', vary: 'accept-encoding' });
+      res.end(gzipSync(body, { level: 9 }));
+    } else {
+      res.writeHead(200, { 'content-type': type });
+      res.end(body);
+    }
   } catch {
     res.writeHead(404, { 'content-type': 'text/html' });
     res.end(await readFile(join(DIST, '404.html')).catch(() => 'not found'));

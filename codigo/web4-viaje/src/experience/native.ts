@@ -91,6 +91,8 @@ export class NativeLayer {
 
   /** visible = la cámara está quieta y la foto está entera en su sitio. Devuelve la opacidad actual. */
   update(q: Quad | null, visible: boolean, dt: number): number {
+    // si decode() se canceló (el navegador cambió de versión del srcset a medio camino), basta con que esté cargada
+    if (!this.ready && this.id && this.img.complete && this.img.naturalWidth > 0 && this.img.currentSrc) this.ready = true;
     const target = visible && this.ready && q ? 1 : 0;
     // entra suave (0,2 s) y sale casi al instante (0,06 s) para no ir nunca por detrás de la cámara
     const k = target > this.alpha ? dt / 0.2 : dt / 0.06;

@@ -20,6 +20,7 @@ _Última actualización: 10/11/2026 (chat 4: web 4 «la calle de los recuerdos»
 - `LA FIESTA NARANJA/`: 22 JPG (5–27 MB). Según el nombre de archivo, 07 y 08/06/2025. Varios «-Mejorado-NR».
 - `SUPERNOVENTEROS/`: 16 JPG (7–20 MB).
 - `MÁS TRABAJOS/`: 15 JPG/JPEG (4–22 MB), mezcla de eventos.
+- `CALLEJERAS/`: fotos de calle (10 usadas en la web 4: _R005298, _R005301, _R005313, _R005473.2, _R005573, _R005832, _R006078, _R006694.2, _R007191, _R007244.2). Sin lugar ni fecha confirmados.
 - **Fechas según EXIF:** Fiesta Naranja 07–08/06/2025; Supernoventeros 29–30/03/2025; Más trabajos: 11/05/2025 (2 fotos), 06/09/2025 (3), 22/08/2026 (2) y una sin EXIF (`SAVE_20251001_220145.jpg`).
 - **Pendiente de Marlon/Álvaro:** lugar de Fiesta Naranja y Supernoventeros, confirmar las fechas, y qué es cada foto de Más trabajos (lugar, evento, quién sale) para los pies.
 
@@ -33,7 +34,7 @@ _Última actualización: 10/11/2026 (chat 4: web 4 «la calle de los recuerdos»
 | 3 | `alvaro-archivo` | Portfolio global: mesa de luz infinita con cuentahílos, filtros por apartado. Newsreader + Schibsted Grotesk | https://claude.ai/artifact/RxBFxBmVxHCzCywXVsahKD (slug ca0f8e88-b9f7-4207-bd91-494176ce8008) |
 | 4 | `alvaro-viaje` | «A través del visor»: intro de visor de cámara (mantén para enfocar), viaje 3D Three.js por 6 estaciones, final con hoja de contactos. Bricolage Grotesque + Martian Mono, acento #ffe14d | https://claude.ai/artifact/8wpoRMP9kGTApD9hAHhjz9 (slug 4057979a-e935-4705-b6a5-112e324de2ba) |
 
-Datos reales metidos en las 4 webs (email, teléfono, prácticas, software, inglés, movilidad, Alex Webb). Instagram quitado y botones de PDF ocultos mientras no haya archivo. Fotos: de muestra generadas (PROVISIONAL) en las webs 1, 3 y 4. **La web 2 ya tiene las fotos reales** (10/11/2026).
+Datos reales metidos en las 4 webs (email, teléfono, prácticas, software, inglés, movilidad, Alex Webb). Instagram quitado y botones de PDF ocultos mientras no haya archivo. Fotos: de muestra generadas (PROVISIONAL) en las webs 1 y 3. **Las webs 2 y 4 ya tienen las fotos reales** (10–11/11/2026).
 
 ## 3b. Web 4 — «La calle de los recuerdos» (10/11/2026, versión publicada 1794340257-c416)
 El vacío oscuro entre estaciones es ahora una **calle de Madrid de noche** (`src/experience/street.ts`):
@@ -60,10 +61,30 @@ Ahora (mismo criterio que la web 2):
 ## 3d. Web 4 — ajustes de Marlon (10/11/2026, prototipo 1794350165-ac97)
 - **Sobre mí:** bio en primera persona con el texto de la web 2 adaptado (sin quitar nada de lo que había), retrato real (`src/assets/retrato/01.jpg`, mismo archivo que la web 2) por la cadena nativa (`/fotos/retrato/`), bloque «Qué fotografío» (fotoperiodismo primero), contacto con copiar email. Fuera «Equipo».
 - **Ficha (Facts, en Sobre mí, Editores y Contacto):** fuera Movilidad y Convenio; Formación incluye el Grado Medio. Quitado también el convenio del cierre y el transporte del capítulo 6.
-- Capítulo 1 renombrado **«Desde Madrid»** (la carpeta sigue siendo `01-desde-arganda`).
+- Capítulo 1 renombrado **«Desde Madrid»** (carpeta renombrada a `01-desde-madrid` el 11/11).
 - **Viaje 3D:** AF recalculado cada fotograma y enganchado solo a la foto activa (sin mover el ratón); etiqueta solo «AF · 00N» (fuera lugar/fecha, también en la lectura de arriba a la derecha); fuera las fechas de carrete; nunca un marco colgado fuera de la foto. Índice lateral con todos los capítulos visibles y el actual marcado. Nombre de la cabecera dentro de la esquina del visor. Sin botón de sonido (viaje e intro).
 - **Transiciones:** cámara con muelle críticamente amortiguado (arranca y frena suave); los tramos largos entre capítulos duran según su longitud (≈0,7 s dentro de un capítulo, ≈2–2,2 s al 90 % en los saltos largos; antes ~0,6 s fijos).
 - **Ciudad:** las ventanas «a puntitos» eran z-fighting (edificios y aceras solapados con caras coplanarias). Ahora 0 solapes (prueba SAT), fachadas desplazadas entre sí y aceras a alturas distintas; además antialiasing analítico de ventanas, persianas y barandillas.
+
+## 3e. Web 4 — fotos reales en 6 capítulos (11/11/2026, prototipo 1794354224-5a04)
+- **63 originales byte a byte** en `src/content/fotos/` (719 MB en el repo, el mayor ~27 MB). Orden pensado para que el viaje vaya de lo íntimo a lo grande y acabe abierto:
+  1. **Desde Madrid** (carpeta `01-desde-madrid`, el cuarto): 4 callejeras.
+  2. **La calle**: 6 callejeras.
+  3. **La noche**: 13 de Más trabajos.
+  4. **Supernoventeros**: 15.
+  5. **Fiesta Naranja**: 22 (la sala grande del final).
+  6. **Lo que viene**: mt 12, mt 13 y sn 16.
+  Las fotos de muestra se han borrado. 16 destacadas (héroe = primera destacada horizontal).
+- Pies y alt de eventos copiados de la web 2; los de las callejeras, descriptivos y neutros. **Textos de capítulo, lugares y fechas siguen como `[PROVISIONAL] … TODO`** (no se inventa nada).
+- **Satélites:** las fotos que no son parada aparecen como miniaturas (muro), telón en 2 filas (escenario) y anillo exterior a dos alturas (carrusel), sin parada propia.
+- **Botón de la cabecera:** «Índice» pasa a **«Sin animación» / «Con animación»** (dice lo que hace al pulsarlo; EN: «No animation» / «Animated»). Durante la intro ya muestra la etiqueta correcta.
+- Anchos generados: 320, 480, 640, 800, 1080, 1280, 1600, 2000, 2400, 3200 + original. Móvil: verticales algo más pequeñas en el 3D. El JSON del viaje ya no lleva srcset ni original (se rehacen en el cliente): HTML más ligero.
+- `content-visibility:auto` en el índice/capítulos 2D y en /editores a partir de la 2.ª foto.
+- Lighthouse (servidor de prueba ahora con gzip, como Cloudflare): home 91, /editores 96, /en 92. **LCP 2,8–3,5 s** (por encima de los 2,5 s del presupuesto: precio de la calidad nativa, igual que la web 2).
+- **Build:** generar las versiones de 63 originales tarda **~10 min** la primera vez (1,3 GB en `public/fotos`; ningún archivo > 24 MB). En Cloudflare el límite es 20 min: el primer build va justo; los siguientes usan la caché. Si falla por tiempo, reintentar (la caché de `node_modules/.astro` se conserva entre builds si está activada) o bajar `WIDTHS`.
+- Prototipo en Claude: 2 versiones por foto (480 y ≤1080 px) por el límite de 64 MB; la calidad nativa completa solo en Cloudflare.
+- Comprobado: build ok, `check:js` 169 KB/350, `photos:check` sin errores, enlaces del prototipo sin rotos. La capa nativa del 3D aparece cuando la foto termina de revelarse (en el renderizado por software tarda ~15 s; en GPU real, inmediato). **fps reales en GPU sin medir.**
+- Pendiente (Marlon/Álvaro): lugar y fecha de cada capítulo, qué es cada foto de Más trabajos, textos de capítulo definitivos.
 
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.

@@ -16,7 +16,7 @@ const first3d = data.chapters[0]?.photos[0];
 const heroSmall = first3d?.srcSmall;
 // misma elección que Historia.astro: la primera destacada (o la primera de todas)
 const allViews = views.flatMap((c) => c.photos);
-const hero2d = allViews.find((p) => p.featured) ?? allViews[0];
+const hero2d = allViews.find((p) => p.featured && p.w > p.h) ?? allViews.find((p) => p.w > p.h) ?? allViews[0];
 const site = Astro.site!;
 const imageObjects = views
   .flatMap((c) => c.photos)

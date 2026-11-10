@@ -42,7 +42,17 @@ const items = [
   </nav>
   {
     page === 'home' ? (
-      <button type="button" class="index-btn" id="btn-indice" aria-pressed="false" title={t.indexHint}>
+      <button
+        type="button"
+        class="index-btn"
+        id="btn-indice"
+        title={t.viewPlainHint}
+        data-plain={t.viewPlain}
+        data-plain-hint={t.viewPlainHint}
+        data-animated={t.viewAnimated}
+        data-animated-hint={t.viewAnimatedHint}
+        data-index={t.index}
+      >
         <span class="index-btn__icon" aria-hidden="true" />
         <span class="index-btn__label">{t.index}</span>
       </button>
@@ -145,7 +155,7 @@ const items = [
     border-color: var(--peaking);
     color: var(--peaking);
   }
-  .index-btn[aria-pressed='true'] {
+  .index-btn[data-view='2d'] {
     border-color: var(--peaking);
   }
   /* icono: rejilla 2×2 de miniaturas */
