@@ -50,15 +50,15 @@ El vacío oscuro entre estaciones es ahora una **calle de Madrid de noche** (`sr
 - Retrato en /sobre (polaroid con cinta), JSON-LD y og:image. Páginas: setlist (home), 3 eventos y /sobre.
 - **Hecho (10/11/2026), web 2:**
   - **Las 53 fotos de la carpeta** importadas con `photos:import` (3000 px, EXIF conservado): Fiesta Naranja 22, Supernoventeros 16, Más trabajos 15. Orden: por nombre de archivo (Fiesta Naranja y Supernoventeros) y por fecha EXIF (Más trabajos).
-  - Portadas: Fiesta Naranja = DSC02931 (confeti), Supernoventeros = DSC02202 (salto chaqueta amarilla), Más trabajos = DSC00851 (dos DJs).
+  - Portadas (elegidas por Álvaro): Fiesta Naranja = DSC03108 (DJ de espaldas con gorra blanca y láseres, `20.jpg`), Supernoventeros = DSC02202 (salto chaqueta amarilla, `05.jpg`), Más trabajos = _R006961 (escenario en blanco y negro, `12.jpg`).
   - Pies y alt: **descriptivos de lo que se ve** (sin nombres, artistas ni lugares). Sustituir cuando Álvaro diga quién sale. Resúmenes de sección siguen como TODO.
   - **Sin recortes:** portada de la home (CSS `contain` y shader WebGL `fit` con bandas negras), miniatura «siguiente evento» y transición entre páginas.
-  - **Sin fechas visibles:** quitadas de pies, fichas del setlist y cabecera de evento (siguen en los datos y en el JSON-LD). Lugar sigue como «pendiente».
-  - **Calidad máxima:** WebP `quality 92` y anchos hasta 2560 px (horizontal) / 2000 px (vertical). Sin AVIF: a este tamaño tardaba >1 h en compilar y Cloudflare Pages corta a los 20 min (con WebP, ~1 min); prototipo con una imagen por foto a ~2000 px. Anchos pequeños (400–640 px) solo para móvil, misma calidad. Lighthouse móvil: home P96 (LCP 2,5–2,8 s, por encima del presupuesto de 2,5 s por la calidad máxima, decisión de Álvaro), evento P97 (2,42 s), /sobre P99, /en/ P97.
-  - Prototipo republicado en el mismo slug: versión `1794339139-2a9b` (73 archivos, una imagen por foto a ~2000 px).
+  - **Sin fechas visibles:** quitadas de pies, fichas del setlist y cabecera de evento (siguen en los datos y en el JSON-LD). **Tampoco se muestra el lugar**: fuera «Lugar: pendiente» y «Varios lugares» (home y cabecera de evento); solo saldría si se rellena `venue`/`city`.
+  - **Calidad máxima:** WebP `quality 92` y anchos hasta 2560 px (horizontal) / 2000 px (vertical). Sin AVIF: a este tamaño tardaba >1 h en compilar y Cloudflare Pages corta a los 20 min (con WebP, ~1 min); prototipo con una imagen por foto a ~2000 px. Anchos pequeños (400–640 px) solo para móvil, misma calidad. Lighthouse móvil: home P96 (LCP 2,5–2,8 s, por encima del presupuesto de 2,5 s por la calidad máxima, decisión de Álvaro), evento P90 (LCP 3,6–3,9 s con la portada nueva de láseres, muy detallada; no se baja calidad por decisión de Álvaro), /sobre P99, /en/ P97.
+  - Prototipo republicado en el mismo slug: versión `1794340326-9781` (73 archivos, una imagen por foto a ~2000 px).
   - **Página «Para promotores» eliminada** (ES y EN: `para-promotores.astro`, `en/for-promoters.astro`, `PromotersPage.astro`, enlaces del menú y del setlist). El campo `selected` de las fotos ya no se usa. Lighthouse revisa ahora `/sobre/` en su lugar.
   - Home: «Bis» → «Info» (ES y EN).
-  - /sobre: bio nueva (cercana, a partir de su texto) con texto más grande; quitado el bloque «Herramientas y referencias» y el TODO de cámara.
+  - /sobre: bio nueva (cercana, a partir de su texto) con texto más grande; quitado el bloque «Herramientas y referencias» y el TODO de cámara. Retrato más grande (polaroid hasta 360 px). En escritorio ≥ 1100 px la ficha (Qué fotografío, Formación, Contacto) va a la derecha de la bio; en tablet y móvil, debajo.
 - **Siguiente paso web 2:** pies con nombres, lugares y resúmenes de sección (datos de Álvaro).
 
 ## 5. Publicar un prototipo en Claude (lo que funcionó)

@@ -122,7 +122,9 @@ export function chronicleCaption(
 /** Ficha corta de un evento («Sala, Ciudad · 14.03.26») con «pendiente» donde falte el dato. */
 export function fichaParts(d: { venue?: string; city?: string; date?: Date; mixed?: boolean }, lang: Lang) {
   const t = T[lang];
-  const place = d.mixed ? t.mixedPlace : [d.venue, d.city].filter(Boolean).join(', ') || t.placePending;
+  // Sin «Lugar: pendiente» ni «Varios lugares» (decisión de Álvaro): solo se muestra si hay dato real
+  void t;
+  const place = d.mixed ? '' : [d.venue, d.city].filter(Boolean).join(', ');
   const date = ''; // sin fechas visibles (decisión de Álvaro)
   return { place, date };
 }

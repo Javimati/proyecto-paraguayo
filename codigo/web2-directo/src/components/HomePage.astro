@@ -56,9 +56,7 @@ const first = events[0];
               <a href={s.href} class="show__link" data-show-link data-vt-id={s.vt}>
                 <span class="show__no ficha" aria-hidden="true">{s.no}</span>
                 <span class="show__title">{s.name}</span>
-                <span class="show__ficha ficha">
-                  {s.ficha.place}{s.ficha.date && <><span class="show__sep" aria-hidden="true"> · </span><span class="sr-only">, </span>{s.ficha.date}</>}
-                </span>
+                {s.ficha.place && <span class="show__ficha ficha">{s.ficha.place}</span>}
                 <span class="show__stage" data-stage-img>
                   <Image
                     src={s.e.data.cover}

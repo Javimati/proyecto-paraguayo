@@ -9,7 +9,7 @@ artist_en: Fiesta Naranja
 kind: fiesta
 summary: '[PROVISIONAL] TODO: dos o tres frases secas sobre la Fiesta Naranja: qué es, dónde y cuándo fue, qué cubriste. Sustituir por el texto de Álvaro.'
 summary_en: '[PROVISIONAL] TODO: two or three plain sentences about Fiesta Naranja: what it is, where and when it took place, what you covered. Replace with Álvaro’s text.'
-cover: ./19.jpg
+cover: ./20.jpg
 order: 1
 provisional: false
 photos:

@@ -9,7 +9,7 @@ artist_en: More work
 mixed: true
 summary: '[PROVISIONAL] TODO: una frase sobre esta selección de otros conciertos, fiestas y eventos. Cada foto lleva su lugar y fecha en el pie.'
 summary_en: '[PROVISIONAL] TODO: one sentence about this selection of other gigs, parties and events. Each photo carries its own place and date in the caption.'
-cover: ./03.jpg
+cover: ./12.jpg
 order: 3
 provisional: false
 photos:

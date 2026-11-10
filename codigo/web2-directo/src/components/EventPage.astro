@@ -66,14 +66,8 @@ const ficha = fichaParts(d, lang);
         <p class="stub__kicker ficha">{t.track} {String(idx + 1).padStart(2, '0')} / {String(all.length).padStart(2, '0')}</p>
         <h1 class="stub__name" tabindex="-1" data-event-title>{name}</h1>
         <p class="stub__ficha ficha">
-          {d.mixed ? (
-            <span>{ficha.place}</span>
-          ) : (
-            <>
-              {d.venue ? <span>{d.venue}</span> : <span>{t.placePending}</span>}
-              {d.city && <span>{d.city}</span>}
-            </>
-          )}
+          {!d.mixed && d.venue && <span>{d.venue}</span>}
+          {!d.mixed && d.city && <span>{d.city}</span>}
           {d.time && <span>{d.time}</span>}
           <span>{t.photos(d.photos.length)}</span>
         </p>
