@@ -12,15 +12,16 @@
  *  1. Lee JPG/JPEG/PNG/WEBP/TIFF (y HEIC/HEIF si este sharp lo soporta; si no, avisa y las salta) de la carpeta
  *     de origen (sin subcarpetas).
  *  2. Las ordena por fecha EXIF (DateTimeOriginal) y, si no hay, por nombre.
- *  3. Las reduce a 3000 px de lado largo, JPEG calidad 88, conservando EXIF/IPTC/ICC (withMetadata),
- *     y las guarda como 01.jpg, 02.jpg… en src/content/eventos/<slug>/.
+ *  3. Copia los JPEG ORIGINALES byte a byte (calidad nativa, sin reducir) como 01.jpg, 02.jpg… en
+ *     src/content/eventos/<slug>/. Otros formatos se pasan a JPEG a resolución completa (calidad 97, 4:4:4).
+ *     Las versiones para la web salen de scripts/build-photos.mjs.
  *  4. Reescribe la lista «photos» del index.md: conserva título, resumen y demás campos; pone `date` desde
  *     EXIF cuando existe y deja pie y alt como «TODO: …» en ES y EN.
  *
  * Modo TODO: los pies/alt que empiezan por «TODO» compilan (no rompen el build) y `npm run photos:check`
  * los lista como pendientes. Hay que sustituirlos antes de publicar en serio.
  */
-import { readdir, readFile, writeFile, mkdir, rm, stat } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, rm, stat, copyFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -102,12 +103,18 @@ let n = prev.length;
 for (const it of items) {
   n++;
   const name = `${String(n).padStart(2, '0')}.jpg`;
-  await sharp(it.abs)
-    .rotate() // respeta la orientación EXIF
-    .resize({ width: 3000, height: 3000, fit: 'inside', withoutEnlargement: true })
-    .withMetadata() // conserva EXIF/IPTC/ICC (autor, copyright)
-    .jpeg({ quality: 88, mozjpeg: true })
-    .toFile(path.join(dir, name));
+  if (/\.jpe?g$/i.test(it.abs)) {
+    // CALIDAD NATIVA (decisión de Álvaro): el JPEG original se copia byte a byte, sin reducir ni recomprimir.
+    // Las versiones para la web las genera scripts/build-photos.mjs.
+    await copyFile(it.abs, path.join(dir, name));
+  } else {
+    // PNG/WEBP/TIFF/HEIC: se pasan a JPEG a resolución completa, calidad 97 y color 4:4:4
+    await sharp(it.abs, { limitInputPixels: false })
+      .rotate()
+      .withMetadata()
+      .jpeg({ quality: 97, chromaSubsampling: '4:4:4', mozjpeg: true })
+      .toFile(path.join(dir, name));
+  }
   const p = {
     file: `./${name}`,
     caption: 'TODO: pie de foto (qué pasa, quién aparece, en qué momento)',

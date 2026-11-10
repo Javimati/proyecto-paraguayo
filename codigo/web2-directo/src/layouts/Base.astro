@@ -27,9 +27,11 @@ interface Props {
   preloadMarker?: boolean;
   /** 404: sin canonical ni hreflang, noindex */
   noindex?: boolean;
+  /** precarga de la foto LCP (srcset + sizes) para que se pida desde el primer byte */
+  preloadImage?: { srcset: string; sizes: string };
 }
 const {
-  title, description, lang, altHref, theme = 'escenario', ogImage, ogAlt, jsonld = [],
+  title, description, lang, altHref, theme = 'escenario', ogImage, ogAlt, jsonld = [], preloadImage,
   enhanced = true, page = 'home', ambient = false, headerless = false, preloadMarker = false, noindex = false,
 } = Astro.props;
 
@@ -64,6 +66,7 @@ const fullTitle = page === 'home' || page === 'notfound' ? title : `${title} —
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {preloadImage && <link rel="preload" as="image" imagesrcset={preloadImage.srcset} imagesizes={preloadImage.sizes} fetchpriority="high" />}
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}

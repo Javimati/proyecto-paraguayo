@@ -74,7 +74,9 @@ npm run photos:import -- "C:/ruta/a/FIESTAS Y MÚSICA/Supernoventeros" supernove
 npm run photos:import -- "C:/ruta/a/FIESTAS Y MÚSICA/Otros" mas-trabajos --select 3
 ```
 
-Copia JPG/PNG/WEBP/TIFF/HEIC de la carpeta (sin subcarpetas), las ordena por fecha EXIF (o por nombre), las reduce a 3000 px conservando EXIF/IPTC, las renombra 01.jpg… y reescribe la lista de fotos del `index.md` manteniendo título y textos. `--select N` marca las N primeras para /para-promotores; `--append` añade en vez de sustituir. Pies y alt quedan como `TODO: …`: compilan, y `npm run photos:check` los lista como pendientes hasta que los rellenes.
+Copia JPG/PNG/WEBP/TIFF/HEIC de la carpeta (sin subcarpetas), las ordena por fecha EXIF (o por nombre), copia los JPEG **originales tal cual** (calidad nativa, sin reducir), los renombra 01.jpg… y reescribe la lista de fotos del `index.md` manteniendo título y textos. `--select N` marca las N primeras para /para-promotores; `--append` añade en vez de sustituir. Pies y alt quedan como `TODO: …`: compilan, y `npm run photos:check` los lista como pendientes hasta que los rellenes.
+
+**Calidad nativa:** `npm run build` ejecuta antes `scripts/build-photos.mjs`, que genera en `public/fotos/` las versiones web (JPEG 95, color 4:4:4, de 640 a 3200 px) y `NN-original.jpg` (el original). La web nunca pinta las fotos en WebGL ni las recorta.
 
 ## 3. Cambiar un pie de foto
 

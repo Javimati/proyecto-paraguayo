@@ -24,6 +24,7 @@ const shows = events.map((e, i) => ({
   ficha: fichaParts(e.data, lang),
 }));
 const first = events[0];
+import { foto } from '../lib/fotos';
 ---
 
 <Base
@@ -36,6 +37,7 @@ const first = events[0];
   theme="escenario"
   page="home"
   preloadMarker
+  preloadImage={first ? { srcset: foto(first.id, first.data.cover).srcset, sizes: '(min-width: 1024px) 50vw, calc(100vw - 100px)' } : undefined}
   ogImage={first?.data.cover}
   ogAlt={first ? (es ? first.data.photos[0].alt : first.data.photos[0].alt_en) : undefined}
 >
@@ -58,17 +60,20 @@ const first = events[0];
                 <span class="show__title">{s.name}</span>
                 {s.ficha.place && <span class="show__ficha ficha">{s.ficha.place}</span>}
                 <span class="show__stage" data-stage-img>
-                  <Image
-                    src={s.e.data.cover}
-                    alt=""
-                    widths={[400, 520, 640, 960, 1280, 1600, 2000]}
-                    quality={92}
-                    sizes="(min-width: 1024px) 50vw, calc(100vw - 100px)"
-                    loading={s.i === 0 ? 'eager' : 'lazy'}
-                    fetchpriority={s.i === 0 ? 'high' : undefined}
-                    decoding="async"
-                    class="show__img"
-                  />
+                  {(() => { const f = foto(s.e.id, s.e.data.cover); return (
+                    <img
+                      src={f.src}
+                      srcset={f.srcset}
+                      sizes="(min-width: 1024px) 50vw, calc(100vw - 100px)"
+                      width={f.width}
+                      height={f.height}
+                      alt=""
+                      loading={s.i === 0 ? 'eager' : 'lazy'}
+                      fetchpriority={s.i === 0 ? 'high' : undefined}
+                      decoding="async"
+                      class="show__img"
+                    />
+                  ); })()}
                 </span>
               </a>
             </li>

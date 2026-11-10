@@ -37,6 +37,10 @@ export const isPortrait = (p: Photo) => p.file.height > p.file.width;
 
 /** Nombre del archivo original a partir de la ruta de Astro (…/01.abc123.jpg → 01.jpg) */
 export function fileName(p: { file: { src: string } }): string {
+  // fsPath (ruta del archivo fuente) no marca la imagen como usada; leer .src haría que Astro copiase el
+  // ORIGINAL completo a dist/_astro aunque no se use (las fotos se sirven desde /fotos, ver lib/fotos.ts).
+  const fs = (p.file as unknown as { fsPath?: string }).fsPath;
+  if (fs) return fs.split('/').pop() ?? '';
   const base = p.file.src.split('?')[0].split('/').pop() ?? '';
   return base.replace(/^([^.]+)\.[^.]+\.(\w+)$/, '$1.$2');
 }

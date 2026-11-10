@@ -17,7 +17,7 @@
 import { Renderer, Program, Mesh, Plane, Texture, Transform } from 'ogl';
 import type { gsap as GSAP } from 'gsap';
 import type Lenis from 'lenis';
-import { STAGE_FRAG, HALO_FRAG, PHOTO_FRAG, VERT } from './shaders';
+import { HALO_FRAG, PHOTO_FRAG, VERT } from './shaders';
 import { rememberGLOff } from '../capabilities';
 
 interface Opts {
@@ -98,10 +98,8 @@ export function initGL({ page, lenis, gsap }: Opts): () => void {
     const list = document.querySelector<HTMLElement>('[data-setlist]');
     const shows = list ? Array.from(list.querySelectorAll<HTMLElement>('[data-show]')) : [];
     if (shows.length) {
-      const imgs = shows.map((s) => s.querySelector<HTMLImageElement>('[data-stage-img] img')!);
       const gels = shows.map((s) => parseHsl(getComputedStyle(s).getPropertyValue('--gel')));
       const quad = new Plane(gl, { widthSegments: 1, heightSegments: 1 });
-      const blank = new Texture(gl);
       let current = Math.max(0, shows.findIndex((s) => s.classList.contains('is-active')));
 
       const halo = new Program(gl, {
@@ -123,32 +121,11 @@ export function initGL({ page, lenis, gsap }: Opts): () => void {
       haloMesh.renderOrder = 0;
       haloMesh.setParent(scene);
 
-      const program = new Program(gl, {
-        vertex: VERT,
-        fragment: STAGE_FRAG,
-        uniforms: {
-          tCur: { value: blank },
-          tPrev: { value: blank },
-          uCurRes: { value: [3, 2] },
-          uPrevRes: { value: [3, 2] },
-          uRect: { value: [0, 0, 1, 1] },
-          uViewport: { value: [1, 1] },
-          uMix: { value: 1 },
-          uIntro: { value: 0 },
-        },
-        transparent: false,
-        depthTest: false,
-      });
-      const mesh = new Mesh(gl, { geometry: quad, program });
-      mesh.renderOrder = 1;
-      mesh.setParent(scene);
-      mesh.visible = false;
-      const textures: (Texture | null)[] = imgs.map(() => null);
-      let ready = false;
-      const u = program.uniforms;
+      // Calidad nativa (decisión de Álvaro): la foto NUNCA se pinta en WebGL. Se ve el <img> real,
+      // decodificado y gestionado en color por el navegador a la densidad de la pantalla.
+      // WebGL solo pone la luz de escenario alrededor del marco.
+      const ready = true;
       const h = halo.uniforms;
-
-      // el escenario es fijo: su rectángulo solo cambia con el layout o el show activo
       const rect = [0, 0, 1, 1];
       const measure = () => {
         const box = shows[current].querySelector<HTMLElement>('[data-stage-img]');
@@ -161,59 +138,26 @@ export function initGL({ page, lenis, gsap }: Opts): () => void {
       };
       layoutFns.push(measure);
       measure();
-
       const select = (i: number, flash: boolean) => {
-        const tex = textures[i];
-        if (!tex) return;
-        u.tPrev.value = u.tCur.value;
-        u.uPrevRes.value = u.uCurRes.value;
-        u.tCur.value = tex;
-        u.uCurRes.value = [imgs[i].naturalWidth || 3, imgs[i].naturalHeight || 2];
         gsap.to(h.uGel.value, { 0: gels[i][0], 1: gels[i][1], 2: gels[i][2], duration: 0.5, ease: 'power2.out', overwrite: true });
-        gsap.fromTo(u.uMix, { value: 0 }, { value: 1, duration: 0.45, ease: 'power2.out', overwrite: true });
         if (flash && canFlash()) {
           gsap.fromTo(h.uFlash, { value: 1 }, { value: 0, duration: 0.45, ease: 'expo.out', overwrite: true });
         }
       };
-
-      // primero la del show activo, luego el resto, de una en una
-      const order = [current, ...imgs.map((_, i) => i).filter((i) => i !== current)];
-      (async () => {
-        for (const i of order) {
-          const img = await decoded(imgs[i]);
-          if (!alive) return;
-          textures[i] = await upload(img);
-          if (!alive) return;
-          shows[i].querySelector('[data-stage-img]')?.setAttribute('data-gl', '');
-          if (i === current && !ready) {
-            ready = true;
-            root.classList.add('gl-on');
-            u.tPrev.value = textures[i]!;
-            select(i, false);
-            u.uMix.value = 1;
-            gsap.fromTo([u.uIntro, h.uIntro], { value: 0 }, { value: 1, duration: 0.8, ease: 'power2.out' });
-          }
-        }
-      })();
+      root.classList.add('gl-on');
+      gsap.fromTo(h.uIntro, { value: 0 }, { value: 1, duration: 0.8, ease: 'power2.out' });
 
       const onChange = (e: Event) => {
         const i = (e as CustomEvent<{ index: number }>).detail.index;
         if (i === current) return;
         current = i;
         measure();
-        if (ready && textures[i]) select(i, true);
+        if (ready) select(i, true);
       };
       list!.addEventListener('show:change', onChange);
       cleanups.push(() => list!.removeEventListener('show:change', onChange));
 
       updaters.push((t) => {
-        if (!ready) {
-          mesh.visible = false;
-          return;
-        }
-        mesh.visible = rect[2] > 0;
-        u.uRect.value = rect;
-        u.uViewport.value = [viewport.w, viewport.h];
         h.uRect.value = [0, 0, viewport.w, viewport.h];
         h.uViewport.value = [viewport.w, viewport.h];
         h.uStage.value = rect;
@@ -223,7 +167,8 @@ export function initGL({ page, lenis, gsap }: Opts): () => void {
   }
 
   /* ───────────── Evento: fotos con arrastre de obturación ───────────── */
-  if (page === 'event') {
+  // Evento: sin capa WebGL sobre las fotos (calidad nativa). Se conserva el código por si se recupera.
+  if (page === 'event' && false) {
     const windows = Array.from(document.querySelectorAll<HTMLElement>('[data-gl-photo]'));
     const geometry = new Plane(gl, { widthSegments: 1, heightSegments: 1 });
     type P = { el: HTMLElement; img: HTMLImageElement; mesh: Mesh; prog: Program; loaded: boolean; revealed: boolean; box: number[] };

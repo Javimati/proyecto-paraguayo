@@ -6,7 +6,9 @@ import { gzipSync } from 'node:zlib';
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
 const JS_LIMIT = 90 * 1024;
-const LCP_LIMIT = 250 * 1024;
+// Calidad nativa (decisión de Álvaro, 10/11/2026): JPEG 95 con color 4:4:4 pesa ~2× que WebP 92.
+// El límite sube de 250 a 600 KB para no rebajar la calidad de la foto.
+const LCP_LIMIT = 600 * 1024;
 // La capa WebGL se carga después del LCP con import(): no cuenta.
 const EXCLUDE = /three|ogl|webgl/i;
 
@@ -121,7 +123,7 @@ if (lcpIdx >= 0) {
     const over = size > LCP_LIMIT;
     if (over) failed = true;
     console.log(
-      `\nImagen LCP de la home (${name}): ${(size / 1024).toFixed(1)} KB (límite 250 KB) ${over ? 'FALLA' : 'ok'}  ${url}`,
+      `\nImagen LCP de la home (${name}): ${(size / 1024).toFixed(1)} KB (límite 600 KB) ${over ? 'FALLA' : 'ok'}  ${url}`,
     );
   }
 } else {

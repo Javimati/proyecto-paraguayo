@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import Caption from './Caption.astro';
 import { PERSON, ROUTES, T, numDate, chronicleCaption, creditCaption, type Lang } from '../i18n/strings';
 import { fichaParts } from '../i18n/strings';
+import { foto } from '../lib/fotos';
 import { getEvents, photoId, anchor, isPortrait, cleanTitle, gelFor, fileName, showName, type Event } from '../lib/events';
 
 interface Props { lang: Lang; entry: Event; }
@@ -24,7 +25,7 @@ const name = showName(entry, lang);
 const site = Astro.site!;
 const imageObjects = await Promise.all(
   d.photos.map(async (p) => {
-    const img = await getImage({ src: p.file, width: 2000, format: 'jpg', quality: 92 });
+    const img = { src: foto(entry.id, p.file).original }; // el original, a resolución nativa
     const date = p.date ?? d.date;
     const place = [p.venue ?? d.venue, p.city ?? d.city].filter(Boolean).join(', ');
     return {
@@ -55,6 +56,7 @@ const ficha = fichaParts(d, lang);
   ambient
   preloadMarker
   ogImage={d.cover}
+  preloadImage={{ srcset: foto(entry.id, d.photos[0].file).srcset, sizes: isPortrait(d.photos[0]) ? '(min-width: 1024px) calc(86vh * 0.8), min(calc(100vw - 32px), 40vh)' : '(min-width: 1024px) min(100vw - 96px, 1200px), calc(100vw - 32px)' }}
   ogAlt={es ? d.photos[ci].alt : d.photos[ci].alt_en}
   jsonld={imageObjects}
 >
@@ -65,12 +67,12 @@ const ficha = fichaParts(d, lang);
         <span class="stub__tape" aria-hidden="true"></span>
         <p class="stub__kicker ficha">{t.track} {String(idx + 1).padStart(2, '0')} / {String(all.length).padStart(2, '0')}</p>
         <h1 class="stub__name" tabindex="-1" data-event-title>{name}</h1>
-        <p class="stub__ficha ficha">
-          {!d.mixed && d.venue && <span>{d.venue}</span>}
-          {!d.mixed && d.city && <span>{d.city}</span>}
-          {d.time && <span>{d.time}</span>}
-          <span>{t.photos(d.photos.length)}</span>
-        </p>
+        {(!d.mixed && (d.venue || d.city)) && (
+          <p class="stub__ficha ficha">
+            {d.venue && <span>{d.venue}</span>}
+            {d.city && <span>{d.city}</span>}
+          </p>
+        )}
       </div>
       {summary && <p class="ev__summary">{summary}</p>}
       {(title.provisional || d.provisional) && <p class="ev__provisional">{t.provisional}</p>}
@@ -96,17 +98,24 @@ const ficha = fichaParts(d, lang);
                     data-gl-photo
                     style={`--ar:${p.file.width / p.file.height}`}
                   >
-                    <Picture
-                      src={p.file}
-                      alt={es ? p.alt : p.alt_en}
-                      formats={['webp']}
-                      widths={isPortrait(p) ? [400, 600, 1000, 1500, 2000] : [480, 640, 800, 1280, 1920, 2560]}
-                      sizes={isPortrait(p) ? '(min-width: 1024px) 57vh, min(calc(100vw - 32px), 32vh)' : '(min-width: 1024px) min(100vw - 96px, 1200px), calc(100vw - 32px)'}
-                      quality={92}
-                      loading={i === 0 ? 'eager' : 'lazy'}
-                      fetchpriority={i === 0 ? 'high' : undefined}
-                      decoding="async"
-                    />
+                    {(() => {
+                      const f = foto(entry.id, p.file);
+                      return (
+                        <a class="shot__link" href={f.original} target="_blank" rel="noopener" aria-label={es ? `${p.alt}. Abrir en resolución original` : `${p.alt_en}. Open at original resolution`}>
+                          <img
+                            src={f.src}
+                            srcset={f.srcset}
+                            sizes={isPortrait(p) ? '(min-width: 1024px) calc(86vh * 0.8), min(calc(100vw - 32px), 40vh)' : '(min-width: 1024px) min(100vw - 96px, 1200px), calc(100vw - 32px)'}
+                            alt={es ? p.alt : p.alt_en}
+                            width={f.width}
+                            height={f.height}
+                            loading={i === 0 ? 'eager' : 'lazy'}
+                            fetchpriority={i === 0 ? 'high' : undefined}
+                            decoding="async"
+                          />
+                        </a>
+                      );
+                    })()}
                   </div>
                 </figure>
               </li>
@@ -119,7 +128,7 @@ const ficha = fichaParts(d, lang);
     <nav class="next wrap" aria-label={t.next}>
       <a href={ROUTES.event[lang](next.id)} data-astro-prefetch="viewport" class="next__link">
         <span class="next__label ficha">{t.next}</span>
-        <Image src={next.data.cover} alt="" widths={[400, 640, 1000]} sizes="(min-width: 1024px) 400px, calc(100vw - 32px)" loading="lazy" decoding="async" class="next__img" />
+        {(() => { const f = foto(next.id, next.data.cover); return <img src={f.src} srcset={f.srcset} sizes="(min-width: 1024px) 400px, calc(100vw - 32px)" width={f.width} height={f.height} alt="" loading="lazy" decoding="async" class="next__img" />; })()}
         <span class="next__title">{nextName}</span>
       </a>
     </nav>
@@ -213,7 +222,7 @@ const ficha = fichaParts(d, lang);
   }
   /* Sin pies ni contador (decisión de Álvaro): todas las fotos centradas en el mismo eje */
   .shot__window { grid-column: 1 / -1; width: 100%; display: flex; justify-content: center; }
-  .shot__window :global(picture) { width: 100%; }
+  .shot__link { display: flex; justify-content: center; width: 100%; }
   .shot__window :global(img) {
     width: min(100%, 1200px, calc(86vh * var(--ar)));
     height: auto;
@@ -289,7 +298,7 @@ const ficha = fichaParts(d, lang);
     .shot figure { display: block; }
     /* cada foto en una caja de la misma altura, centrada: el carrusel queda alineado */
     .shot__window { height: 48vh; align-items: center; }
-    .shot__window :global(picture) { display: flex; justify-content: center; }
+    .shot__link { align-items: center; height: 100%; }
     .shot__window :global(img) { width: auto; max-width: 100%; max-height: 48vh; }
     .next { padding-block: 48px; }
     .next__link { grid-template-columns: 1fr; grid-template-areas: 'label' 'img' 'title'; }
