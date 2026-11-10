@@ -107,9 +107,9 @@ const ficha = fichaParts(d, lang);
                       src={p.file}
                       alt={es ? p.alt : p.alt_en}
                       formats={['avif', 'webp']}
-                      widths={isPortrait(p) ? [480, 720, 1000] : [800, 1280, 1800]}
+                      widths={isPortrait(p) ? [480, 720, 1000] : [640, 800, 1280, 1800]}
                       sizes={isPortrait(p) ? '(min-width: 1024px) 57vh, min(calc(100vw - 32px), 32vh)' : '(min-width: 1024px) min(66vw, 1100px), calc(100vw - 32px)'}
-                      quality={74}
+                      quality={i === 0 ? 62 : 74}
                       loading={i === 0 ? 'eager' : 'lazy'}
                       fetchpriority={i === 0 ? 'high' : undefined}
                       decoding="async"

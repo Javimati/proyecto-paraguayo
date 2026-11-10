@@ -1,6 +1,5 @@
 ---
-# Sección «Más trabajos». Fotos y textos PROVISIONALES hasta importar las reales:
-#   npm run photos:import -- "<carpeta con las fotos>" mas-trabajos --select 4
+# Sección «Más trabajos». Fotos reales de Álvaro (importadas 10/11/2026). Pies y alt descriptivos: falta que Álvaro diga quién sale y el momento.
 # TODO(lugar/fecha): venue, city y date del evento (opcionales; sin dato se muestra «pendiente»). No inventar.
 # Sección mixta: pon venue/city/date en cada foto (opcionales) para que salgan en su pie.
 title: Más trabajos
@@ -10,50 +9,63 @@ artist_en: More work
 mixed: true
 summary: '[PROVISIONAL] TODO: una frase sobre esta selección de otros conciertos, fiestas y eventos. Cada foto lleva su lugar y fecha en el pie.'
 summary_en: '[PROVISIONAL] TODO: one sentence about this selection of other gigs, parties and events. Each photo carries its own place and date in the caption.'
-cover: ./01.jpg
+cover: ./02.jpg
 order: 3
-provisional: true
+provisional: false
 photos:
 - file: ./01.jpg
-  caption: '[PROVISIONAL] Pie pendiente: qué ocurre, quién aparece, en qué momento de la noche.'
-  caption_en: '[PROVISIONAL] Caption pending: what is happening, who appears, at what moment of the night.'
+  caption: Una carcajada bajo la luz azul.
+  caption_en: A burst of laughter under blue light.
   selected: true
-  alt: Escenario de sala con focos ámbar y un guitarrista a contraluz delante del público
-  alt_en: Club stage with amber spotlights and a backlit guitarist in front of the crowd
+  alt: Hombre con barba canosa riendo a carcajadas hacia la cámara bajo luz azul
+  alt_en: Grey-bearded man laughing loudly toward the camera under blue light
+  date: '2025-05-11'
 - file: ./02.jpg
-  caption: '[PROVISIONAL] Pie pendiente: qué ocurre, quién aparece, en qué momento de la noche.'
-  caption_en: '[PROVISIONAL] Caption pending: what is happening, who appears, at what moment of the night.'
-  selected: false
-  alt: Banda de tres músicos en silueta bajo haces de luz roja y ámbar; el público levanta los brazos
-  alt_en: Three-piece band silhouetted under red and amber beams; the crowd raises their arms
+  caption: Dos DJs en la cabina, a la luz de la barra.
+  caption_en: Two DJs in the booth, lit by the bar.
+  selected: true
+  alt: Dos DJs inclinados sobre la mesa de mezclas en una cabina con luces rosas y verdes
+  alt_en: Two DJs leaning over the mixer in a booth with pink and green lights
+  date: '2025-05-11'
 - file: ./03.jpg
-  caption: '[PROVISIONAL] Pie pendiente: qué ocurre, quién aparece, en qué momento de la noche.'
-  caption_en: '[PROVISIONAL] Caption pending: what is happening, who appears, at what moment of the night.'
-  selected: true
-  alt: Guitarrista solo en el escenario bajo luz cálida de sodio
-  alt_en: Solo guitarist on stage under warm sodium light
+  caption: El DJ, con la luz arrastrada.
+  caption_en: The DJ, with the light dragged.
+  selected: false
+  alt: DJ con camiseta blanca y brazos en alto en una foto con barrido de luces azules y rosas
+  alt_en: DJ in a white T-shirt with raised arms in a shot with dragged blue and pink light trails
+  date: '2025-09-06'
 - file: ./04.jpg
-  caption: '[PROVISIONAL] Pie pendiente: qué ocurre, quién aparece, en qué momento de la noche.'
-  caption_en: '[PROVISIONAL] Caption pending: what is happening, who appears, at what moment of the night.'
+  caption: 'En blanco y negro: risas en la cabina.'
+  caption_en: 'In black and white: laughter in the booth.'
   selected: false
-  alt: Escena movida de un acústico con luz cálida
-  alt_en: Motion-blurred acoustic scene in warm light
+  alt: Foto en blanco y negro de dos jóvenes riendo en la cabina de DJ
+  alt_en: Black-and-white photo of two young men laughing in the DJ booth
+  date: '2025-09-06'
 - file: ./05.jpg
-  caption: '[PROVISIONAL] Pie pendiente: qué ocurre, quién aparece, en qué momento de la noche.'
-  caption_en: '[PROVISIONAL] Caption pending: what is happening, who appears, at what moment of the night.'
-  selected: true
-  alt: Músicos en silueta con focos violetas y magenta; móviles encendidos entre el público
-  alt_en: Musicians silhouetted under violet and magenta lights; phones lit in the crowd
+  caption: Un grupo de amigas bailando en la pista.
+  caption_en: A group of friends dancing on the floor.
+  selected: false
+  alt: Grupo de chicas bailando y abrazándose en una pista con luces azules y verdes
+  alt_en: Group of young women dancing and hugging on a floor lit blue and green
+  date: '2025-09-06'
 - file: ./06.jpg
-  caption: '[PROVISIONAL] Pie pendiente: qué ocurre, quién aparece, en qué momento de la noche.'
-  caption_en: '[PROVISIONAL] Caption pending: what is happening, who appears, at what moment of the night.'
-  selected: false
-  alt: Músico en silueta con luz blanca y ámbar
-  alt_en: Musician silhouetted in white and amber light
+  caption: 'En blanco y negro: el escenario entre humo y focos.'
+  caption_en: 'In black and white: the stage through smoke and lights.'
+  selected: true
+  alt: Foto en blanco y negro de un escenario de concierto con humo, focos y público en primer término
+  alt_en: Black-and-white photo of a concert stage with smoke, lights and the crowd in the foreground
+  date: '2026-08-22'
 - file: ./07.jpg
-  caption: '[PROVISIONAL] Pie pendiente: qué ocurre, quién aparece, en qué momento de la noche.'
-  caption_en: '[PROVISIONAL] Caption pending: what is happening, who appears, at what moment of the night.'
+  caption: 'En blanco y negro: el mismo escenario, en vertical.'
+  caption_en: 'In black and white: the same stage, vertical.'
   selected: false
-  alt: Guitarrista en vertical bajo un cenital ámbar con un haz azul lateral
-  alt_en: Guitarist in portrait under an amber top light with a blue side beam
+  alt: Foto vertical en blanco y negro de un escenario con una fila de focos y el público delante
+  alt_en: Vertical black-and-white photo of a stage with a row of lights and the crowd in front
+  date: '2026-08-22'
+- file: ./08.jpg
+  caption: Retrato en una tienda de camisetas.
+  caption_en: Portrait in a T-shirt shop.
+  selected: false
+  alt: Joven con gafas de sol y camiseta blanca posando de cuerpo entero entre camisetas colgadas en una pared de ladrillo
+  alt_en: Young man in sunglasses and a white T-shirt posing full length among T-shirts hung on a brick wall
 ---

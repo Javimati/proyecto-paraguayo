@@ -138,8 +138,8 @@ const sizes = '(min-width: 1100px) calc(33vw - 54px), (min-width: 640px) calc(50
                   formats={['avif', 'webp']}
                   widths={[480, 720, 1000]}
                   sizes={sizes}
-                  quality={72}
-                  loading={i < 3 ? 'eager' : 'lazy'}
+                  quality={i === 0 ? 62 : 72}
+                  loading={i === 0 ? 'eager' : 'lazy'}
                   fetchpriority={i === 0 ? 'high' : undefined}
                   decoding="async"
                 />

@@ -1,5 +1,5 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 10/11/2026 (chat inicial de construcción)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
+_Última actualización: 10/11/2026 (chat 2: fotos reales en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 
 ## 1. Álvaro (datos confirmados)
 - 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha.
@@ -18,7 +18,8 @@ _Última actualización: 10/11/2026 (chat inicial de construcción)._ Se actuali
 - `LA FIESTA NARANJA/`: 22 JPG (5–27 MB). Según el nombre de archivo, 07 y 08/06/2025. Varios «-Mejorado-NR».
 - `SUPERNOVENTEROS/`: 16 JPG (7–20 MB).
 - `MÁS TRABAJOS/`: 15 JPG/JPEG (4–22 MB), mezcla de eventos.
-- **Pendiente de Marlon/Álvaro:** lugar y fecha de Fiesta Naranja y Supernoventeros, y qué es cada foto de Más trabajos (para los pies).
+- **Fechas según EXIF:** Fiesta Naranja 07–08/06/2025; Supernoventeros 29–30/03/2025; Más trabajos: 11/05/2025 (2 fotos), 06/09/2025 (3), 22/08/2026 (2) y una sin EXIF (`SAVE_20251001_220145.jpg`).
+- **Pendiente de Marlon/Álvaro:** lugar de Fiesta Naranja y Supernoventeros, confirmar las fechas, y qué es cada foto de Más trabajos (lugar, evento, quién sale) para los pies.
 
 **Repositorio:** https://github.com/Javimati/proyecto-paraguayo · código en `codigo/web1-fotoperiodismo`, `codigo/web2-directo`, `codigo/web3-portfolio`, `codigo/web4-viaje`.
 
@@ -30,19 +31,21 @@ _Última actualización: 10/11/2026 (chat inicial de construcción)._ Se actuali
 | 3 | `alvaro-archivo` | Portfolio global: mesa de luz infinita con cuentahílos, filtros por apartado. Newsreader + Schibsted Grotesk | https://claude.ai/artifact/RxBFxBmVxHCzCywXVsahKD (slug ca0f8e88-b9f7-4207-bd91-494176ce8008) |
 | 4 | `alvaro-viaje` | «A través del visor»: intro de visor de cámara (mantén para enfocar), viaje 3D Three.js por 6 estaciones, final con hoja de contactos. Bricolage Grotesque + Martian Mono, acento #ffe14d | https://claude.ai/artifact/8wpoRMP9kGTApD9hAHhjz9 (slug 4057979a-e935-4705-b6a5-112e324de2ba) |
 
-Datos reales metidos en las 4 webs (email, teléfono, prácticas, software, inglés, movilidad, Alex Webb). Instagram quitado y botones de PDF ocultos mientras no haya archivo. Fotos: **todas de muestra generadas (PROVISIONAL)**, salvo el retrato de la web 2.
+Datos reales metidos en las 4 webs (email, teléfono, prácticas, software, inglés, movilidad, Alex Webb). Instagram quitado y botones de PDF ocultos mientras no haya archivo. Fotos: de muestra generadas (PROVISIONAL) en las webs 1, 3 y 4. **La web 2 ya tiene las fotos reales** (10/11/2026).
 
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.
 - Retrato en /sobre (polaroid con cinta), miniatura en /para-promotores, JSON-LD y og:image.
-- **Siguiente paso:** importar las fotos reales con el importador (reduce a 3000 px, conserva EXIF/IPTC, ordena por fecha EXIF y pone las fechas):
-  ```
-  npm run photos:import -- "<carpeta>" fiesta-naranja --select 4
-  npm run photos:import -- "<carpeta>" supernoventeros --select 4
-  npm run photos:import -- "<carpeta>" mas-trabajos --select 3
-  ```
-  Las fotos se pasan del PC al chat con `device_stage_files` (máx. 50 archivos, 400 MB/archivo y 500 MB por llamada). Después: elegir 6–10 por sección (no meter las 53), escribir pies y alt reales (con los datos que dé Marlon), build, comprobaciones, reempaquetar y republicar en el mismo slug.
+- **Hecho (10/11/2026): fotos reales importadas** con `photos:import` (3000 px, EXIF conservado). Selección: Fiesta Naranja 10 de 22, Supernoventeros 8 de 16, Más trabajos 8 de 15. Descartadas a propósito: `07062025-DSC02979` (casi negra) y `KC PARED 2 (V2) (1)` (póster de desnudo al fondo).
+  - Fiesta Naranja (orden de galería = cronológico por nº DSC): 01=DSC02591, 02=DSC02658, 03=DSC02735, 07=DSC02931 (**portada**), 08=DSC03108, 04=DSC03171, 09=DSC03200, 10=DSC03499, 05=DSC03587, 06=DSC03747. Destacadas: 07, 10, 04, 05.
+  - Supernoventeros: 01=DSC02138, 02=DSC02202 (**portada**), 03=DSC02260, 04=DSC02282, 05=DSC02378, 06=DSC02684, 07=DSC02754, 08=DSC02780. Destacadas: 01, 02, 04, 06.
+  - Más trabajos: 01=DSC09914, 02=DSC00851 (**portada**), 03=DSC00963, 04=DSC00978, 05=DSC01014, 06=_R006961, 07=_R006980, 08=SAVE_20251001_220145. Destacadas: 01, 02, 06.
+  - Pies y alt: **descriptivos de lo que se ve** (sin nombres, artistas ni lugares). Sustituir cuando Álvaro diga quién sale y el momento. Resúmenes de sección siguen como TODO visible.
+  - Fecha de sección = primer día según EXIF (comentado en cada `index.md` como «confirmar»). Lugar: «pendiente».
+  - Rendimiento: la primera foto de evento y de /para-promotores sale con calidad 62 (y ancho 640 añadido); en /para-promotores solo la primera es `eager`. Lighthouse móvil: home P99, evento P98 (LCP 2,41 s), promotores P99 (LCP 1,05 s), /en/ P98. `photos:check` sin errores (avisos: sin autor/copyright en EXIF). `check:js` ok.
+  - Prototipo republicado en el mismo slug (versión `1794337265-4348`, 48 archivos).
+- **Siguiente paso web 2:** pies reales, lugares, resúmenes, bio, tarifas y plazo de entrega (datos de Álvaro).
 - Pendientes de la web 2: tarifas, plazo de entrega y bio (TODO).
 
 ## 5. Publicar un prototipo en Claude (lo que funcionó)
