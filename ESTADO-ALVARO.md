@@ -68,7 +68,7 @@ Herramientas en `herramientas/` del repo:
 - Comprobado el 10/11/2026: las dos URLs cargan; eventos ya muestra el commit `40eb592` (fotos reales).
 - Límites del plan gratuito: 500 builds/mes y 1 build a la vez (por cuenta); tráfico ilimitado. Con los watch paths, un push solo reconstruye la web cuya carpeta cambió.
 - Comprobado: un push que no toca la carpeta de una web aparece en Cloudflare como «No deployment available» (build omitido, no gasta).
-- **Por confirmar:** Marlon dijo «portfolio = web 4», pero la carpeta `web3-portfolio` es la 3. Si era la 3, cambiar en el proyecto `alvarorodriguezportfolio` el directorio raíz y el watch path.
+- Confirmado por Marlon (10/11/2026): el portfolio publicado es la **web 4** (visor «A través del visor»), aunque la carpeta `web3-portfolio` se llame así; los eventos son la **web 2**. Las webs 1 y 3 no se publican.
 - Dominio propio: pendiente. Cuando lo haya: Custom domains en el proyecto, cambiar `SITE_URL` y la línea `Sitemap:` de `public/robots.txt`. Guía: `LEEME-DESPLIEGUE.md`.
 
 ## 7. Problemas conocidos
