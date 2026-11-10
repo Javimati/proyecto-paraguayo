@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactActions from './ContactActions.astro';
+import Facts from './Facts.astro';
+import { ROUTES, T, otherLang, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+const es = lang === 'es';
+---
+<Base
+  title={t.nav.contact}
+  description={es ? 'Contacto de Álvaro Rodríguez Valverde: email, teléfono y disponibilidad para prácticas.' : 'Contact Álvaro Rodríguez Valverde: email, phone and internship availability.'}
+  lang={lang}
+  altHref={ROUTES.contact[otherLang(lang)]}
+  page="contact"
+>
+  <main id="main" tabindex="-1" class="contact wrap">
+    <p class="mono meta">{t.nav.contact}</p>
+    <h1 class="contact__title">{t.closeTitle}</h1>
+    <p class="contact__text">{t.closeText}</p>
+    <ContactActions lang={lang} />
+    <div class="contact__facts"><Facts lang={lang} /></div>
+  </main>
+</Base>
+<style>
+  .contact {
+    padding-block: calc(var(--header-h) + 48px) 96px;
+    display: grid;
+    gap: 24px;
+    max-width: 1100px;
+  }
+  .contact__title {
+    max-width: 16ch;
+    font-size: clamp(2.4rem, 6.5vw, 6rem);
+    font-weight: 760;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+  .contact__text {
+    max-width: 52ch;
+    font-size: var(--t-21);
+    line-height: 1.45;
+  }
+  .contact__facts {
+    margin-top: 32px;
+    max-width: 760px;
+  }
+</style>

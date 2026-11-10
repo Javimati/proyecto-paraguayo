@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Cambia esta URL cuando haya dominio propio (y SITE_URL en Cloudflare)
+Sitemap: https://alvaro-rodriguez-viaje.pages.dev/sitemap-index.xml

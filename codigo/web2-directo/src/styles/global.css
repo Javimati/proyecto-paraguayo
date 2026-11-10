@@ -1,0 +1,132 @@
+@import './tokens.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  min-height: 100svh;
+  font-family: var(--f-sans);
+  font-size: var(--t-16);
+  line-height: 1.55;
+  font-stretch: 100%;
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--fg);
+  transition: background-color 0.5s var(--ease-out);
+}
+img, svg, picture { display: block; max-width: 100%; }
+img { height: auto; }
+button { font: inherit; color: inherit; }
+ul[role='list'], ol[role='list'] { list-style: none; padding: 0; }
+
+.theme-escenario {
+  --bg: var(--escenario);
+  --fg: var(--sala);
+  --muted: var(--meta);
+  --active: var(--luz-trabajo);
+  color-scheme: dark;
+}
+.theme-papel {
+  --bg: var(--papel);
+  --fg: var(--rotulador);
+  --muted: var(--meta-papel);
+  --active: #8a4a00; /* ámbar oscuro para texto sobre papel (AA) */
+  color-scheme: light;
+}
+/* Evento: fondo neutro fijo para no cambiar cómo se percibe el color de la foto.
+   El gel de la foto en pantalla (--ambient) solo tiñe acentos de interfaz. */
+.theme-escenario[data-ambient] { background-color: var(--escenario-evento); }
+
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { color: var(--active); }
+:focus-visible { outline: 3px solid var(--luz-trabajo); outline-offset: 3px; }
+/* Sobre papel el ámbar no llega a 3:1: anillo doble rotulador + luz de trabajo */
+.theme-papel :focus-visible,
+.paper :focus-visible,
+.stub :focus-visible {
+  outline: 3px solid var(--rotulador);
+  box-shadow: 0 0 0 6px var(--luz-trabajo);
+}
+::selection { background: var(--luz-trabajo); color: var(--rotulador); }
+
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: absolute; left: var(--margin); top: -100px; z-index: 100;
+  padding: 8px 12px; background: var(--fg); color: var(--bg);
+}
+.skip-link:focus { top: 8px; }
+.wrap { padding-inline: var(--margin); }
+.todo {
+  display: inline-block; padding: 0 0.4em; border: 1px dashed currentColor;
+  color: var(--active); font-size: 0.9em;
+}
+.tag-provisional {
+  display: inline-block; font-family: var(--f-sans); font-stretch: 72%; font-weight: 600;
+  font-size: var(--t-12); letter-spacing: 0.04em; padding: 1px 6px;
+  border: 1px solid currentColor; vertical-align: middle;
+}
+
+/* Ficha técnica: Archivo condensada, como una entrada */
+.ficha {
+  font-family: var(--f-cond);
+  font-stretch: 72%;
+  font-weight: 560;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───── Capa 1: estados iniciales (solo con JS y sin reduced motion) ───── */
+@keyframes failsafe-show { to { visibility: visible; } }
+@keyframes failsafe-light { to { filter: none; } }
+
+/* Foto que se enciende al entrar en pantalla (solo escritorio: en la tira móvil nunca hay fotos apagadas).
+   Parte de brillo 0,6 sin tocar la saturación y dura 0,5 s. */
+@media (min-width: 1024px) {
+  .motion [data-reveal] img {
+    filter: brightness(0.6);
+    animation: failsafe-light 0s 2s forwards;
+  }
+  .motion [data-reveal].is-revealed img {
+    animation: encender 0.5s var(--ease-out) forwards;
+  }
+  .motion [data-reveal].no-anim img { animation: none; filter: none; }
+}
+@keyframes encender {
+  from { filter: brightness(0.6); }
+  to { filter: none; }
+}
+
+/* View transition setlist → evento */
+::view-transition-group(photo) {
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 50;
+}
+::view-transition-old(photo), ::view-transition-new(photo) { height: 100%; object-fit: cover; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.35s; }
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+/* Capa 2: cuando WebGL dibuja una imagen, la <img> sigue en el DOM pero invisible */
+.gl-on [data-gl] img { opacity: 0 !important; }
+.gl-canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  pointer-events: none; z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+    animation-duration: 150ms !important;
+  }
+}
+.l1 [data-gl] img, .gl-leaving img { transition: opacity 0.4s var(--ease-out); }

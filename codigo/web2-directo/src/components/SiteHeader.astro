@@ -1,0 +1,59 @@
+---
+import { ROUTES, T, type Lang } from '../i18n/strings';
+interface Props { lang: Lang; altHref: string; page: string; }
+const { lang, altHref, page } = Astro.props;
+const t = T[lang];
+const other: Lang = lang === 'es' ? 'en' : 'es';
+const cur = (p: string) => (page === p ? 'page' : undefined);
+---
+<header class="site-header wrap">
+  <p class="masthead">
+    <a href={ROUTES.home[lang]}>
+      <span class="long">{t.masthead}</span>
+      <span class="short" aria-hidden="true">{t.mastShort}</span>
+    </a>
+  </p>
+  <nav aria-label={lang === 'es' ? 'Principal' : 'Main'}>
+    <ul role="list">
+      <li class="nav-setlist"><a href={ROUTES.home[lang]} aria-current={cur('home')}>{t.nav.setlist}</a></li>
+      <li>
+        <a href={ROUTES.promoters[lang]} aria-current={cur('promoters')}>
+          <span class="long">{t.nav.promoters}</span><span class="short" aria-hidden="true">{t.navShort.promoters}</span>
+        </a>
+      </li>
+      <li><a href={ROUTES.about[lang]} aria-current={cur('about')}>{t.nav.about}</a></li>
+      <li class="lang">
+        <a href={altHref} hreflang={other} lang={other}>
+          <span aria-hidden="true">{other.toUpperCase()}</span>
+          <span class="sr-only">{t.otherLang}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
+<style>
+  .site-header {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline;
+    gap: 6px 32px; padding-block: 16px; font-size: var(--t-14);
+    font-family: var(--f-cond); font-stretch: 72%; font-weight: 600; letter-spacing: 0.03em;
+    position: relative; z-index: 10;
+  }
+  .masthead a { display: inline-block; padding-block: 6px; text-decoration: none; text-transform: uppercase; }
+  nav ul { display: flex; flex-wrap: wrap; gap: 2px 22px; }
+  nav a { display: inline-block; padding-block: 6px; text-decoration: none; }
+  nav a[aria-current='page'] { box-shadow: inset 0 -2px 0 var(--luz-trabajo); }
+  .lang a { border: 1px solid currentColor; padding: 2px 8px; }
+  .short { display: none; }
+
+  /* Móvil: una sola línea */
+  @media (max-width: 599px) {
+    .site-header { flex-wrap: nowrap; gap: 10px; padding-block: 10px; font-size: var(--t-12); align-items: center; }
+    .masthead { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .long { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .short { display: inline; }
+    nav ul { flex-wrap: nowrap; gap: 0 12px; white-space: nowrap; }
+    .nav-setlist { display: none; }
+    nav a { padding-block: 12px; }
+    .lang a { padding: 1px 6px; }
+  }
+</style>

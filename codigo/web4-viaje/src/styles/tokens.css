@@ -1,0 +1,31 @@
+/* Tokens — ver docs/PLAN.md §2. Los agentes de experiencia e intro también los usan. */
+:root {
+  --noche: #0a0b10;
+  --pantalla: #12141b;
+  --linea: #2a2e39;
+  --texto: #ebe8e0;
+  --tenue: #9ea2ab;
+  --peaking: #ffe14d;
+
+  --f-display: 'Bricolage', 'Bricolage Fallback', ui-sans-serif, sans-serif;
+  --f-mono: 'Martian', 'Martian Fallback', ui-monospace, monospace;
+
+  --t-12: 0.75rem;
+  --t-13: 0.8125rem;
+  --t-15: 0.9375rem;
+  --t-17: 1.0625rem;
+  --t-21: 1.3125rem;
+  --t-27: 1.6875rem;
+  --t-34: 2.125rem;
+  --t-43: 2.6875rem;
+  --t-chapter: clamp(3.2rem, 11vw, 11rem);
+  --t-hero: clamp(2.3rem, 4.6vw, 4.75rem);
+
+  --margin: clamp(16px, 4vw, 64px);
+  --gap: 20px;
+  --measure: 62ch;
+  --header-h: 56px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.83, 0, 0.17, 1);
+}

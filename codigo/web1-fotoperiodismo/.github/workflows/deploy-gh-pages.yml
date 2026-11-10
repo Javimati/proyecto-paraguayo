@@ -1,0 +1,39 @@
+# Alternativa a Cloudflare Pages: publicar en GitHub Pages.
+# Desactivado por defecto: solo se ejecuta a mano (Actions → Deploy to GitHub Pages → Run workflow).
+# Para activarlo en cada push, descomenta el bloque "push".
+name: Deploy to GitHub Pages
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: withastro/action@v3
+        with:
+          node-version: 22
+        env:
+          # Cambia por https://<usuario>.github.io/<repo> o por el dominio propio.
+          SITE_URL: ${{ vars.SITE_URL }}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,66 @@
+---
+import { ROUTES, T, PERSON, SECTION_ORDER, SECTION_NAMES, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+---
+
+<footer class="site-footer wrap">
+  <nav aria-label={lang === 'es' ? 'Apartados (pie de página)' : 'Sections (footer)'}>
+    <p class="label">{t.sections}</p>
+    <ul role="list">
+      {SECTION_ORDER.map((s) => <li><a href={ROUTES.section[lang](s)}>{SECTION_NAMES[lang][s]}</a></li>)}
+    </ul>
+  </nav>
+  <div>
+    <p class="label">{t.nav.contact}</p>
+    <p>
+      {PERSON.email ? <a href={`mailto:${PERSON.email}`}>{PERSON.email}</a> : <span class="todo">TODO: email</span>}
+    </p>
+    <p><a href={ROUTES.editors[lang]}>{t.nav.editors}</a></p>
+    <p><a href={ROUTES.commissions[lang]}>{t.nav.commissions}</a></p>
+  </div>
+  <p class="label copy">© {new Date().getFullYear()} {PERSON.name}. {lang === 'es' ? 'Todas las fotografías tienen derechos de autor.' : 'All photographs are copyrighted.'}</p>
+</footer>
+
+<style>
+  .site-footer {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px var(--gap);
+    padding-block: 64px 32px;
+    margin-top: 96px;
+    border-top: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    font-size: 0.9375rem;
+  }
+  nav {
+    grid-column: 1 / 7;
+  }
+  nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin-top: 8px;
+    font-family: var(--f-serif);
+    font-size: var(--t-25);
+  }
+  nav a {
+    text-decoration: none;
+  }
+  div {
+    grid-column: 8 / -1;
+    display: grid;
+    gap: 6px;
+  }
+  .copy {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 800px) {
+    nav,
+    div {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

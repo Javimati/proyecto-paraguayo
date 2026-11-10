@@ -1,0 +1,28 @@
+---
+import { wireCaption, type Lang } from '../i18n/strings';
+interface Props {
+  place: string;
+  date: Date;
+  text: string;
+  lang: Lang;
+}
+const { place, date, text, lang } = Astro.props;
+const full = wireCaption(place, date, text, lang);
+const dash = full.indexOf(' — ');
+---
+<figcaption class="caption">
+  <span class="caption__dateline">{full.slice(0, dash)}</span> — {full.slice(dash + 3)}
+</figcaption>
+
+<style>
+  .caption {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    max-width: var(--measure);
+    color: var(--fg);
+  }
+  .caption__dateline {
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+</style>

@@ -1,0 +1,44 @@
+---
+import { PERSON, ROUTES, T, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+---
+<footer class="site-footer wrap">
+  <p class="mono meta">© {new Date().getFullYear()} {PERSON.name}</p>
+  <p class="mono">
+    <a href={`mailto:${PERSON.email}`}>{PERSON.email}</a>
+    <span class="meta"> / </span>
+    <a href={`tel:${PERSON.phoneIntl}`}>{PERSON.phone}</a>
+  </p>
+  <nav aria-label={lang === 'es' ? 'Pie de página' : 'Footer'}>
+    <ul role="list" class="mono">
+      <li><a href={ROUTES.editors[lang]}>{t.nav.editors}</a></li>
+      <li><a href={ROUTES.about[lang]}>{t.nav.about}</a></li>
+      <li><a href={ROUTES.contact[lang]}>{t.nav.contact}</a></li>
+    </ul>
+  </nav>
+</footer>
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+    align-items: baseline;
+    padding-block: 40px 48px;
+    border-top: 1px solid var(--linea);
+  }
+  .site-footer p:first-child {
+    margin-right: auto;
+  }
+  ul {
+    display: flex;
+    gap: 20px;
+  }
+  a {
+    display: inline-block;
+    padding-block: 6px;
+  }
+</style>

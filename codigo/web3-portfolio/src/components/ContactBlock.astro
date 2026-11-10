@@ -1,0 +1,71 @@
+---
+import { PERSON, T, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+  big?: boolean;
+}
+const { lang, big = false } = Astro.props;
+const t = T[lang];
+const es = lang === 'es';
+---
+<dl class:list={['contact', { 'contact--big': big }]}>
+  <div>
+    <dt>Email</dt>
+    <dd>
+      <a href={`mailto:${PERSON.email}`}>{PERSON.email}</a>
+      <button class="btn" type="button" data-copy-email={PERSON.email} data-copied={t.copied}>{t.copyEmail}</button>
+      <span class="copy-status label" role="status" aria-live="polite" data-copy-status></span>
+    </dd>
+  </div>
+  <div>
+    <dt>{es ? 'Teléfono' : 'Phone'}</dt>
+    <dd><a href={`tel:${PERSON.phoneIntl}`}>{PERSON.phone}</a></dd>
+  </div>
+  {PERSON.cvPdf && (
+    <div>
+      <dt>CV</dt>
+      <dd><a href={PERSON.cvPdf} download>{t.downloadCv}</a></dd>
+    </div>
+  )}
+</dl>
+
+<style>
+  .contact {
+    display: grid;
+    gap: 14px;
+  }
+  .contact div {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 12px;
+    align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  }
+  dt {
+    color: var(--meta);
+    font-size: var(--t-13);
+  }
+  dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+  }
+  .contact--big dd {
+    font-family: var(--f-serif);
+    font-size: var(--t-31);
+    line-height: 1.15;
+  }
+  .contact--big .btn,
+  .contact--big .label {
+    font-family: var(--f-sans);
+    font-size: var(--t-16);
+  }
+  @media (max-width: 600px) {
+    .contact div {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>

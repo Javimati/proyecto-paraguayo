@@ -1,0 +1,140 @@
+---
+import { ROUTES, T, PERSON, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+  altHref: string;
+  page: string;
+}
+const { lang, altHref, page } = Astro.props;
+const t = T[lang];
+const other: Lang = lang === 'es' ? 'en' : 'es';
+const items = [
+  { key: 'home', href: ROUTES.home[lang], label: t.nav.table },
+  { key: 'editors', href: ROUTES.editors[lang], label: t.nav.editors },
+  { key: 'commissions', href: ROUTES.commissions[lang], label: t.nav.commissions },
+  { key: 'about', href: ROUTES.about[lang], label: t.nav.about },
+  { key: 'contact', href: ROUTES.contact[lang], label: t.nav.contact },
+];
+---
+
+<header class="site-header wrap">
+  <a class="brand" href={ROUTES.home[lang]}>
+    <span class="brand__name"><span class="brand__full">{PERSON.name}</span><span class="brand__short">{PERSON.shortName}</span></span>
+    <span class="brand__tag">{t.tagline}</span>
+  </a>
+  <nav aria-label={lang === 'es' ? 'Principal' : 'Main'}>
+    <ul role="list">
+      {
+        items.map((i) => (
+          <li>
+            <a href={i.href} aria-current={page === i.key ? 'page' : undefined}>
+              {i.label}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a href={altHref} hreflang={other} lang={other} class="lang">
+          <span aria-hidden="true">{other.toUpperCase()}</span>
+          <span class="sr-only">{t.otherLang}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: relative;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px 32px;
+    padding-block: 18px 14px;
+  }
+  .brand {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 14px;
+    text-decoration: none;
+  }
+  .brand__name {
+    font-family: var(--f-serif);
+    font-size: var(--t-25);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .brand__tag {
+    font-size: var(--t-13);
+    color: var(--meta);
+  }
+  nav ul {
+    /* contenedor de los .sr-only absolutos: sin esto escapan del scroll y ensanchan la página */
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 22px;
+    font-size: 0.9375rem;
+  }
+  nav a {
+    display: inline-block;
+    padding-block: 8px;
+    text-decoration: none;
+  }
+  nav a[aria-current='page'] {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.35em;
+  }
+  .lang {
+    font-weight: 500;
+  }
+  .brand__short {
+    display: none;
+  }
+  /* Móvil: una sola línea — nombre corto + menú con desplazamiento horizontal */
+  @media (max-width: 700px) {
+    .site-header {
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 14px;
+      padding-block: 10px;
+    }
+    .brand {
+      flex: none;
+    }
+    .brand__tag,
+    .brand__full {
+      display: none;
+    }
+    .brand__short {
+      display: inline;
+    }
+    .brand__name {
+      font-size: var(--t-20);
+      white-space: nowrap;
+    }
+    nav {
+      min-width: 0;
+      flex: 1;
+    }
+    nav ul {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      gap: 0 14px;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+      mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+      padding-right: 24px;
+    }
+    nav a {
+      padding-block: 12px;
+    }
+  }
+</style>

@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="404" description="Página no encontrada / Page not found" lang="es" altHref="/en/" page="notfound" noindex footer={false}>
+  <main id="main" tabindex="-1" class="nf">
+    <div class="nf__screen">
+      <span class="frame-marks nf__marks" aria-hidden="true"></span>
+      <p class="nf__readout mono" aria-hidden="true"><span>ISO —</span><span>1/— </span><span>f/—</span><span class="nf__err">[000]</span></p>
+      <div class="nf__center">
+        <p class="nf__code mono">Err 404</p>
+        <h1 class="nf__title">Esta foto no está en la tarjeta.</h1>
+        <p class="nf__text">La página que buscas no existe o ha cambiado de dirección.</p>
+        <p><a class="btn btn--solid" href="/">Volver a la historia</a></p>
+        <div lang="en" class="nf__en">
+          <h2 class="nf__title-en">This shot isn’t on the card.</h2>
+          <p><a href="/en/">Back to the story</a></p>
+        </div>
+      </div>
+    </div>
+  </main>
+</Base>
+<style>
+  .nf {
+    min-height: 100svh;
+    padding: calc(var(--header-h) + 16px) var(--margin) 24px;
+    display: grid;
+  }
+  .nf__screen {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    background: radial-gradient(ellipse at 50% 45%, #171a22 0%, var(--noche) 70%);
+    overflow: hidden;
+  }
+  .nf__marks {
+    --m: 28px;
+    color: var(--tenue);
+  }
+  .nf__readout {
+    display: flex;
+    gap: 22px;
+    padding: 14px 18px;
+    color: var(--tenue);
+  }
+  .nf__err {
+    margin-left: auto;
+    color: var(--peaking);
+  }
+  .nf__center {
+    align-self: center;
+    justify-self: center;
+    text-align: center;
+    display: grid;
+    gap: 16px;
+    justify-items: center;
+    padding: 24px;
+  }
+  .nf__code {
+    color: var(--peaking);
+    border: 1px solid var(--peaking);
+    padding: 4px 10px;
+  }
+  .nf__title {
+    max-width: 14ch;
+    font-size: clamp(2.2rem, 6vw, 5rem);
+    font-weight: 760;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+  .nf__text {
+    color: var(--tenue);
+  }
+  .nf__en {
+    margin-top: 28px;
+    color: var(--tenue);
+  }
+  .nf__title-en {
+    font-size: var(--t-21);
+    font-weight: 600;
+    color: var(--texto);
+  }
+</style>

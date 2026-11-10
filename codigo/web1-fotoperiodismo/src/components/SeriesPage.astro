@@ -1,0 +1,376 @@
+---
+import { Picture, Image, getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Caption from './Caption.astro';
+import SplitTitle from './SplitTitle.astro';
+import { PERSON, ROUTES, T, monthYear, wireCaption, type Lang } from '../i18n/strings';
+import { getSeries, photoId, anchor, isPortrait, type Series } from '../lib/series';
+import palettes from '../data/palettes.json';
+
+interface Props {
+  lang: Lang;
+  entry: Series;
+}
+const { lang, entry } = Astro.props;
+const t = T[lang];
+const all = await getSeries();
+const idx = all.findIndex((s) => s.id === entry.id);
+const next = all[(idx + 1) % all.length];
+const d = entry.data;
+const title = lang === 'es' ? d.title : d.title_en;
+const summary = lang === 'es' ? d.summary : d.summary_en;
+const other: Lang = lang === 'es' ? 'en' : 'es';
+const total = String(d.photos.length).padStart(2, '0');
+
+/** Clave de paleta `<slug>/<archivo>` a partir del nombre del archivo original (p. ej. 01.jpg). */
+const pal = palettes as Record<string, { dominant: string; palette: string[] }>;
+function paletteKey(src: string): string | undefined {
+  const base = decodeURIComponent(src.split('?')[0].split('/').pop() ?? '').split('.')[0];
+  return Object.keys(pal).find((k) => k.startsWith(`${entry.id}/${base}.`));
+}
+/** Color de ambiente: solo si la foto tiene color de verdad (max−min ≥ 0,25); luminancia limitada (AA). */
+function moodColor(key?: string): string | undefined {
+  const e = key ? pal[key] : undefined;
+  if (!e) return undefined;
+  const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const best = [e.dominant, ...e.palette]
+    .map((hex) => ({ hex, c: rgb(hex) }))
+    .map((o) => ({ ...o, sat: Math.max(...o.c) - Math.min(...o.c) }))
+    .sort((a, b) => b.sat - a.sat)[0];
+  if (!best || best.sat < 0.25) return undefined;
+  // limita la luminosidad: el fondo resultante (8 % sobre #121110) sigue muy oscuro
+  const max = Math.max(...best.c);
+  const k = max > 0.6 ? 0.6 / max : 1;
+  return '#' + best.c.map((v) => Math.round(v * k * 255).toString(16).padStart(2, '0')).join('');
+}
+
+const site = Astro.site!;
+const imageObjects = await Promise.all(
+  d.photos.map(async (p) => {
+    const img = await getImage({ src: p.file, width: 1600, format: 'jpg' });
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ImageObject',
+      contentUrl: new URL(img.src, site).href,
+      caption: wireCaption(p.place, p.date, lang === 'es' ? p.caption : p.caption_en, lang),
+      creator: { '@type': 'Person', name: PERSON.name },
+      creditText: PERSON.credit,
+      copyrightNotice: `© ${PERSON.name}`,
+      dateCreated: p.date.toISOString().slice(0, 10),
+      contentLocation: p.place,
+    };
+  }),
+);
+---
+
+<Base
+  title={title}
+  description={summary}
+  lang={lang}
+  altHref={ROUTES.series[other](entry.id)}
+  theme="oscuro"
+  page="series"
+  ogImage={d.cover}
+  ogAlt={lang === 'es' ? d.photos[0].alt : d.photos[0].alt_en}
+  jsonld={imageObjects}
+>
+  <article class="series" data-series data-home={ROUTES.home[lang]}>
+    <header class="series__head wrap">
+      <p class="series__back"><a href={ROUTES.home[lang]} data-back>{t.backToSheet}</a></p>
+      <p class="series__roll">{t.roll} {String(idx + 1).padStart(2, '0')}</p>
+      <SplitTitle class="series__title" text={title} />
+      <div class="series__meta">
+        <p class="series__where">{d.place}, {monthYear(d.date, lang)}</p>
+        <p class="series__summary">{summary}</p>
+        {d.provisional && <p class="series__provisional">{t.provisional}</p>}
+      </div>
+    </header>
+
+    <ol
+      class="film"
+      role="list"
+      data-film
+      tabindex="0"
+      aria-label={lang === 'es' ? `Fotos de la serie (${d.photos.length})` : `Story photos (${d.photos.length})`}
+    >
+      {
+        d.photos.map((p, i) => (
+          <li class:list={['shot', { 'shot--portrait': isPortrait(p) }]} id={anchor(i)} data-shot={i + 1}>
+            <figure tabindex="-1">
+              <div class="shot__window" data-reveal={i === 0 ? undefined : true} data-vt-id={photoId(entry.id, i)} style={`--ar:${p.file.width / p.file.height}`} data-palette-key={paletteKey(p.file.src)} data-mood={moodColor(paletteKey(p.file.src))}>
+                <Picture
+                  src={p.file}
+                  alt={lang === 'es' ? p.alt : p.alt_en}
+                  formats={['avif', 'webp']}
+                  widths={isPortrait(p) ? [480, 720, 960, 1280] : [640, 960, 1280, 1600, 2000]}
+                  quality={60}
+                  sizes={
+                    isPortrait(p)
+                      ? '(min-width: 1024px) calc((100vh - 170px) * 0.667), 88vw'
+                      : '(min-width: 1024px) min(calc(100vw - 112px), calc((100vh - 170px) * 1.5)), 88vw'
+                  }
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : undefined}
+                  decoding="async"
+                  class="shot__img"
+                />
+              </div>
+              <Caption place={p.place} date={p.date} text={lang === 'es' ? p.caption : p.caption_en} lang={lang} />
+            </figure>
+          </li>
+        ))
+      }
+    </ol>
+
+    <nav class="seriesbar" data-seriesbar aria-label={lang === 'es' ? 'Serie' : 'Story'}>
+      <span class="seriesbar__roll">{t.roll} {String(idx + 1).padStart(2, '0')}</span>
+      <span class="seriesbar__sep" aria-hidden="true">/</span>
+      <span class="seriesbar__title">{title}</span>
+      <span class="seriesbar__sep" aria-hidden="true">/</span>
+      <span class="seriesbar__count" aria-hidden="true"><span data-counter-current>01</span>/{total}</span>
+      <span class="seriesbar__sep" aria-hidden="true">/</span>
+      <a href={ROUTES.home[lang]} data-back class="seriesbar__back">{t.nav.sheet}</a>
+    </nav>
+
+    <nav class="next wrap" aria-label={t.nextSeries}>
+      <a href={ROUTES.series[lang](next.id)} data-astro-prefetch="viewport" class="next__link">
+        <span class="next__label">{t.nextSeries}</span>
+        <Image
+          src={next.data.cover}
+          alt=""
+          widths={[320, 480, 640]}
+          sizes="(min-width: 1024px) 320px, 60vw"
+          loading="lazy"
+          decoding="async"
+          class="next__img"
+        />
+        <span class="next__title">{lang === 'es' ? next.data.title : next.data.title_en}</span>
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .series__head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    padding-block: clamp(12px, 2vw, 24px) clamp(28px, 4vw, 56px);
+  }
+  .series__back {
+    grid-column: 1 / 7;
+    font-size: var(--t-14);
+  }
+  .series__back a {
+    display: inline-block;
+    padding-block: 12px; /* objetivo táctil ≥ 44 px */
+  }
+  .series__roll {
+    grid-column: 7 / -1;
+    justify-self: end;
+    font-size: var(--t-12);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--meta);
+  }
+  .series__head :global(.series__title) {
+    grid-column: 1 / -1;
+    margin-top: clamp(16px, 3vw, 40px);
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: var(--t-title);
+    line-height: 0.85;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+  .series__meta {
+    grid-column: 1 / 8;
+    margin-top: 24px;
+    display: grid;
+    gap: 10px;
+    font-size: var(--t-14);
+    max-width: 62ch;
+  }
+  .series__where {
+    color: var(--meta);
+  }
+  .series__provisional {
+    color: var(--meta);
+    font-size: var(--t-12);
+  }
+
+  /* La tira: en escritorio avanza en vertical, como la película en la ampliadora */
+  .film {
+    position: relative; /* contiene los textos sr-only de los pies (evita desbordes) */
+    display: grid;
+    gap: clamp(56px, 10vh, 120px);
+    padding-inline: var(--margin);
+    outline-offset: 4px;
+  }
+  .film:focus-visible {
+    outline: 3px solid var(--lapiz);
+  }
+  /* Foto + pie caben en una pantalla; la figura mide lo que la foto */
+  .shot figure {
+    display: grid;
+    gap: 14px;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    outline: none;
+  }
+  .shot__window {
+    line-height: 0;
+  }
+  .shot__window :global(picture) {
+    display: block;
+  }
+  .shot__window :global(img) {
+    width: min(calc(100vw - 2 * var(--margin)), calc((100svh - 170px) * var(--ar)));
+    height: auto;
+  }
+  /* el pie no ensancha la figura: se ajusta al ancho de la foto */
+  .shot figure :global(.caption) {
+    width: 0;
+    min-width: 100%;
+  }
+
+  /* Barra fina superior: dónde estás y cómo volver */
+  .seriesbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 var(--margin);
+    min-height: 36px;
+    background: color-mix(in srgb, var(--cuarto-oscuro) 92%, transparent);
+    font-size: var(--t-12);
+    letter-spacing: 0.04em;
+    color: var(--meta);
+    white-space: nowrap;
+    transform: translateY(-100%);
+    transition: transform 0.25s var(--ease-out);
+  }
+  :global(.l1) .seriesbar:global(.is-on),
+  .seriesbar:focus-within {
+    transform: none;
+  }
+  .seriesbar__title {
+    color: var(--fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .seriesbar__count {
+    font-variant-numeric: tabular-nums;
+  }
+  .seriesbar__back {
+    margin-left: auto;
+    color: var(--fg);
+    padding-block: 10px;
+  }
+
+  .next {
+    padding-block: clamp(80px, 14vw, 180px) 64px;
+  }
+  .next__link {
+    display: grid;
+    grid-template-columns: minmax(0, 320px) 1fr;
+    grid-template-areas: 'label label' 'img title';
+    gap: 12px 24px;
+    align-items: end;
+    text-decoration: none;
+  }
+  .next__label {
+    grid-area: label;
+    font-size: var(--t-12);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--meta);
+  }
+  .next__img {
+    grid-area: img;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .next__title {
+    grid-area: title;
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: var(--t-50);
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+  .next__link:hover .next__title {
+    color: var(--lapiz-texto-oscuro);
+  }
+
+  /* Móvil: tira horizontal con scroll-snap */
+  @media (max-width: 599px) {
+    .seriesbar__roll,
+    .seriesbar__roll + .seriesbar__sep {
+      display: none;
+    }
+  }
+  @media (max-width: 1023px) {
+    .series__meta {
+      grid-column: 1 / -1;
+      margin-top: 14px;
+      gap: 6px;
+    }
+    .series__head {
+      padding-block: 4px 20px;
+    }
+    .series__back {
+      grid-column: 1 / 9;
+      font-size: var(--t-12);
+    }
+    .series__roll {
+      grid-column: 9 / -1;
+    }
+    .series__head :global(.series__title) {
+      margin-top: 14px;
+      font-size: clamp(2.25rem, 11vw, 3.5rem);
+    }
+    .series__summary {
+      font-size: var(--t-12);
+      line-height: 1.55;
+    }
+    .film {
+      display: flex;
+      align-items: flex-start; /* sin huecos bajo las horizontales */
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      padding-bottom: 16px;
+      scroll-padding-inline: var(--margin);
+    }
+    .shot {
+      flex: 0 0 88vw;
+      scroll-snap-align: start;
+    }
+    .shot figure {
+      width: 100%;
+    }
+    /* la foto a todo el ancho de la tira */
+    .shot__window :global(img) {
+      width: 100%;
+    }
+    .series__back a {
+      padding-block: 14px;
+    }
+    .next__link {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'label' 'img' 'title';
+    }
+    .next__title {
+      font-size: var(--t-38);
+    }
+  }
+</style>

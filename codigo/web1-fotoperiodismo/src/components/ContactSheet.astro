@@ -1,0 +1,291 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { T, ROUTES, type Lang } from '../i18n/strings';
+import { getSeries, photoId, anchor, greaseCircle, greaseCross } from '../lib/series';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+const series = await getSeries();
+
+const rolls = await Promise.all(
+  series.map(async (s, ri) => {
+    const firstSel = s.data.photos.findIndex((p) => p.selected);
+    const d = s.data.date;
+    return {
+      s,
+      rollNo: String(ri + 1).padStart(2, '0'),
+      meta: `${s.data.place} / ${String(d.getUTCMonth() + 1).padStart(2, '0')}.${d.getUTCFullYear()} / ${s.data.photos.length} ${lang === 'es' ? 'fot.' : 'fr.'}`,
+      frames: await Promise.all(
+        s.data.photos.map(async (p, i) => {
+          const no = i + 1; // la numeración del borde empieza en 1 en cada rollo
+          const seed = (ri + 1) * 31 + no * 7;
+          const loupe = await getImage({ src: p.file, width: 1000, format: 'webp', quality: 72 });
+          return {
+            p,
+            i,
+            no,
+            id: photoId(s.id, i),
+            href: `${ROUTES.series[lang](s.id)}#${anchor(i)}`,
+            loupe: loupe.src,
+            marks: p.selected
+              ? i === firstSel
+                ? [greaseCircle(seed), greaseCircle(seed + 13, 49, 33)] // la principal, doble pasada
+                : [greaseCircle(seed)]
+              : [],
+            cross: !p.selected && p.mark === 'cross' ? greaseCross(seed) : null,
+          };
+        }),
+      ),
+    };
+  }),
+);
+---
+
+<div class="sheet" data-sheet>
+  <p class="sheet__help">{t.sheetHelp}</p>
+  {
+    rolls.map(({ s, rollNo, meta, frames }, ri) => (
+      <section class="roll" aria-labelledby={`roll-${s.id}`}>
+        <h2 class="roll__label" id={`roll-${s.id}`}>
+          <a href={ROUTES.series[lang](s.id)}>
+            <span class="roll__no">
+              {t.roll} {rollNo}
+            </span>
+            <span class="roll__title">{lang === 'es' ? s.data.title : s.data.title_en}</span>
+            <span class="roll__meta">{meta}</span>
+          </a>
+        </h2>
+        <ol class="strip" role="list">
+          {frames.map((f) => (
+            <li class:list={['frame', { 'frame--selected': f.p.selected }]}>
+              <a href={f.href} class="frame__link" id={`fr-${f.id}`} data-frame data-vt-id={f.id}>
+                <span class="frame__window" data-reveal>
+                  <Image
+                    src={f.p.file}
+                    alt={lang === 'es' ? f.p.alt : f.p.alt_en}
+                    widths={[240, 360, 480, 640]}
+                    sizes="(min-width: 1440px) 330px, (min-width: 1024px) 23vw, 46vw"
+                    loading={ri === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={ri === 0 && f.i === 0 ? 'high' : undefined}
+                    decoding="async"
+                    data-loupe={f.loupe}
+                    class="frame__img"
+                  />
+                </span>
+                <span class="frame__edge" aria-hidden="true">
+                  <span>ARV 400 ▸{f.no}</span>
+                  <span>{f.no}A</span>
+                </span>
+                {f.marks.length > 0 && (
+                  <svg class="mark" viewBox="0 0 100 66" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                    {f.marks.map((d, k) => (
+                      <path d={d} pathLength="1" style={k ? '--extra: 260ms' : undefined} />
+                    ))}
+                  </svg>
+                )}
+                {f.cross && (
+                  <svg class="mark mark--cross" viewBox="0 0 100 66" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                    <path d={f.cross} pathLength="1" />
+                  </svg>
+                )}
+                {f.p.selected && <span class="sr-only">({t.selected})</span>}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .sheet {
+    display: grid;
+    gap: clamp(28px, 4vw, 48px);
+  }
+
+  /* Ayuda de teclado: solo aparece cuando se navega la hoja con el teclado */
+  .sheet__help {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .sheet:focus-within .sheet__help {
+    position: fixed;
+    left: var(--margin);
+    bottom: 16px;
+    z-index: 30;
+    width: auto;
+    height: auto;
+    clip: auto;
+    padding: 6px 10px;
+    background: var(--grafito);
+    color: var(--papel-claro);
+    font-size: var(--t-12);
+  }
+
+  /* Rótulo del rollo: impreso en el margen de la película, como el edge print. */
+  .roll__label {
+    font-weight: inherit;
+    font-size: inherit;
+  }
+  .roll__label a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 20px;
+    padding: 10px 12px 6px;
+    background: var(--pelicula);
+    color: var(--papel-claro);
+    text-decoration: none;
+  }
+  .roll__label a:hover .roll__title,
+  .roll__label a:focus-visible .roll__title {
+    color: var(--lapiz-texto-oscuro);
+  }
+  .roll__no,
+  .roll__meta {
+    font-family: var(--f-mono);
+    font-size: var(--t-12);
+    letter-spacing: 0.08em;
+    color: var(--borde-pelicula);
+    text-transform: uppercase;
+  }
+  .roll__title {
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: var(--t-28);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .roll__meta {
+    margin-left: auto;
+  }
+
+  /* Tira: película continua, cortada en filas de 4 (2 tiras exactas por rollo de 8). */
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 10px;
+  }
+  @media (min-width: 1024px) {
+    .strip {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .frame {
+    position: relative;
+    min-width: 0;
+  }
+  .frame__link {
+    position: relative;
+    display: block;
+    padding: calc(var(--sprocket) + 4px) 5px calc(var(--sprocket) + 4px);
+    background-color: var(--pelicula);
+    background-image:
+      linear-gradient(90deg, transparent 0 5px, #2b2927 5px 13px, transparent 13px 20px),
+      linear-gradient(90deg, transparent 0 5px, #2b2927 5px 13px, transparent 13px 20px);
+    background-size: 20px 7px, 20px 7px;
+    background-repeat: repeat-x;
+    background-position: 0 4px, 0 calc(100% - 4px);
+    color: var(--papel-claro);
+    text-decoration: none;
+  }
+  /* Foco: anillo doble (papel + lápiz) visible sobre película negra y sobre la marca roja */
+  .frame__link:focus-visible {
+    outline: 2px solid var(--papel-claro);
+    outline-offset: -2px;
+    box-shadow: 0 0 0 4px var(--lapiz);
+  }
+  .frame__link:focus-visible .mark {
+    opacity: 0.45;
+  }
+  .frame__window {
+    display: block;
+    aspect-ratio: 3 / 2;
+    background: #050505;
+    overflow: hidden;
+  }
+  .frame__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .frame__edge {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    line-height: var(--sprocket);
+    letter-spacing: 0.06em;
+    color: var(--borde-pelicula);
+    pointer-events: none;
+  }
+  .frame__edge span {
+    background: var(--pelicula);
+    padding-inline: 3px;
+  }
+
+  /* Lápiz graso: el círculo va sobre el borde de la película, sin tapar la foto */
+  .mark {
+    position: absolute;
+    z-index: 6; /* por encima del canvas WebGL */
+    left: -10px;
+    top: -4px;
+    width: calc(100% + 20px);
+    height: calc(100% + 8px);
+    overflow: visible;
+    pointer-events: none;
+  }
+  .mark path {
+    fill: none;
+    stroke: var(--lapiz);
+    /* Grosor en unidades del viewBox equivalente a ~2,5 px (non-scaling-stroke rompe pathLength en Chrome) */
+    stroke-width: 0.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.95;
+  }
+  .mark path + path {
+    opacity: 0.7;
+  }
+  /* Cruz de descarte: lápiz blanco, no rojo (el rojo solo significa «elegida») */
+  .mark--cross path {
+    stroke: var(--papel-claro);
+    stroke-width: 0.9;
+    opacity: 0.85;
+  }
+
+  .frame__link:hover .frame__img {
+    opacity: 0.92;
+  }
+
+  @media (max-width: 1023px) {
+    .mark path {
+      stroke-width: 1.1;
+    }
+    .mark--cross path {
+      stroke-width: 1.6;
+    }
+  }
+  @media (max-width: 599px) {
+    .roll__title {
+      font-size: var(--t-21);
+    }
+    .roll__meta {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+</style>

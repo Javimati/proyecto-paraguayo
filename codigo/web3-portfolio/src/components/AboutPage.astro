@@ -1,0 +1,105 @@
+---
+import Base from '../layouts/Base.astro';
+import { ROUTES, T, PERSON, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const es = lang === 'es';
+const t = T[lang];
+---
+<Base
+  title={t.nav.about}
+  description={es ? 'Álvaro Rodríguez Valverde: fotoperiodista en Madrid, estudiante de Iluminación, Captación y Tratamiento de Imagen en Campus FP Atocha.' : 'Álvaro Rodríguez Valverde: Madrid photojournalist, student of Lighting, Image Capture and Processing at Campus FP Atocha.'}
+  lang={lang}
+  altHref={ROUTES.about[es ? 'en' : 'es']}
+  page="about"
+>
+  <div class="about wrap">
+    <h1>{PERSON.name}</h1>
+    <div class="bio">
+      {/* TODO(bio): bio en primera persona, 60–90 palabras */}
+      <p><span class="todo">TODO: {es ? 'bio en primera persona, 60–90 palabras' : 'first-person bio, 60–90 words'}</span></p>
+    </div>
+    <dl class="facts">
+      <div>
+        <dt>{es ? 'Qué hago' : 'What I do'}</dt>
+        <dd>{es ? 'Fotoperiodismo, fotografía de calle, reportaje y actualidad. También conciertos, eventos y bodas.' : 'Photojournalism, street photography, documentary and news. Also concerts, events and weddings.'}</dd>
+      </div>
+      <div>
+        <dt>{es ? 'Dónde' : 'Where'}</dt>
+        <dd>Madrid</dd>
+      </div>
+      <div>
+        <dt>{es ? 'Formación' : 'Training'}</dt>
+        <dd>{es ? '2.º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen. Campus FP Atocha, Madrid.' : 'Second year, Higher Vocational Diploma in Lighting, Image Capture and Processing. Campus FP Atocha, Madrid.'}</dd>
+      </div>
+      <div>
+        <dt>{es ? 'Busco' : 'Looking for'}</dt>
+        <dd>{es ? 'Mis primeras prácticas en una agencia: desde el 16 de febrero de 2027, 440 horas, en el horario que me asignen.' : 'My first internship at an agency: from 16 February 2027, 440 hours, on whatever schedule I am assigned.'} <a href={ROUTES.editors[lang]}>{t.nav.editors}</a></dd>
+      </div>
+      <div>
+        <dt>{es ? 'Referentes' : 'Influences'}</dt>
+        <dd>{es ? 'Alex Webb, de Magnum. Me quedo con sus fotos de niños jugando en un patio en México.' : 'Alex Webb, from Magnum. I keep going back to his photos of children playing in a courtyard in Mexico.'}</dd>
+      </div>
+      <div>
+        <dt>{es ? 'Herramientas' : 'Tools'}</dt>
+        <dd>
+          {es ? 'Lightroom Classic y Photoshop. Inglés B1. Sin carné de conducir: me muevo en transporte público por toda la Comunidad de Madrid. ' : 'Lightroom Classic and Photoshop. English B1. No driving licence: I get around the whole Madrid region by public transport. '}
+          {/* TODO(opcional): cámara y objetivos */}
+          <span class="todo">TODO ({es ? 'opcional' : 'optional'}): {es ? 'cámara y objetivos' : 'camera and lenses'}</span>
+        </dd>
+      </div>
+    </dl>
+    <p class="more"><a href={ROUTES.contact[lang]}>{t.nav.contact}</a></p>
+  </div>
+</Base>
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px var(--gap);
+    padding-block: 16px 0;
+  }
+  h1 {
+    grid-column: 1 / -1;
+    font-size: clamp(2.75rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 12ch;
+  }
+  .bio {
+    grid-column: 1 / 7;
+    font-family: var(--f-serif-text);
+    font-size: var(--t-25);
+    line-height: 1.4;
+  }
+  .facts {
+    grid-column: 7 / -1;
+    display: grid;
+    gap: 14px;
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  }
+  dt {
+    color: var(--meta);
+    font-size: var(--t-13);
+  }
+  .more {
+    grid-column: 7 / -1;
+    font-family: var(--f-serif-text);
+    font-size: var(--t-25);
+  }
+  @media (max-width: 900px) {
+    .bio,
+    .facts,
+    .more {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

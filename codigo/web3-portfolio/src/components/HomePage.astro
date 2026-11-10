@@ -1,0 +1,452 @@
+---
+import Base from '../layouts/Base.astro';
+import Slide from './Slide.astro';
+import { PERSON, ROUTES, T, SECTION_NAMES, type Lang } from '../i18n/strings';
+import { bySection } from '../lib/series';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+const groups = await bySection();
+const first = groups[0]?.series[0];
+let n = 0;
+const picks = groups.reduce((a, g) => a + g.series.reduce((b, s) => b + s.data.photos.filter((p) => p.featured).length, 0), 0);
+const total = groups.reduce((a, g) => a + g.series.reduce((b, s) => b + s.data.photos.length, 0), 0);
+const description =
+  lang === 'es'
+    ? 'Archivo de Álvaro Rodríguez Valverde, fotoperiodista en Madrid: actualidad, calle, reportaje, directo, eventos y bodas.'
+    : 'Archive of Álvaro Rodríguez Valverde, Madrid-based photojournalist: news, street, documentary, live music, events and weddings.';
+---
+
+<Base
+  title={`${PERSON.name} — ${t.archive}`}
+  description={description}
+  lang={lang}
+  altHref={ROUTES.home[lang === 'es' ? 'en' : 'es']}
+  page="home"
+  footer={false}
+  ogImage={first?.data.cover}
+  ogAlt={first ? (lang === 'es' ? first.data.photos[0].alt : first.data.photos[0].alt_en) : undefined}
+>
+  <div class="home" data-home>
+    <div class="intro wrap" data-intro>
+      <h1 class="intro__title">{t.tagline}</h1>
+      <p class="intro__editors">
+        <a href={ROUTES.editors[lang]}>
+          {lang === 'es' ? `${picks} fotos seleccionadas para editores` : `${picks} photos selected for editors`}
+        </a>
+      </p>
+      <p class="intro__mail">
+        {PERSON.email ? (
+          <>
+            <a href={`mailto:${PERSON.email}`}>{PERSON.email}</a>
+            <button class="intro__copy" type="button" data-copy-email={PERSON.email} data-copied={t.copied}>{t.copyEmail}</button>
+            <span class="sr-only" role="status" aria-live="polite" data-copy-status></span>
+          </>
+        ) : (
+          <span class="todo">TODO: email</span>
+        )}
+      </p>
+      <p class="intro__text">{t.tableIntro}</p>
+      <p class="intro__help label"><span class="only-live">{t.tableHelp}</span></p>
+      {groups.some((g) => g.series.some((s) => s.data.provisional)) && <p class="intro__prov label">{t.provisional}</p>}
+    </div>
+
+    <nav class="filters wrap" aria-label={t.filterLabel} data-filters>
+      <ul role="list">
+        <li><a href={ROUTES.home[lang]} data-filter="all" aria-current="true">{t.all} <sup>{total}</sup></a></li>
+        {
+          groups.map((g) => (
+            <li>
+              <a href={ROUTES.section[lang](g.section)} data-filter={g.section}>
+                {SECTION_NAMES[lang][g.section]} <sup>{g.series.reduce((b, s) => b + s.data.photos.length, 0)}</sup>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <p class="sr-only" aria-live="polite" data-filter-status></p>
+
+    <div class="mesa" data-mesa>
+      <div class="mesa__light" aria-hidden="true"></div>
+      <div class="loupe" aria-hidden="true" data-loupe-el>
+        <div class="loupe__lens"></div>
+        <p class="loupe__cap"><span class="loupe__where"></span><span class="loupe__title"></span></p>
+      </div>
+      {
+        groups.map((g, gi) => (
+          <section class="box wrap" aria-labelledby={`box-${g.section}`} data-box={g.section}>
+            <h2 class="box__title" id={`box-${g.section}`}>
+              <a href={ROUTES.section[lang](g.section)}>{SECTION_NAMES[lang][g.section]}</a>
+            </h2>
+            <ol class="slides" role="list" data-grid>
+              {g.series.flatMap((s) =>
+                s.data.photos.map((p, i) => {
+                  n++;
+                  return <Slide lang={lang} series={s} photo={p} index={i} eager={gi === 0 && n <= 6} priority={n === 1} />;
+                }),
+              )}
+            </ol>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Base>
+
+<style>
+  :global(body[data-page='home'] .brand__tag) {
+    display: none;
+  }
+  .intro {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 8px var(--gap);
+    padding-block: clamp(20px, 5vw, 56px) 18px;
+  }
+  .intro > * {
+    grid-column: 1 / 8;
+  }
+  .intro__title {
+    grid-column: 1 / -1;
+    font-size: clamp(2.5rem, 8vw, 6.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+  }
+  .intro__editors {
+    margin-top: 8px;
+    font-family: var(--f-serif-text);
+    font-size: var(--t-25);
+    line-height: 1.25;
+  }
+  .intro__editors a {
+    color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+  .intro__mail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    align-items: baseline;
+  }
+  .intro__copy {
+    min-height: 32px;
+    padding: 4px 10px;
+    border: 1px solid currentColor;
+    background: none;
+    cursor: pointer;
+  }
+  .intro__text {
+    max-width: 52ch;
+    color: var(--meta);
+  }
+  .intro__prov {
+    color: var(--aviso);
+  }
+  .only-live {
+    display: none;
+  }
+  @media (max-width: 900px) {
+    .intro > * {
+      grid-column: 1 / -1;
+    }
+    .intro__title {
+      font-size: clamp(2.25rem, 10vw, 3.5rem);
+    }
+    .intro__editors {
+      font-size: var(--t-20);
+    }
+    /* en móvil la ficha se queda en dos líneas: título y enlace a editores (+ email) */
+    .intro__text {
+      display: none;
+    }
+  }
+
+  .filters {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding-block: 10px;
+    background: color-mix(in srgb, var(--mesa) 94%, transparent);
+  }
+  .filters ul {
+    display: flex;
+    gap: 4px 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  @media (max-width: 1023px) {
+    /* pista de que hay más filtros a la derecha */
+    .filters ul {
+      -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+      mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+      padding-right: 32px;
+    }
+  }
+  .filters a {
+    display: inline-block;
+    padding: 8px 0;
+    font-family: var(--f-serif-text);
+    font-size: var(--t-20);
+    text-decoration: none;
+    color: var(--tinta-2);
+  }
+  .filters a:hover {
+    color: var(--tinta);
+  }
+  .filters a[aria-current='true'] {
+    color: var(--sello);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+  .filters sup {
+    font-family: var(--f-sans);
+    font-size: 0.55em;
+    vertical-align: 0.7em;
+  }
+
+  .box {
+    padding-block: 28px 8px;
+    scroll-margin-top: 64px;
+  }
+  .box__title {
+    font-size: var(--t-39);
+    margin-bottom: 18px;
+  }
+  .box__title a {
+    text-decoration: none;
+  }
+  .slides {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--slide), 44vw), 1fr));
+    gap: clamp(14px, 2.4vw, 36px);
+  }
+  /* filtro móvil sin Flip: las que entran aparecen con un fundido, sin mover el layout */
+  .slides :global(.slide.is-entering) {
+    animation: slide-in 0.35s var(--ease-out) both;
+  }
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .loupe {
+    display: none;
+  }
+
+  /* ── Mesa viva (capa 1 escritorio): todo el plano es la mesa ── */
+  :global(html.mesa-live) {
+    overflow: hidden;
+    height: 100%;
+  }
+  :global(html.mesa-live body) {
+    overflow: hidden;
+    height: 100%;
+  }
+  :global(.mesa-live) .home {
+    position: fixed;
+    inset: 0;
+  }
+  :global(.mesa-live) .mesa {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  :global(.mesa-live) .mesa.is-dragging {
+    cursor: grabbing;
+  }
+  :global(.mesa-live) .box {
+    display: contents;
+  }
+  :global(.mesa-live) .box__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  :global(.mesa-live) .slides {
+    display: contents;
+  }
+  :global(.mesa-live) .mesa :global(.slide) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    width: var(--slide);
+    will-change: transform;
+    transform: translate3d(-9999px, 0, 0);
+    /* la opacidad la anima mesa.ts (GSAP): nada de transiciones CSS que se peleen con ella */
+    transition: none;
+  }
+  :global(.mesa-live) .mesa :global(.slide__mount) {
+    rotate: var(--r);
+  }
+  :global(.mesa-live) .mesa :global(.slide.is-out) {
+    pointer-events: none;
+  }
+  :global(.mesa-live) .mesa :global(.slide__link:hover .slide__mount),
+  :global(.mesa-live) .mesa :global(.slide__link:focus-visible .slide__mount) {
+    transform: none;
+  }
+  .mesa__light {
+    display: none;
+  }
+  /* Difusor opalino: el tubo no ilumina igual en toda la mesa; marco de aluminio en el perímetro */
+  :global(.mesa-live) .mesa__light {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(70% 60% at 50% 46%, #ffffff 0%, #f7f8f5 38%, #eceee9 70%, #dadfd8 100%);
+  }
+  :global(.mesa-live) .mesa__light::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow:
+      inset 0 0 0 7px #cfd2cd,
+      inset 0 0 0 8px #b8bcb6,
+      inset 0 0 0 9px rgba(255, 255, 255, 0.7),
+      inset 0 0 120px 20px rgba(22, 24, 27, 0.07);
+    pointer-events: none;
+  }
+
+  /* Cuentahílos (solo puntero fino, decorativo) */
+  :global(.mesa-live) .loupe {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 15;
+    width: 260px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(-9999px, 0, 0);
+  }
+  .loupe__lens {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background-color: #0b0c0d;
+    background-repeat: no-repeat;
+    box-shadow:
+      0 0 0 1px rgba(22, 24, 27, 0.55),
+      0 0 0 6px #e9ebe7,
+      0 0 0 7px rgba(22, 24, 27, 0.35),
+      0 22px 44px -16px rgba(22, 24, 27, 0.55);
+  }
+  .loupe__cap {
+    display: grid;
+    gap: 2px;
+    margin-top: 14px;
+    padding: 6px 10px;
+    background: var(--montura);
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(22, 24, 27, 0.1);
+    text-align: center;
+    font-size: var(--t-13);
+    line-height: 1.3;
+  }
+  .loupe__where {
+    color: var(--tinta-2);
+    letter-spacing: 0.02em;
+  }
+  .loupe__title {
+    font-family: var(--f-serif-text);
+    font-size: var(--t-16);
+    color: var(--tinta);
+  }
+  :global(.mesa-live) .mesa.is-loupe {
+    cursor: none;
+  }
+
+  /* En la mesa viva, la intro es la ficha de archivo apoyada en una esquina */
+  :global(.mesa-live) .intro {
+    position: absolute;
+    left: var(--margin);
+    bottom: 20px;
+    z-index: 20;
+    width: min(380px, 32vw);
+    display: block;
+    padding: 16px 20px 14px;
+    background: var(--montura);
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 1px rgba(22, 24, 27, 0.08),
+      0 10px 28px -14px rgba(22, 24, 27, 0.35);
+  }
+  :global(.mesa-live) .intro > * + * {
+    margin-top: 8px;
+  }
+  :global(.mesa-live) .intro__title {
+    font-size: var(--t-31);
+  }
+  :global(.mesa-live) .intro__editors {
+    font-size: var(--t-20);
+  }
+  :global(.mesa-live) .intro__text {
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+  /* tras la primera interacción la ficha se pliega: título, editores y email */
+  :global(.mesa-live) .intro.is-folded .intro__text,
+  :global(.mesa-live) .intro.is-folded .intro__help,
+  :global(.mesa-live) .intro.is-folded .intro__prov {
+    display: none;
+  }
+  :global(.mesa-live) .only-live {
+    display: inline;
+  }
+  :global(.mesa-live) .filters {
+    position: absolute;
+    left: auto;
+    right: 0;
+    bottom: 16px;
+    top: auto;
+    background: none;
+    padding-block: 0;
+  }
+  :global(.mesa-live) .filters ul {
+    gap: 4px 20px;
+    padding: 6px 18px;
+    background: color-mix(in srgb, var(--montura) 96%, transparent);
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgba(22, 24, 27, 0.08), 0 6px 20px -10px rgba(22, 24, 27, 0.3);
+  }
+  /* Cabecera sobre la mesa: banda de mesa casi opaca, sin máscaras ni desenfoques */
+  :global(.mesa-live) :global(.site-header) {
+    position: fixed;
+    inset: 0 0 auto 0;
+    background: color-mix(in srgb, var(--mesa) 92%, transparent);
+    box-shadow: 0 1px 0 rgba(22, 24, 27, 0.08);
+  }
+  /* capa 2: la foto la dibuja WebGL encima de la montura */
+  :global(.mesa-live) .mesa :global(.slide.gl-on .slide__img) {
+    opacity: 0;
+  }
+
+  /* Encendido (solo con movimiento): el difusor sube de 96 % a 100 % con un titileo mínimo arriba.
+     Ningún estado baja de 0,8 de luminancia relativa (96 % de #f2f4f1 ≈ 0,81): no hay destellos
+     según WCAG 2.3.1. El momento lo da la caída de las diapositivas, no un parpadeo. */
+  :global(.mesa-live.intro-run) .mesa__light {
+    animation: tubo 1.1s linear both;
+  }
+  @keyframes tubo {
+    0% { filter: brightness(0.96); }
+    40% { filter: brightness(1); }
+    48% { filter: brightness(0.98); }
+    56% { filter: brightness(1); }
+    100% { filter: brightness(1); }
+  }
+</style>

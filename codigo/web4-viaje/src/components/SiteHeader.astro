@@ -1,0 +1,195 @@
+---
+import { ROUTES, T, otherLang, type Lang, type PageKey } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+  altHref: string;
+  page: PageKey;
+}
+const { lang, altHref, page } = Astro.props;
+const t = T[lang];
+const ol = otherLang(lang);
+const items = [
+  ['home', ROUTES.home[lang], t.nav.home],
+  ['editors', ROUTES.editors[lang], t.nav.editors],
+  ['about', ROUTES.about[lang], t.nav.about],
+  ['contact', ROUTES.contact[lang], t.nav.contact],
+] as const;
+---
+
+<header class="site-header">
+  <a class="brand" href={ROUTES.home[lang]}>
+    <span class="brand__mark" aria-hidden="true"></span>
+    <span class="brand__name">Álvaro Rodríguez</span>
+    <span class="brand__short" aria-hidden="true">Álvaro R.</span>
+  </a>
+  <nav aria-label={lang === 'es' ? 'Principal' : 'Main'}>
+    <ul role="list">
+      {
+        items.map(([key, href, label]) => (
+          <li class:list={[{ 'is-secondary': key === 'home' || key === 'contact', 'is-about': key === 'about' }]}>
+            <a href={href} aria-current={page === key ? 'page' : undefined}>
+              {label}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a class="lang" href={altHref} hreflang={ol} lang={ol}>
+          {t.otherShort}<span class="sr-only"> — {t.other}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  {
+    page === 'home' ? (
+      <button type="button" class="index-btn" id="btn-indice" aria-pressed="false" title={t.indexHint}>
+        <span class="index-btn__icon" aria-hidden="true" />
+        <span class="index-btn__label">{t.index}</span>
+      </button>
+    ) : (
+      <a class="index-btn" href={`${ROUTES.home[lang]}#capitulos`}>
+        <span class="index-btn__icon" aria-hidden="true" />
+        <span class="index-btn__label">{t.index}</span>
+      </a>
+    )
+  }
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 3vw, 40px);
+    padding-inline: var(--margin);
+    /* En la historia 2D el contenido pasa por debajo: fondo de pantalla al 85 % con desenfoque */
+    background: color-mix(in srgb, var(--pantalla) 85%, transparent);
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    backdrop-filter: blur(12px) saturate(1.1);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--linea) 70%, transparent);
+    font-family: var(--f-mono);
+    font-size: var(--t-12);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: auto;
+    text-decoration: none;
+    font-family: var(--f-display);
+    font-size: var(--t-17);
+    font-weight: 620;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  /* Sobre la escena 3D, la cabecera vuelve a ser un degradado que no encajona el visor */
+  :global(html.exp-on) .site-header {
+    background: linear-gradient(to bottom, rgb(10 11 16 / 0.92), rgb(10 11 16 / 0.6) 70%, rgb(10 11 16 / 0));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+  .brand__short {
+    display: none;
+  }
+  .brand__mark {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--peaking);
+  }
+  nav ul {
+    display: flex;
+    align-items: center;
+    gap: 4px clamp(12px, 2vw, 28px);
+  }
+  nav a {
+    display: inline-block;
+    white-space: nowrap;
+    padding-block: 12px;
+    text-decoration: none;
+    color: var(--tenue);
+  }
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--texto);
+  }
+  nav a[aria-current='page'] {
+    box-shadow: inset 0 -1px 0 var(--peaking);
+  }
+  .lang {
+    color: var(--texto) !important;
+  }
+  .index-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 6px 12px;
+    border: 1px solid var(--linea);
+    background: rgb(18 20 27 / 0.7);
+    color: var(--texto);
+    font-family: var(--f-mono);
+    font-size: var(--t-12);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .index-btn:hover {
+    border-color: var(--peaking);
+    color: var(--peaking);
+  }
+  .index-btn[aria-pressed='true'] {
+    border-color: var(--peaking);
+  }
+  /* icono: rejilla 2×2 de miniaturas */
+  .index-btn__icon {
+    width: 12px;
+    height: 12px;
+    background:
+      linear-gradient(currentColor, currentColor) 0 0 / 5px 5px,
+      linear-gradient(currentColor, currentColor) 100% 0 / 5px 5px,
+      linear-gradient(currentColor, currentColor) 0 100% / 5px 5px,
+      linear-gradient(currentColor, currentColor) 100% 100% / 5px 5px;
+    background-repeat: no-repeat;
+  }
+  @media (max-width: 760px) {
+    .is-secondary {
+      display: none;
+    }
+    .brand__name {
+      font-size: var(--t-15);
+    }
+  }
+  @media (max-width: 420px) {
+    nav ul {
+      gap: 10px;
+    }
+    /* el nombre completo sigue siendo el texto accesible del enlace; se ve «Álvaro R.» */
+    .brand__name,
+    .index-btn__label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    /* en pantallas muy estrechas «Sobre mí» queda en el pie; «Para editores» es la acción principal */
+    .is-about {
+      display: none;
+    }
+    .brand__short {
+      display: inline;
+      font-size: var(--t-15);
+    }
+    /* el botón Índice queda en icono (nombre accesible intacto) y no tapa el visor del hero */
+    .index-btn {
+      min-width: 40px;
+      min-height: 40px;
+      justify-content: center;
+      padding: 6px;
+    }
+  }
+</style>

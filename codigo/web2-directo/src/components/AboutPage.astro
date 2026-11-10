@@ -1,0 +1,168 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import retrato from '../assets/retrato-alvaro.jpg';
+import { PERSON, ROUTES, T, type Lang } from '../i18n/strings';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = T[lang];
+const es = lang === 'es';
+---
+<Base
+  title={t.nav.about}
+  description={es
+    ? 'Sobre Álvaro Rodríguez Valverde: fotografía de directo, formación y contacto.'
+    : 'About Álvaro Rodríguez Valverde: live photography, training and contact.'}
+  lang={lang}
+  altHref={ROUTES.about[es ? 'en' : 'es']}
+  theme="escenario"
+  page="about"
+  ogImage={retrato}
+  ogAlt={es ? 'Retrato de Álvaro Rodríguez Valverde' : 'Portrait of Álvaro Rodríguez Valverde'}
+>
+  <div class="ab wrap">
+    <section class="ab__intro" aria-labelledby="ab-title">
+      <figure class="ab__portrait">
+        <div class="polaroid">
+          <span class="polaroid__tape" aria-hidden="true"></span>
+          <Image
+            src={retrato}
+            alt={es ? 'Retrato de Álvaro Rodríguez Valverde' : 'Portrait of Álvaro Rodríguez Valverde'}
+            widths={[320, 480, 640, 800]}
+            sizes="(min-width: 768px) 16vw, 42vw"
+            quality={80}
+            loading="eager"
+            decoding="async"
+            class="polaroid__img"
+          />
+        </div>
+      </figure>
+      <div class="ab__lead">
+        <h1 id="ab-title" class="ab__title">{es ? 'Sobre mí' : 'About'}</h1>
+        {/* TODO(bio): 60–90 palabras en primera persona, escritas por Álvaro */}
+        <p class="ab__bio"><span class="todo">TODO: {es ? 'bio en primera persona, 60–90 palabras' : 'first-person bio, 60–90 words'}</span></p>
+      </div>
+    </section>
+
+    <section class="ab__block" aria-labelledby="ab-what">
+      <h2 id="ab-what" class="ab__h2 ficha">{es ? 'Qué fotografío' : 'What I shoot'}</h2>
+      <p>
+        {es
+          ? 'Conciertos en sala y teatro, festivales, fiestas y club, y eventos. También bodas, en segundo plano. En paralelo trabajo en fotoperiodismo, calle y reportaje.'
+          : 'Club and theatre gigs, festivals, parties and club nights, and events. Weddings too, as a secondary line. In parallel I work in photojournalism, street and reportage.'}
+      </p>
+    </section>
+
+    <section class="ab__block" aria-labelledby="ab-edu">
+      <h2 id="ab-edu" class="ab__h2 ficha">{es ? 'Formación' : 'Training'}</h2>
+      <p>
+        {es
+          ? '2.º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen. Campus FP Atocha, Madrid.'
+          : 'Second year, Higher Vocational Diploma in Lighting, Image Capture and Processing. Campus FP Atocha, Madrid.'}
+      </p>
+    </section>
+
+    <section class="ab__block" aria-labelledby="ab-contact">
+      <h2 id="ab-contact" class="ab__h2 ficha">{es ? 'Contacto' : 'Contact'}</h2>
+      <dl class="ab__contact">
+        <div>
+          <dt>Email</dt>
+          <dd>
+                <a href={`mailto:${PERSON.email}`}>{PERSON.email}</a>
+                <button type="button" class="ab__copy" data-copy-email={PERSON.email} data-copied={t.copied}>{t.copyEmail}</button>
+          </dd>
+        </div>
+        <div>
+          <dt>{es ? 'Teléfono' : 'Phone'}</dt>
+          <dd><a href={`tel:${PERSON.phoneIntl}`}>{PERSON.phone}</a></dd>
+        </div>
+        {PERSON.cvPdf && (
+          <div>
+            <dt>CV</dt>
+            <dd><a href={PERSON.cvPdf} download>{t.downloadCv}</a></dd>
+          </div>
+        )}
+      </dl>
+      <p class="ab__status" role="status" aria-live="polite" data-copy-status></p>
+    </section>
+
+    <section class="ab__block" aria-labelledby="ab-gear">
+      <h2 id="ab-gear" class="ab__h2 ficha">{es ? 'Herramientas y referencias' : 'Tools and references'}</h2>
+      <p>
+        {es
+          ? 'Edito con Lightroom Classic y Photoshop. Inglés B1. Sin carné de conducir: me muevo en transporte público por toda la Comunidad de Madrid. Mi referente es Alex Webb, de Magnum; me quedo con sus fotos de niños jugando en un patio en México.'
+          : 'I edit in Lightroom Classic and Photoshop. English B1. No driving licence: I get around the whole Madrid region by public transport. My reference is Alex Webb, from Magnum; I keep going back to his photos of children playing in a courtyard in Mexico.'}
+      </p>
+      <p>
+        {/* TODO(opcional): cámara y objetivos */}
+        <span class="todo">TODO ({es ? 'opcional' : 'optional'}): {es ? 'cámara y objetivos' : 'camera and lenses'}</span>
+      </p>
+    </section>
+  </div>
+</Base>
+<style>
+  .ab {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    padding-block: clamp(8px, 2vw, 24px) clamp(64px, 10vw, 140px);
+  }
+  .ab__intro {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: end;
+    padding-block: clamp(16px, 3vw, 40px) clamp(28px, 4vw, 48px);
+  }
+  .ab__portrait { grid-column: 1 / 3; }
+  /* Retrato pegado con cinta, como una polaroid sobre el setlist. Sin filtros: color intacto. */
+  .polaroid {
+    position: relative;
+    background: var(--papel, #f4f4f1);
+    padding: 8px 8px 28px;
+    transform: rotate(-1.6deg);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    max-width: 260px;
+  }
+  .polaroid__img { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; }
+  .polaroid__tape {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 84px;
+    height: 24px;
+    transform: translateX(-50%) rotate(3deg);
+    background: rgba(143, 141, 136, 0.82);
+    z-index: 1;
+  }
+  .ab__lead { grid-column: 4 / 11; }
+  .ab__title {
+    font-family: var(--f-cond);
+    font-size: var(--t-14);
+    font-weight: 600;
+    font-stretch: 72%;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .ab__bio { margin-top: 10px; font-size: var(--t-20); line-height: 1.5; max-width: 52ch; }
+  .ab__block {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    padding-block: 20px;
+    border-top: 1px solid rgba(236, 235, 231, 0.18);
+  }
+  .ab__h2 { grid-column: 1 / 4; font-size: var(--t-14); font-weight: 600; color: var(--muted); text-transform: uppercase; }
+  .ab__block > :not(h2) { grid-column: 4 / 11; max-width: 62ch; }
+  .ab__contact { display: grid; gap: 8px; }
+  .ab__contact div { display: grid; grid-template-columns: 8rem 1fr; gap: 12px; align-items: baseline; }
+  .ab__contact dt { color: var(--muted); }
+  .ab__copy { margin-left: 12px; background: none; border: 1px solid currentColor; padding: 4px 10px; cursor: pointer; min-height: 32px; }
+  .ab__status { grid-column: 4 / 11; margin-top: 8px; color: var(--muted); font-size: var(--t-14); }
+  @media (max-width: 767px) {
+    .ab__h2, .ab__block > :not(h2), .ab__status, .ab__lead { grid-column: 1 / -1; }
+    .ab__portrait { grid-column: 1 / 6; margin-bottom: 20px; }
+    .ab__h2 { margin-bottom: 8px; }
+  }
+</style>

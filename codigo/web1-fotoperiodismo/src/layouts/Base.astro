@@ -1,0 +1,126 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import '../styles/global.css';
+import display800 from '@fontsource/big-shoulders-display/files/big-shoulders-display-latin-800-normal.woff2?url';
+import mono400 from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2?url';
+import SiteHeader from '../components/SiteHeader.astro';
+import AppScripts from '../components/AppScripts.astro';
+import { PERSON, T, type Lang } from '../i18n/strings';
+
+interface Props {
+  title: string;
+  description: string;
+  lang: Lang;
+  /** URL de la misma página en el otro idioma */
+  altHref: string;
+  theme?: 'papel' | 'claro' | 'oscuro';
+  ogImage?: ImageMetadata;
+  ogAlt?: string;
+  jsonld?: Record<string, unknown>[];
+  /** false en /editores: página sin efectos ni router */
+  enhanced?: boolean;
+  page?: 'home' | 'series' | 'editors' | 'about' | 'notfound';
+}
+
+const {
+  title,
+  description,
+  lang,
+  altHref,
+  theme = 'papel',
+  ogImage,
+  ogAlt,
+  jsonld = [],
+  enhanced = true,
+  page = 'home',
+} = Astro.props;
+
+const site = Astro.site!;
+// URLs normalizadas con barra final (igual que el sitemap y que sirve Cloudflare Pages)
+const withSlash = (p: string) => (p.endsWith('/') ? p : `${p}/`);
+const canonical = new URL(withSlash(Astro.url.pathname), site).href;
+const altUrl = new URL(withSlash(altHref), site).href;
+const indexable = page !== 'notfound';
+const esUrl = lang === 'es' ? canonical : altUrl;
+const enUrl = lang === 'en' ? canonical : altUrl;
+
+let og: string | undefined;
+if (ogImage) {
+  const img = await getImage({ src: ogImage, width: 1200, format: 'jpg', quality: 78 });
+  og = new URL(img.src, site).href;
+}
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: PERSON.name,
+  jobTitle: lang === 'es' ? 'Fotoperiodista' : 'Photojournalist',
+  address: { '@type': 'PostalAddress', addressLocality: 'Madrid', addressCountry: 'ES' },
+  url: new URL('/', site).href,
+  ...(PERSON.email ? { email: `mailto:${PERSON.email}` } : {}),
+  ...(PERSON.phoneIntl ? { telephone: PERSON.phoneIntl } : {}),
+};
+const fullTitle = page === 'home' ? title : `${title} — ${PERSON.shortName}`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {
+      indexable && (
+        <>
+          <link rel="canonical" href={canonical} />
+          <link rel="alternate" hreflang="es" href={esUrl} />
+          <link rel="alternate" hreflang="en" href={enUrl} />
+          <link rel="alternate" hreflang="x-default" href={esUrl} />
+        </>
+      )
+    }
+    {!indexable && <meta name="robots" content="noindex" />}
+    <link rel="preload" href={display800} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={mono400} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content={theme === 'oscuro' ? '#121110' : '#d4d1c9'} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={PERSON.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_GB'} />
+    {og && <meta property="og:image" content={og} />}
+    {og && ogAlt && <meta property="og:image:alt" content={ogAlt} />}
+    <meta name="twitter:card" content={og ? 'summary_large_image' : 'summary'} />
+    <script type="application/ld+json" set:html={JSON.stringify([person, ...jsonld])} />
+    <slot name="head" />
+    {
+      enhanced && (
+        <script is:inline data-astro-rerun>
+          (function (d) {
+            var m = window.matchMedia;
+            if (m('(prefers-reduced-motion: reduce)').matches) return;
+            d.classList.add('motion');
+            if (m('(min-width: 1024px) and (pointer: fine)').matches) d.classList.add('wide');
+          })(document.documentElement);
+        </script>
+      )
+    }
+    {enhanced && <ClientRouter fallback="swap" />}
+  </head>
+  <body class={`theme-${theme}`} data-page={page}>
+    <a class="skip-link" href="#main">{T[lang].skip}</a>
+    <SiteHeader lang={lang} altHref={altHref} page={page} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <slot name="footer" />
+    <div class="grain" aria-hidden="true" transition:persist="grain"></div>
+    {enhanced && <AppScripts />}
+  </body>
+</html>

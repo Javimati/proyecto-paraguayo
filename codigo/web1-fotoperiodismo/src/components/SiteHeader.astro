@@ -1,0 +1,120 @@
+---
+import { ROUTES, T, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+  altHref: string;
+  page: string;
+}
+const { lang, altHref, page } = Astro.props;
+const t = T[lang];
+const other: Lang = lang === 'es' ? 'en' : 'es';
+// Etiquetas cortas para pantallas estrechas (el nav y el idioma caben en una fila)
+const short = lang === 'es' ? { sheet: 'Hoja', editors: 'Editores', about: 'Sobre mí' } : { sheet: 'Sheet', editors: 'Editors', about: 'About' };
+---
+
+<header class="site-header wrap">
+  <p class="masthead">
+    <a href={ROUTES.home[lang]}>{t.masthead}</a>
+  </p>
+  <nav aria-label={lang === 'es' ? 'Principal' : 'Main'}>
+    <ul role="list">
+      <li><a href={ROUTES.home[lang]} aria-current={page === 'home' ? 'page' : undefined}><span class="l">{t.nav.sheet}</span><span class="s">{short.sheet}</span></a></li>
+      <li><a href={ROUTES.editors[lang]} aria-current={page === 'editors' ? 'page' : undefined}><span class="l">{t.nav.editors}</span><span class="s">{short.editors}</span></a></li>
+      <li><a href={ROUTES.about[lang]} aria-current={page === 'about' ? 'page' : undefined}><span class="l">{t.nav.about}</span><span class="s">{short.about}</span></a></li>
+      <li class="lang">
+        <span class="lang__cur">{lang.toUpperCase()}</span>
+        <span class="lang__sep" aria-hidden="true">/</span>
+        <a href={altHref} hreflang={other} lang={other}>{other.toUpperCase()}<span class="sr-only"> — {t.otherLang}</span></a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px 32px;
+    padding-block: 18px;
+    font-size: var(--t-12);
+    letter-spacing: 0.04em;
+    position: relative;
+    z-index: 10;
+  }
+  .masthead {
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .masthead a {
+    text-decoration: none;
+    display: inline-block;
+    padding-block: 6px; /* objetivo táctil ≥ 24 px */
+  }
+  nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+  }
+  nav a {
+    text-decoration: none;
+    display: inline-block;
+    padding-block: 6px;
+  }
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--lapiz);
+    text-decoration-thickness: 2px;
+  }
+  .lang {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .lang__cur {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .lang__sep {
+    color: var(--meta);
+  }
+  .lang a {
+    color: var(--meta);
+  }
+  .lang a:hover {
+    color: var(--link-active);
+  }
+  nav .s {
+    display: none;
+  }
+  @media (max-width: 599px) {
+    .site-header {
+      padding-block: 12px 4px;
+      gap: 2px 16px;
+    }
+    .masthead {
+      font-size: 11px;
+      letter-spacing: 0.02em;
+    }
+    nav {
+      width: 100%;
+    }
+    nav ul {
+      flex-wrap: nowrap;
+      gap: 2px 16px;
+    }
+    nav .l {
+      display: none;
+    }
+    nav .s {
+      display: inline;
+    }
+    .lang {
+      margin-left: auto;
+    }
+    nav a {
+      padding-block: 10px;
+    }
+  }
+</style>

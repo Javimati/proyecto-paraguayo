@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Cambia esta URL cuando se conecte el dominio propio (y SITE_URL en Cloudflare Pages).
+Sitemap: https://alvaro-rodriguez-archivo.pages.dev/sitemap-index.xml

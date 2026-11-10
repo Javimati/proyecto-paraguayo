@@ -1,0 +1,9 @@
+---
+import SectionPage from '../../components/SectionPage.astro';
+import { SECTION_ORDER, SECTION_SLUG, type Section } from '../../i18n/strings';
+export function getStaticPaths() {
+  return SECTION_ORDER.map((s) => ({ params: { apartado: SECTION_SLUG.es[s] }, props: { section: s } }));
+}
+const { section } = Astro.props as { section: Section };
+---
+<SectionPage lang="es" section={section} />

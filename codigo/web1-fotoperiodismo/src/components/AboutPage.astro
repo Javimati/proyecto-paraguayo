@@ -1,0 +1,219 @@
+---
+import Base from '../layouts/Base.astro';
+import { PERSON, ROUTES, T, type Lang } from '../i18n/strings';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+const es = lang === 'es';
+---
+
+<Base
+  title={t.nav.about}
+  description={es
+    ? 'Álvaro Rodríguez Valverde, fotoperiodista en Madrid: formación, tipo de trabajo y contacto.'
+    : 'Álvaro Rodríguez Valverde, photojournalist in Madrid: training, kind of work and contact.'}
+  lang={lang}
+  altHref={es ? ROUTES.about.en : ROUTES.about.es}
+  theme="papel"
+  page="about"
+>
+  <article class="about wrap">
+    <h1 class="about-title">{PERSON.name}</h1>
+
+    <section class="block" aria-labelledby="a-bio">
+      <h2 id="a-bio">{es ? 'Bio' : 'Bio'}</h2>
+      <div class="body">
+        {/* TODO(bio): bio en primera persona, 60–90 palabras, seca y periodística */}
+        <p><span class="todo">TODO: {es ? 'bio en primera persona, 60–90 palabras' : 'first-person bio, 60–90 words'}</span></p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="a-edu">
+      <h2 id="a-edu">{es ? 'Formación' : 'Training'}</h2>
+      <div class="body">
+        <p>
+          {es
+            ? '2.º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen. Campus FP Atocha, Madrid.'
+            : 'Second year, Higher Vocational Diploma in Lighting, Image Capture and Processing. Campus FP Atocha, Madrid.'}
+        </p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="a-work">
+      <h2 id="a-work">{es ? 'Trabajo' : 'Work'}</h2>
+      <div class="body">
+        <p>
+          {es
+            ? 'Fotoperiodismo, fotografía de calle, reportaje y actualidad. Busco mis primeras prácticas en una agencia: desde el 16 de febrero de 2027, 440 horas, en el horario que me asignen.'
+            : 'Photojournalism, street photography, reportage and news. Looking for my first internship at an agency: from 16 February 2027, 440 hours, on whatever schedule I am assigned.'}
+        </p>
+        <p class="secondary">
+          {es
+            ? 'También eventos, conciertos y bodas.'
+            : 'Also events, concerts and weddings.'}
+        </p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="a-contact">
+      <h2 id="a-contact">{es ? 'Contacto' : 'Contact'}</h2>
+      <div class="body">
+        <dl class="contact">
+          <div>
+            <dt>Email</dt>
+            <dd>
+              <a href={`mailto:${PERSON.email}`}>{PERSON.email}</a>
+              <button type="button" class="copy" data-copy-email={PERSON.email} data-copied={t.copied}>
+                {t.copyEmail}
+              </button>
+            </dd>
+          </div>
+          <div>
+            <dt>{es ? 'Teléfono' : 'Phone'}</dt>
+            <dd>
+              <a href={`tel:${PERSON.phoneIntl}`}>{PERSON.phone}</a>
+            </dd>
+          </div>
+          {
+            PERSON.cvPdf && (
+              <div>
+                <dt>CV</dt>
+                <dd><a href={PERSON.cvPdf} download>{t.downloadCv}</a></dd>
+              </div>
+            )
+          }
+        </dl>
+        <p class="copy-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="a-gear">
+      <h2 id="a-gear">{es ? 'Herramientas' : 'Tools'}</h2>
+      <div class="body">
+        <p>
+          {es
+            ? 'Edito con Lightroom Classic y Photoshop. Inglés B1. Sin carné de conducir: me muevo en transporte público por toda la Comunidad de Madrid.'
+            : 'I edit in Lightroom Classic and Photoshop. English B1. No driving licence: I get around the whole Madrid region by public transport.'}
+        </p>
+        {/* TODO(opcional): cámara y objetivos, si Álvaro quiere mostrarlos */}
+        <p><span class="todo">TODO ({es ? 'opcional' : 'optional'}): {es ? 'cámara y objetivos' : 'camera and lenses'}</span></p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="a-refs">
+      <h2 id="a-refs">{es ? 'Referencias' : 'References'}</h2>
+      <div class="body">
+        <p>
+          {es
+            ? 'Mi fotógrafo de Magnum favorito es Alex Webb; me quedo con sus fotos de niños jugando en un patio en México.'
+            : 'My favourite Magnum photographer is Alex Webb; I keep going back to his photos of children playing in a courtyard in Mexico.'}
+        </p>
+      </div>
+    </section>
+  </article>
+
+  <script is:inline>
+    document.addEventListener('click', function (ev) {
+      var b = ev.target.closest && ev.target.closest('[data-copy-email]');
+      if (!b) return;
+      var e = b.getAttribute('data-copy-email'),
+        s = document.querySelector('.about .copy-status');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(e).then(function () {
+          if (s) s.textContent = b.getAttribute('data-copied') + ': ' + e;
+        });
+      } else {
+        location.href = 'mailto:' + e;
+      }
+    });
+  </script>
+</Base>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    padding-bottom: 120px;
+  }
+  .about-title {
+    grid-column: 1 / -1;
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: var(--t-title);
+    line-height: 0.88;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    margin-block: 24px 56px;
+  }
+  .block {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    padding-block: 20px 28px;
+    border-top: 1.5px solid var(--grafito);
+  }
+  .block h2 {
+    grid-column: 1 / -1;
+    font-size: var(--t-14);
+    font-weight: 500;
+    color: var(--meta);
+    margin-bottom: 10px;
+  }
+  .body {
+    grid-column: 1 / -1;
+    max-width: var(--measure);
+    display: grid;
+    gap: 12px;
+  }
+  @media (min-width: 900px) {
+    .block h2 {
+      grid-column: 1 / span 3;
+      margin: 0;
+    }
+    .body {
+      grid-column: 4 / span 7;
+    }
+  }
+  .secondary {
+    color: var(--meta);
+  }
+  .contact {
+    display: grid;
+    gap: 10px;
+  }
+  .contact div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .contact dt {
+    color: var(--meta);
+  }
+  .contact dd {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: baseline;
+  }
+  .copy {
+    background: none;
+    border: 1.5px solid currentColor;
+    padding: 4px 10px;
+    font-size: var(--t-12);
+    cursor: pointer;
+    min-height: 32px;
+  }
+  .copy:hover {
+    color: var(--link-active);
+  }
+  .copy-status {
+    font-size: var(--t-14);
+    color: var(--meta);
+    min-height: 1.5em;
+  }
+</style>

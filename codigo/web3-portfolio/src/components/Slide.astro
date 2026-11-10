@@ -1,0 +1,184 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { T, ROUTES, type Lang } from '../i18n/strings';
+import { photoId, anchor, isPortrait, archiveNumber, mountDate, type Series, type Photo } from '../lib/series';
+
+interface Props {
+  lang: Lang;
+  series: Series;
+  photo: Photo;
+  index: number;
+  /** (obsoleto) el número de archivo se calcula siempre de forma estable */
+  n?: number;
+  eager?: boolean;
+  priority?: boolean;
+  /** texturas para la capa 2 y la lupa (solo en la mesa) */
+  tex?: boolean;
+}
+const { lang, series, photo, index, eager = false, priority = false, tex = true } = Astro.props;
+const t = T[lang];
+const portrait = isPortrait(photo);
+const n = await archiveNumber(series.id, index);
+// giro y desplazamiento deterministas, como diapositivas colocadas a mano
+const rnd = (k: number) => {
+  const x = Math.sin(n * 12.9898 + k * 78.233) * 43758.5453;
+  return x - Math.floor(x);
+};
+const rot = ((rnd(1) - 0.5) * 5).toFixed(2);
+const jx = ((rnd(2) - 0.5) * 0.18).toFixed(3);
+const jy = ((rnd(3) - 0.5) * 0.18).toFixed(3);
+// textura WebGL ligera (400 px) y versión de 640 px solo para el cuentahílos (se pide al pasar)
+const texSrc = tex ? (await getImage({ src: photo.file, width: 400, format: 'webp', quality: 72 })).src : undefined;
+const loupeSrc = tex ? (await getImage({ src: photo.file, width: 640, format: 'webp', quality: 74 })).src : undefined;
+const title = lang === 'es' ? series.data.title : series.data.title_en;
+const label = `${photo.place.toUpperCase()} ${mountDate(photo.date)}`;
+---
+
+<li
+  class="slide"
+  data-section={series.data.section}
+  data-n={n}
+  data-title={title}
+  data-label={label}
+  style={`--r:${rot}deg;--jx:${jx};--jy:${jy}`}
+>
+  <a
+    class="slide__link"
+    href={`${ROUTES.series[lang](series.id)}#${anchor(index)}`}
+    data-slide
+    data-vt-id={photoId(series.id, index)}
+  >
+    <span class="slide__mount">
+      <span class:list={['slide__window', { 'slide__window--v': portrait }]}>
+        <Image
+          src={photo.file}
+          alt={lang === 'es' ? photo.alt : photo.alt_en}
+          widths={[120, 200, 280, 400, 560]}
+          sizes={portrait ? '(min-width: 1024px) 175px, 23vw' : '(min-width: 1024px) 260px, 34vw'}
+          loading={eager ? 'eager' : 'lazy'}
+          fetchpriority={priority ? 'high' : undefined}
+          decoding="async"
+          data-tex={texSrc}
+          data-loupe={loupeSrc}
+          class="slide__img"
+        />
+      </span>
+      <span class="slide__label" aria-hidden="true">
+        <span class="slide__where">{label}</span>
+        <span class="slide__title">{title}</span>
+        <span class="num">{String(n).padStart(3, '0')}</span>
+      </span>
+      {photo.pick && <span class="slide__stamp" aria-hidden="true">{lang === 'es' ? 'Selección' : 'Select'}</span>}
+    </span>
+    <span class="sr-only">
+      {title}. {photo.place}, {mountDate(photo.date)}
+      {photo.pick ? `. ${t.featured}` : ''}
+    </span>
+  </a>
+</li>
+
+<style>
+  .slide {
+    min-width: 0;
+  }
+  .slide__link {
+    display: block;
+    text-decoration: none;
+    color: var(--tinta);
+    border-radius: 8px;
+  }
+  .slide__mount {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    background: var(--montura);
+    border-radius: 7px;
+    box-shadow:
+      0 0 0 1px rgba(22, 24, 27, 0.06),
+      0 1px 2px rgba(22, 24, 27, 0.1),
+      0 3px 8px -4px rgba(22, 24, 27, 0.18);
+    transition:
+      transform 0.35s var(--ease-out),
+      box-shadow 0.35s var(--ease-out);
+  }
+  .slide__window {
+    width: 80%;
+    aspect-ratio: 3 / 2;
+    background: #0b0c0d;
+    overflow: hidden;
+    border-radius: 1px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  }
+  .slide__window--v {
+    width: auto;
+    height: 76%;
+    aspect-ratio: 2 / 3;
+  }
+  .slide__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .slide__label {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 2.6%;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    color: var(--tinta-2);
+    white-space: nowrap;
+  }
+  .slide__where,
+  .slide__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .slide__title {
+    display: none;
+    color: var(--tinta);
+  }
+  .slide__link:hover .slide__where,
+  .slide__link:focus-visible .slide__where {
+    display: none;
+  }
+  .slide__link:hover .slide__title,
+  .slide__link:focus-visible .slide__title {
+    display: block;
+  }
+  /* Sello de tampón: borde irregular con máscara de ruido */
+  .slide__stamp {
+    position: absolute;
+    top: 3%;
+    right: 7%;
+    padding: 0 6px;
+    border: 1.5px solid var(--sello);
+    border-radius: 3px;
+    color: var(--sello);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    transform: rotate(-4deg);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='24'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -3.2 3.0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='24'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -3.2 3.0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    -webkit-mask-size: 80px 24px;
+    mask-size: 80px 24px;
+  }
+  .slide__link:hover .slide__mount,
+  .slide__link:focus-visible .slide__mount {
+    transform: translateY(-3px);
+    box-shadow:
+      0 0 0 1px rgba(22, 24, 27, 0.06),
+      0 8px 18px -6px rgba(22, 24, 27, 0.28);
+  }
+  .slide__link:focus-visible {
+    outline: 2px solid var(--sello);
+    outline-offset: 4px;
+  }
+</style>

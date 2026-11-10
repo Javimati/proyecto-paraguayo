@@ -1,0 +1,117 @@
+---
+import Base from '../layouts/Base.astro';
+import Facts from './Facts.astro';
+import { PERSON, ROUTES, T, otherLang, type Lang } from '../i18n/strings';
+import { getChapterViews } from '../lib/viaje-data';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+const es = lang === 'es';
+const views = await getChapterViews(lang);
+const portrait = views.flatMap((c) => c.photos).find((p) => p.h > p.w) ?? views[0].photos[0];
+---
+<Base
+  title={t.nav.about}
+  description={es
+    ? 'Sobre Álvaro Rodríguez Valverde: fotógrafo de reportaje y eventos, estudiante en Campus FP Atocha, Arganda del Rey (Madrid).'
+    : 'About Álvaro Rodríguez Valverde: reportage and events photographer, student at Campus FP Atocha, Arganda del Rey (Madrid).'}
+  lang={lang}
+  altHref={ROUTES.about[otherLang(lang)]}
+  page="about"
+>
+  <main id="main" tabindex="-1" class="about wrap">
+    <div class="about__photo">
+      <div class="about__frame">
+        <img src={portrait.srcMid} srcset={portrait.srcset} sizes="(min-width: 900px) 34vw, 92vw" width={portrait.w} height={portrait.h} alt={portrait.alt} decoding="async" />
+        <span class="frame-marks" aria-hidden="true"></span>
+      </div>
+      <p class="mono meta">{es ? 'TODO: retrato tuyo o foto representativa' : 'TODO: a portrait or a representative photo'}</p>
+    </div>
+    <div class="about__body">
+      <p class="mono meta">{t.nav.about}</p>
+      <h1 class="about__title">{es ? 'Hago fotos de lo que pasa delante de mí.' : 'I photograph what happens in front of me.'}</h1>
+      <p class="about__bio">
+        {es
+          ? 'Tengo 20 años, vivo en Arganda del Rey y estudio 2.º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen en Campus FP Atocha. Me interesan el fotorreportaje, la calle y la actualidad; también fotografío conciertos, fiestas y bodas.'
+          : 'I am 20, I live in Arganda del Rey and I am in my second year of the Higher Diploma in Lighting, Image Capture and Processing at Campus FP Atocha. I am drawn to reportage, street and news photography; I also shoot gigs, parties and weddings.'}
+        {' '}<span class="todo">{es ? 'TODO: bio en primera persona, 60–90 palabras' : 'TODO: first-person bio, 60–90 words'}</span>
+      </p>
+      <section class="about__ref" aria-labelledby="ref-t">
+        <h2 id="ref-t" class="mono">{es ? 'Referente' : 'Influence'}</h2>
+        <p>
+          {es
+            ? 'Alex Webb (Magnum). Me gusta su foto de unos niños jugando en un patio en México: varias escenas que conviven dentro del mismo encuadre.'
+            : 'Alex Webb (Magnum). I like his picture of children playing in a courtyard in Mexico: several scenes living inside one frame.'}
+        </p>
+      </section>
+      <section class="about__ref" aria-labelledby="gear-t">
+        <h2 id="gear-t" class="mono">{es ? 'Equipo' : 'Gear'}</h2>
+        <p><span class="todo">{es ? 'TODO: cámara y objetivos (opcional)' : 'TODO: camera and lenses (optional)'}</span></p>
+      </section>
+      <Facts lang={lang} />
+      <p class="about__cta"><a class="btn btn--solid" href={ROUTES.contact[lang]}>{t.nav.contact}</a> <a class="btn" href={ROUTES.editors[lang]}>{t.forEditors}</a></p>
+    </div>
+  </main>
+</Base>
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 32px var(--gap);
+    padding-block: calc(var(--header-h) + 40px) 96px;
+    align-items: start;
+  }
+  .about__photo {
+    grid-column: 1 / 5;
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    display: grid;
+    gap: 12px;
+  }
+  .about__frame {
+    position: relative;
+    color: var(--tenue);
+  }
+  .about__frame .frame-marks {
+    inset: -10px;
+  }
+  .about__body {
+    grid-column: 6 / -1;
+    display: grid;
+    gap: 28px;
+    max-width: 70ch;
+  }
+  .about__title {
+    font-size: clamp(2.2rem, 5vw, 4.6rem);
+    font-weight: 760;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+  .about__bio {
+    font-size: var(--t-21);
+    line-height: 1.5;
+  }
+  .about__ref h2 {
+    font-weight: 500;
+    color: var(--peaking);
+    margin-bottom: 6px;
+  }
+  .about__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 899px) {
+    .about__photo,
+    .about__body {
+      grid-column: 1 / -1;
+      position: static;
+    }
+    .about__photo {
+      max-width: 420px;
+    }
+  }
+</style>

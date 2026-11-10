@@ -1,0 +1,158 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Slide from './Slide.astro';
+import { ROUTES, T, SECTION_NAMES, SECTION_BLURB, SECTION_ORDER, monthYear, type Lang, type Section } from '../i18n/strings';
+import { getSeries } from '../lib/series';
+
+interface Props {
+  lang: Lang;
+  section: Section;
+}
+const { lang, section } = Astro.props;
+const t = T[lang];
+const series = (await getSeries()).filter((s) => s.data.section === section);
+const other: Lang = lang === 'es' ? 'en' : 'es';
+const name = SECTION_NAMES[lang][section];
+---
+
+<Base
+  title={name}
+  description={SECTION_BLURB[lang][section]}
+  lang={lang}
+  altHref={ROUTES.section[other](section)}
+  page="section"
+  ogImage={series[0]?.data.cover}
+>
+  <div class="sec wrap">
+    <header class="sec__head">
+      <nav class="sec__nav label" aria-label={t.sections}>
+        <ul role="list">
+          {SECTION_ORDER.map((s) => (
+            <li><a href={ROUTES.section[lang](s)} aria-current={s === section ? 'page' : undefined}>{SECTION_NAMES[lang][s]}</a></li>
+          ))}
+        </ul>
+      </nav>
+      <h1>{name}</h1>
+      <p class="sec__blurb">{SECTION_BLURB[lang][section]}</p>
+      <p class="label">{t.seriesIn(series.length)}</p>
+    </header>
+
+    <ol class="stories" role="list">
+      {series.map((s, i) => (
+        <li class="story">
+          <a href={ROUTES.series[lang](s.id)} class="story__link">
+            <Image
+              src={s.data.cover}
+              alt={lang === 'es' ? s.data.photos[0].alt : s.data.photos[0].alt_en}
+              widths={[480, 900]}
+              sizes="(min-width: 1024px) 50vw, 92vw"
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchpriority={i === 0 ? 'high' : undefined}
+              class="story__img"
+            />
+            <span class="story__text">
+              <span class="story__title">{lang === 'es' ? s.data.title : s.data.title_en}</span>
+              <span class="label">{s.data.place}, {monthYear(s.data.date, lang)}. {t.photos(s.data.photos.length)}</span>
+              <span class="story__sum">{lang === 'es' ? s.data.summary : s.data.summary_en}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ol>
+
+    <section aria-labelledby="all-photos" class="all">
+      <h2 id="all-photos">{lang === 'es' ? 'Todas las fotos' : 'All photos'}</h2>
+      <ol class="slides" role="list">
+        {series.flatMap((s) => s.data.photos.map((p, i) => <Slide lang={lang} series={s} photo={p} index={i} tex={false} />))}
+      </ol>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .sec__head {
+    display: grid;
+    gap: 12px;
+    padding-block: 16px 48px;
+  }
+  .sec__nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+  .sec__nav a {
+    display: inline-block;
+    padding-block: 6px;
+    text-decoration: none;
+  }
+  .sec__nav a[aria-current='page'] {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  h1 {
+    font-size: clamp(3.5rem, 12vw, 10rem);
+    line-height: 0.9;
+    letter-spacing: -0.035em;
+    margin-top: 16px;
+  }
+  .sec__blurb {
+    font-family: var(--f-serif-text);
+    font-size: var(--t-25);
+    max-width: 36ch;
+    line-height: 1.3;
+  }
+  .stories {
+    display: grid;
+    gap: 56px;
+  }
+  .story__link {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px var(--gap);
+    align-items: end;
+    text-decoration: none;
+  }
+  .story__img {
+    grid-column: 1 / 8;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    background: var(--proyector);
+  }
+  .story__text {
+    grid-column: 8 / -1;
+    display: grid;
+    gap: 8px;
+  }
+  .story__title {
+    font-family: var(--f-serif);
+    font-size: var(--t-39);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+  }
+  .story__link:hover .story__title {
+    color: var(--accent);
+  }
+  .story__sum {
+    max-width: 48ch;
+  }
+  .all {
+    margin-top: 96px;
+  }
+  .all h2 {
+    font-size: var(--t-31);
+    margin-bottom: 20px;
+  }
+  .slides {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--slide), 44vw), 1fr));
+    gap: clamp(14px, 2.4vw, 32px);
+  }
+  @media (max-width: 900px) {
+    .story__img,
+    .story__text {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

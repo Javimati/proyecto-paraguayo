@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import Historia from './Historia.astro';
+import { PERSON, ROUTES, otherLang, type Lang } from '../i18n/strings';
+import { getChapters, getViajeData, getChapterViews } from '../lib/viaje-data';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const data = await getViajeData(lang);
+const views = await getChapterViews(lang);
+const chapters = await getChapters();
+const firstPhoto = chapters[0].data.photos[0];
+const heroSmall = data.chapters[0]?.photos[0]?.srcSmall;
+const site = Astro.site!;
+const imageObjects = views
+  .flatMap((c) => c.photos)
+  .filter((p) => p.featured)
+  .map((p) => ({
+    '@context': 'https://schema.org',
+    '@type': 'ImageObject',
+    contentUrl: new URL(p.src, site).href,
+    caption: p.caption,
+    creator: { '@type': 'Person', name: PERSON.name },
+    creditText: PERSON.credit,
+    copyrightNotice: `© ${PERSON.name}`,
+  }));
+const description =
+  lang === 'es'
+    ? 'Álvaro Rodríguez Valverde, fotógrafo de reportaje y eventos en Madrid. Un viaje por sus fotos, capítulo a capítulo. Busca prácticas desde febrero de 2027.'
+    : 'Álvaro Rodríguez Valverde, reportage and events photographer in Madrid. A journey through his photos, chapter by chapter. Looking for an internship from February 2027.';
+---
+
+<Base
+  title={`${PERSON.name} — ${lang === 'es' ? 'Fotorreportaje y eventos' : 'Reportage and events'}`}
+  description={description}
+  lang={lang}
+  altHref={ROUTES.home[otherLang(lang)]}
+  page="home"
+  ogImage={firstPhoto.file}
+  ogAlt={lang === 'es' ? firstPhoto.alt : firstPhoto.alt_en}
+  jsonld={imageObjects}
+>
+  <Fragment slot="head">
+    {/* Primer frame: decide antes de pintar si habrá intro (mismos checks baratos que src/scripts/caps.ts;
+        el sondeo de WebGL2 lo hace home.ts y, si falla, retira la intro). Así el visor aparece desde el HTML
+        y nunca se ve la escena 3D antes que él. */}
+    <script is:inline>
+      (function (d) {
+        try {
+          var ok, q = new URLSearchParams(location.search).get('tier');
+          var ss = sessionStorage;
+          if (q) ok = q === 'high' || q === 'mid';
+          else {
+            var m = function (x) { return matchMedia(x).matches; };
+            var n = navigator, c = n.hardwareConcurrency || 2, mem = n.deviceMemory;
+            ok = !m('(prefers-reduced-motion: reduce)') && ss.getItem('gl-off') !== '1' &&
+              !(n.connection && n.connection.saveData) && c >= 4 && !(mem !== undefined && mem < 4);
+            if (ok && (m('(pointer: coarse)') || innerWidth < 1024)) ok = c >= 6 && (mem === undefined || mem >= 6);
+          }
+          if (ok && ss.getItem('vista-2d') !== '1' && ss.getItem('intro-visto') !== '1') d.classList.add('intro-on', 'intro-pre');
+        } catch (e) {}
+      })(document.documentElement);
+    </script>
+    <style is:inline>
+      html.intro-pre #intro-root { display: block; }
+      html.intro-on .site-header { opacity: 0; pointer-events: none; }
+      .intro-pre { position: fixed; inset: 0; background: #0a0b10; transition: opacity 0.45s ease; }
+      .intro-pre img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.05); transition: transform 0.3s cubic-bezier(0.2, 0.6, 0.3, 1); }
+      .intro-pre__b { filter: blur(18px) brightness(0.62); }
+      .intro-pre__s { opacity: var(--focus, 0); }
+      #intro-root.is-shooting .intro-pre img { transform: scale(1); }
+      .intro-pre.is-gone { opacity: 0; }
+    </style>
+  </Fragment>
+  <Historia lang={lang} />
+  <div id="viaje-root" aria-hidden="true"></div>
+  <div id="viaje-ui"></div>
+  <div id="intro-root">
+    {
+      heroSmall && (
+        <div class="intro-pre" aria-hidden="true">
+          <img class="intro-pre__b" src={heroSmall} alt="" decoding="async" loading="lazy" />
+          <img class="intro-pre__s" src={heroSmall} alt="" decoding="async" loading="lazy" />
+        </div>
+      )
+    }
+  </div>
+  <script type="application/json" id="viaje-data" set:html={JSON.stringify(data)} />
+  <script>
+    import '../scripts/home';
+  </script>
+</Base>

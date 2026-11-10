@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactBlock from './ContactBlock.astro';
+import { ROUTES, T, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const es = lang === 'es';
+const t = T[lang];
+---
+<Base
+  title={t.nav.contact}
+  description={es ? 'Contacto de Álvaro Rodríguez Valverde, fotoperiodista en Madrid.' : 'Contact Álvaro Rodríguez Valverde, Madrid-based photojournalist.'}
+  lang={lang}
+  altHref={ROUTES.contact[es ? 'en' : 'es']}
+  page="contact"
+>
+  <div class="ct wrap">
+    <h1>{t.nav.contact}</h1>
+    <p class="ct__lede">
+      {es ? 'Para prácticas, colaboraciones o encargos. Respondo por email.' : 'For internships, freelance work or commissions. Email is best.'}
+    </p>
+    <ContactBlock lang={lang} big />
+    <p class="label">{es ? 'Sin formulario: escribe directamente al email.' : 'No form: write straight to the email address.'}</p>
+  </div>
+</Base>
+<style>
+  .ct {
+    display: grid;
+    gap: 28px;
+    padding-block: 16px 0;
+    max-width: 1100px;
+  }
+  h1 {
+    font-size: clamp(3rem, 10vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: -0.035em;
+  }
+  .ct__lede {
+    font-family: var(--f-serif-text);
+    font-size: var(--t-25);
+    max-width: 40ch;
+  }
+</style>

@@ -1,0 +1,124 @@
+---
+import Base from '../layouts/Base.astro';
+import { T } from '../i18n/strings';
+---
+
+<Base
+  title="404 — Este negativo se veló"
+  description="Página no encontrada."
+  lang="es"
+  altHref="/en/"
+  theme="oscuro"
+  page="notfound"
+>
+  <div class="nf wrap">
+    <div class="strip" aria-hidden="true">
+      <span class="edge">◂ 00 &nbsp; 00A</span>
+      <div class="frame"></div>
+      <span class="edge edge-b">VELADO &nbsp; 404</span>
+    </div>
+    <div class="copy">
+      <div lang="es">
+        <h1>{T.es.notFoundTitle}</h1>
+        <p>{T.es.notFoundText}</p>
+        <p><a href="/">{T.es.notFoundBack}</a></p>
+      </div>
+      <div lang="en" class="en">
+        <h2 class="en-title">{T.en.notFoundTitle}</h2>
+        <p>{T.en.notFoundText}</p>
+        <p><a href="/en/">{T.en.notFoundBack}</a></p>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .nf {
+    display: grid;
+    gap: 48px;
+    padding-block: 32px 120px;
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .nf {
+      grid-template-columns: 7fr 5fr;
+      min-height: calc(100svh - 120px);
+    }
+  }
+  .strip {
+    position: relative;
+    background: var(--pelicula);
+    padding: calc(var(--sprocket) + 18px) 18px;
+  }
+  .strip::before,
+  .strip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--sprocket);
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0 8px,
+      #3a3733 8px 20px,
+      transparent 20px 28px
+    );
+    background-size: 28px 8px;
+    background-repeat: repeat-x;
+    background-position: 0 50%;
+  }
+  .strip::before {
+    top: 4px;
+  }
+  .strip::after {
+    bottom: 4px;
+  }
+  .frame {
+    aspect-ratio: 3 / 2;
+    background:
+      radial-gradient(ellipse 70% 80% at 72% 30%, #fffaf0 0%, #f6d9a8 22%, #c9773e 48%, transparent 75%),
+      radial-gradient(ellipse 60% 50% at 20% 85%, rgba(220, 120, 60, 0.55), transparent 70%),
+      #2a2622;
+    filter: contrast(1.1);
+  }
+  .edge {
+    position: absolute;
+    top: calc(var(--sprocket) + 2px);
+    left: 22px;
+    font-size: var(--t-12);
+    color: var(--borde-pelicula);
+    letter-spacing: 0.08em;
+  }
+  .edge-b {
+    top: auto;
+    bottom: calc(var(--sprocket) + 2px);
+  }
+  h1,
+  .en-title {
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 0.92;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .en-title {
+    font-size: var(--t-28);
+    margin-bottom: 8px;
+  }
+  .copy p {
+    max-width: 48ch;
+  }
+  .copy p + p {
+    margin-top: 8px;
+  }
+  .copy a {
+    color: var(--lapiz-texto-oscuro);
+  }
+  .en {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #3a3733;
+    color: var(--meta);
+  }
+</style>

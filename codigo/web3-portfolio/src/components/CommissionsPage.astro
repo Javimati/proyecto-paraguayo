@@ -1,0 +1,192 @@
+---
+import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import ContactBlock from './ContactBlock.astro';
+import { ROUTES, T, SECTION_NAMES, SECTION_BLURB, type Lang, type Section } from '../i18n/strings';
+import { getSeries } from '../lib/series';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const es = lang === 'es';
+const t = T[lang];
+const all = await getSeries();
+const kinds: Section[] = ['directo', 'eventos', 'bodas'];
+// Una foto grande por apartado y tres de apoyo, sin monturas: la metáfora de archivo es para el editor;
+// aquí el público compra emoción.
+const groups = kinds.map((k) => {
+  const ss = all.filter((s) => s.data.section === k);
+  const photos = ss.flatMap((s) => s.data.photos.map((p, i) => ({ s, p, i })));
+  const hero = photos.find(({ p }) => p.file.width >= p.file.height) ?? photos[0];
+  const rest = photos.filter((x) => x !== hero).slice(0, 3);
+  return { k, hero, rest };
+});
+---
+<Base
+  title={t.nav.commissions}
+  description={es ? 'Encargos de conciertos, eventos y bodas: cómo pedir presupuesto a Álvaro Rodríguez Valverde.' : 'Commissions for concerts, events and weddings: how to ask Álvaro Rodríguez Valverde for a quote.'}
+  lang={lang}
+  altHref={ROUTES.commissions[es ? 'en' : 'es']}
+  page="commissions"
+  ogImage={groups[0]?.hero?.p.file}
+>
+  <div class="com wrap">
+    <header class="com__head">
+      <h1>{es ? 'Encargos: directo, eventos y bodas' : 'Commissions: live music, events and weddings'}</h1>
+      <p class="com__lede">
+        {es
+          ? 'Además del fotoperiodismo, hago conciertos, eventos y bodas con la misma mirada: contar lo que pasa sin preparar la escena.'
+          : 'Alongside photojournalism, I shoot concerts, events and weddings the same way: telling what happens without staging it.'}
+      </p>
+    </header>
+
+    {groups.map((g) => (
+      <section class="kind" aria-labelledby={`k-${g.k}`}>
+        <div class="kind__text">
+          <h2 id={`k-${g.k}`}>{SECTION_NAMES[lang][g.k]}</h2>
+          <p>{SECTION_BLURB[lang][g.k]}</p>
+          <a href={ROUTES.section[lang](g.k)}>{es ? `Ver ${SECTION_NAMES.es[g.k].toLowerCase()}` : `See ${SECTION_NAMES.en[g.k].toLowerCase()}`}</a>
+        </div>
+        {g.hero && (
+          <a class="kind__hero" href={`${ROUTES.series[lang](g.hero.s.id)}#f-${String(g.hero.i + 1).padStart(2, '0')}`}>
+            <Image
+              src={g.hero.p.file}
+              alt={es ? g.hero.p.alt : g.hero.p.alt_en}
+              widths={[640, 1000, 1400]}
+              sizes="(min-width: 900px) 64vw, 92vw"
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+        )}
+        <ul class="kind__more" role="list">
+          {g.rest.map(({ s, p, i }) => (
+            <li>
+              <a href={`${ROUTES.series[lang](s.id)}#f-${String(i + 1).padStart(2, '0')}`}>
+                <Image
+                  src={p.file}
+                  alt={es ? p.alt : p.alt_en}
+                  widths={[320, 520]}
+                  sizes="(min-width: 900px) 20vw, 30vw"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    <section class="terms" aria-labelledby="terms">
+      <h2 id="terms">{es ? 'Cómo trabajo' : 'How I work'}</h2>
+      <dl>
+        <div><dt>{es ? 'Antes' : 'Before'}</dt><dd><span class="todo">TODO: {es ? 'cómo es la primera conversación y qué necesita saber' : 'first conversation and what he needs to know'}</span></dd></div>
+        <div><dt>{es ? 'Entrega' : 'Delivery'}</dt><dd><span class="todo">TODO: {es ? 'formato, número aproximado de fotos y plazo' : 'format, approximate number of photos and turnaround'}</span></dd></div>
+        <div><dt>{es ? 'Tarifas' : 'Rates'}</dt><dd><span class="todo">TODO: {es ? 'tarifas o «a consultar» (no inventar precios)' : 'rates or “on request” (do not invent prices)'}</span></dd></div>
+        <div><dt>{es ? 'Zona' : 'Area'}</dt><dd>{es ? 'Madrid y toda la Comunidad de Madrid, en transporte público.' : 'Madrid and the whole Madrid region, by public transport.'}</dd></div>
+      </dl>
+    </section>
+
+    <section class="ask" aria-labelledby="ask">
+      <h2 id="ask">{es ? 'Pedir presupuesto' : 'Ask for a quote'}</h2>
+      <p class="meta">{es ? 'Escribe con la fecha, el lugar y el tipo de evento.' : 'Write with the date, place and type of event.'}</p>
+      <ContactBlock lang={lang} />
+    </section>
+  </div>
+</Base>
+
+<style>
+  .com__head {
+    padding-block: 16px 56px;
+    display: grid;
+    gap: 16px;
+  }
+  h1 {
+    font-size: clamp(2.75rem, 7vw, 6.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 14ch;
+  }
+  .com__lede {
+    font-family: var(--f-serif-text);
+    font-size: var(--t-25);
+    line-height: 1.35;
+    max-width: 40ch;
+  }
+  .kind {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 20px var(--gap);
+    padding-block: 40px;
+    border-top: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  }
+  .kind__text {
+    grid-column: 1 / 5;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+  .kind h2 {
+    font-size: var(--t-49);
+  }
+  .kind__hero {
+    grid-column: 5 / -1;
+    grid-row: 1 / span 2;
+    display: block;
+    background: var(--proyector);
+  }
+  .kind__hero :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .kind__more {
+    grid-column: 1 / 5;
+    align-self: end;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .kind__more :global(img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--proyector);
+  }
+  .kind__hero:hover :global(img),
+  .kind__more a:hover :global(img) {
+    opacity: 0.9;
+  }
+  .terms,
+  .ask {
+    margin-top: 72px;
+    display: grid;
+    gap: 16px;
+    max-width: 880px;
+  }
+  .terms h2,
+  .ask h2 {
+    font-size: var(--t-39);
+  }
+  .terms dl {
+    display: grid;
+    gap: 12px;
+  }
+  .terms div {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 12px;
+  }
+  .terms dt {
+    color: var(--meta);
+  }
+  @media (max-width: 900px) {
+    .kind__text,
+    .kind__hero,
+    .kind__more {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+  }
+</style>

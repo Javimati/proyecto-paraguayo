@@ -1,0 +1,285 @@
+---
+// Página "Para editores": sin efectos, sin router, sin fuentes extra en la carga crítica.
+import { Picture, getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { PERSON, ROUTES, T, PRESS, SECTION_NAMES, wireCaption, type Lang } from '../i18n/strings';
+import { getSeries } from '../lib/series';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+const es = lang === 'es';
+
+const series = (await getSeries()).filter((s) => PRESS.includes(s.data.section));
+const picks = series.flatMap((s) =>
+  s.data.photos
+    .filter((p) => p.featured)
+    .map((p) => ({ ...p, slug: s.id, section: s.data.section, seriesTitle: es ? s.data.title : s.data.title_en })),
+);
+const anyProvisional = series.some((s) => s.data.provisional);
+
+const site = Astro.site!;
+const jsonld = await Promise.all(
+  picks.map(async (p) => {
+    const img = await getImage({ src: p.file, width: 1600, format: 'jpg' });
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ImageObject',
+      contentUrl: new URL(img.src, site).href,
+      caption: es ? p.caption : p.caption_en,
+      description: es ? p.alt : p.alt_en,
+      dateCreated: p.date.toISOString().slice(0, 10),
+      contentLocation: { '@type': 'Place', name: p.place },
+      creator: { '@type': 'Person', name: PERSON.name },
+      creditText: PERSON.credit,
+      copyrightNotice: `© ${p.date.getUTCFullYear()} ${PERSON.name}`,
+    };
+  }),
+);
+
+// Rejilla: 1 col < 640px, 2 col hasta 1100px, 3 col después; contenedor máx. 1400px.
+const sizes = '(min-width: 1100px) min(30vw, 440px), (min-width: 640px) calc(50vw - 48px), calc(100vw - 32px)';
+---
+
+<Base
+  title={t.nav.editors}
+  description={es
+    ? 'Selección de fotoperiodismo de Álvaro Rodríguez Valverde para editores gráficos: fotos con pie completo, disponibilidad y contacto.'
+    : 'Photojournalism selects by Álvaro Rodríguez Valverde for picture editors: full captions, availability and contact.'}
+  lang={lang}
+  altHref={es ? ROUTES.editors.en : ROUTES.editors.es}
+  theme="mesa"
+  footer={false}
+  page="editors"
+  enhanced={false}
+  ogImage={picks[0]?.file}
+  ogAlt={picks[0] ? (es ? picks[0].alt : picks[0].alt_en) : undefined}
+  jsonld={jsonld}
+>
+  <div class="ed wrap">
+    <section class="ed-head" aria-labelledby="ed-name">
+      <h1 id="ed-name">{PERSON.name}</h1>
+      <p class="ed-what">
+        {es
+          ? 'Actualidad, calle y reportaje. Madrid. Estudiante de 2.º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen (Campus FP Atocha). Busco mis primeras prácticas en una agencia.'
+          : 'News, street and documentary. Madrid. Second-year student, Higher Vocational Diploma in Lighting, Image Capture and Processing (Campus FP Atocha). Looking for my first internship at an agency.'}
+      </p>
+      <dl class="ed-facts">
+        <div>
+          <dt>{es ? 'Disponibilidad' : 'Availability'}</dt>
+          <dd>
+            {es
+              ? 'Prácticas (FCT) desde el 16 de febrero de 2027 hasta completar 440 horas. Horario de mañana o tarde, el que asigne la agencia.'
+              : 'Internship (FCT) from 16 February 2027 until 440 hours are completed. Morning or afternoon shifts, whatever the agency assigns.'}
+          </dd>
+        </div>
+        <div>
+          <dt>{es ? 'Sobre mí' : 'About'}</dt>
+          <dd>
+            {/* TODO(bio): bio de 3 líneas en primera persona */}
+            <span class="todo">TODO: {es ? 'bio de 3 líneas' : '3-line bio'}</span>
+          </dd>
+        </div>
+        <div>
+          <dt>{es ? 'Convenio' : 'Agreement'}</dt>
+          <dd>{es ? 'Sin convenio previo: el centro lo tramita.' : 'No prior agreement needed: the school arranges it.'}</dd>
+        </div>
+        <div>
+          <dt>{es ? 'Ficha' : 'Details'}</dt>
+          <dd>
+            {es
+              ? 'Lightroom Classic y Photoshop. Inglés B1. Me muevo en transporte público por toda la Comunidad de Madrid.'
+              : 'Lightroom Classic and Photoshop. English B1. I get around the whole Madrid region by public transport.'}
+          </dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd><a href={`mailto:${PERSON.email}`}>{PERSON.email}</a></dd>
+        </div>
+        <div>
+          <dt>{es ? 'Teléfono' : 'Phone'}</dt>
+          <dd><a href={`tel:${PERSON.phoneIntl}`}>{PERSON.phone}</a></dd>
+        </div>
+      </dl>
+      <div class="ed-actions">
+        {PERSON.portfolioPdf && <a class="btn btn--solid" href={PERSON.portfolioPdf} download>{t.downloadPdf}</a>}
+        <button
+          class="btn"
+          type="button"
+          data-copy-email={PERSON.email}
+          data-copied={t.copied}
+          aria-describedby="copy-status">{t.copyEmail}</button
+        >
+        <span id="copy-status" class="copy-status" role="status" aria-live="polite"></span>
+      </div>
+      {anyProvisional && <p class="ed-provisional">{t.provisional}</p>}
+    </section>
+
+    <section aria-labelledby="ed-picks">
+      <h2 id="ed-picks" class="ed-h2">
+        {es ? `${picks.length} fotos seleccionadas` : `${picks.length} selected photos`}
+      </h2>
+      <ol class="ed-grid" role="list">
+        {
+          picks.map((p, i) => (
+            <li class:list={[{ 'is-v': p.file.height > p.file.width }]}>
+              <figure>
+                <Picture
+                  src={p.file}
+                  alt={es ? p.alt : p.alt_en}
+                  formats={['avif', 'webp']}
+                  widths={[480, 720, 960]}
+                  sizes={sizes}
+                  quality={58}
+                  loading={i < 1 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : undefined}
+                  decoding="async"
+                />
+                <figcaption>
+                  {wireCaption(p.place, p.date, es ? p.caption : p.caption_en, lang)}
+                  <a class="ed-series" href={ROUTES.series[lang](p.slug)}>
+                    {SECTION_NAMES[lang][p.section]}: {p.seriesTitle}
+                  </a>
+                </figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
+
+  <script is:inline>
+    (function () {
+      var b = document.querySelector('[data-copy-email]');
+      if (!b) return;
+      b.addEventListener('click', function () {
+        var e = b.getAttribute('data-copy-email'),
+          s = document.getElementById('copy-status'),
+          ok = function () {
+            s.textContent = b.getAttribute('data-copied') + ': ' + e;
+          };
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(e).then(ok, function () {
+            location.href = 'mailto:' + e;
+          });
+        } else {
+          location.href = 'mailto:' + e;
+        }
+      });
+    })();
+  </script>
+</Base>
+
+<style>
+  .ed {
+    padding-bottom: 96px;
+  }
+  .ed-head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px var(--gap);
+    padding-block: 16px 36px;
+  }
+  h1 {
+    grid-column: 1 / 7;
+    font-size: clamp(2.25rem, 5vw, 4.25rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+  }
+  .ed-what {
+    grid-column: 1 / 7;
+    max-width: 56ch;
+    font-size: var(--t-16);
+  }
+  .ed-facts {
+    grid-column: 8 / -1;
+    grid-row: 1 / span 3;
+    align-self: end;
+    display: grid;
+    gap: 8px;
+    font-size: 0.9375rem;
+  }
+  .ed-facts div {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    gap: 12px;
+  }
+  .ed-facts dt {
+    color: var(--meta);
+  }
+  .ed-actions {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .copy-status {
+    font-size: var(--t-13);
+    color: var(--meta);
+  }
+  .ed-provisional {
+    grid-column: 1 / -1;
+    font-size: var(--t-13);
+    color: var(--aviso);
+  }
+  .ed-h2 {
+    font-family: var(--f-sans);
+    font-size: var(--t-13);
+    font-weight: 500;
+    padding-block: 12px;
+    border-top: 1px solid var(--tinta);
+    margin-bottom: 20px;
+  }
+  .ed-grid {
+    display: grid;
+    gap: 44px 24px;
+    grid-template-columns: 1fr;
+    grid-auto-flow: row dense;
+    align-items: start;
+  }
+  /* verticales a su proporción real: ocupan dos filas en vez de encogerse dentro de un 3:2 */
+  @media (min-width: 640px) {
+    .ed-grid .is-v {
+      grid-row: span 2;
+    }
+  }
+  @media (min-width: 640px) {
+    .ed-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1100px) {
+    .ed-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 900px) {
+    h1,
+    .ed-what,
+    .ed-facts {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+  }
+  figure img {
+    width: 100%;
+    height: auto;
+    background: var(--proyector);
+  }
+  figcaption {
+    margin-top: 10px;
+    font-size: var(--t-13);
+    line-height: 1.6;
+    max-width: 62ch;
+  }
+  .ed-series {
+    display: block;
+    margin-top: 6px;
+    color: var(--meta);
+  }
+</style>

@@ -1,0 +1,87 @@
+/* Tokens — ver docs/PLAN.md §2 */
+
+/* Archivo, partido en dos archivos (subset Latin-1 + puntuación):
+   · texto: variable wght 400–650, wdth 72–100 (fichas condensadas y texto)
+   · cartel: estático 850 / 125 % (títulos de cartel extendidos)          */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 650;
+  font-stretch: 72% 100%;
+  src: url('./fonts/archivo-text.woff2') format('woff2-variations'), url('./fonts/archivo-text.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 850;
+  font-stretch: 125%;
+  src: url('./fonts/archivo-display.woff2') format('woff2');
+}
+/* Permanent Marker solo en mayúsculas, cifras y puntuación (todo su uso es uppercase).
+   optional: si no llega a tiempo, esa vista usa el respaldo y no hay salto (CLS). Se precarga en la home. */
+@font-face {
+  font-family: 'Permanent Marker';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 400;
+  src: url('./fonts/permanent-marker-caps.woff2') format('woff2');
+}
+/* Respaldos métricos por ancho (reducen el salto al cargar Archivo) */
+@font-face {
+  font-family: 'Archivo Fallback';
+  src: local('Arial'), local('Liberation Sans'), local('Helvetica'), local('Roboto');
+  size-adjust: 98%;
+  ascent-override: 92%;
+  descent-override: 24%;
+}
+@font-face {
+  font-family: 'Archivo Condensed Fallback';
+  src: local('Arial Narrow'), local('Liberation Sans Narrow'), local('Arial'), local('Liberation Sans'), local('Roboto');
+  size-adjust: 84%;
+  ascent-override: 106%;
+  descent-override: 28%;
+}
+@font-face {
+  font-family: 'Archivo Wide Fallback';
+  src: local('Arial Black'), local('Arial Bold'), local('Liberation Sans Bold'), local('Roboto Black'), local('Arial');
+  size-adjust: 112%;
+  ascent-override: 80%;
+  descent-override: 21%;
+}
+
+:root {
+  --escenario: #1b1a1d;
+  --escenario-apagado: #0e0d10;
+  --papel: #f4f4f1;
+  --rotulador: #18171a;
+  --cinta: #8f8d88;
+  --sala: #ecebe7;
+  --meta: #a8a5a0;
+  --meta-papel: #55524d;
+  --luz-trabajo: #f0a640;
+  --gel: hsl(35 85% 60%);
+
+  --f-marker: 'Permanent Marker', 'Marker Felt', 'Archivo', 'Archivo Wide Fallback', sans-serif;
+  --f-sans: 'Archivo', 'Archivo Fallback', sans-serif;
+  --f-cond: 'Archivo', 'Archivo Condensed Fallback', sans-serif;
+  --f-wide: 'Archivo', 'Archivo Wide Fallback', sans-serif;
+  --escenario-evento: #161616;
+
+  /* Escala 1.25 */
+  --t-12: 0.75rem;
+  --t-14: 0.875rem;
+  --t-16: 1rem;
+  --t-20: 1.25rem;
+  --t-25: 1.5625rem;
+  --t-31: 1.9375rem;
+  --t-39: 2.4375rem;
+  --t-49: 3.0625rem;
+  --t-title: clamp(2rem, 6vw, 6rem);
+
+  --margin: clamp(16px, 4vw, 56px);
+  --gap: 16px;
+  --measure: 66ch;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}

@@ -1,0 +1,54 @@
+/* Tokens — ver docs/PLAN.md §2 */
+:root {
+  --mesa: #f2f4f1;
+  --mesa-borde: #d6dad4;
+  --montura: #fbfbf7;
+  --tinta: #16181b;
+  --tinta-2: #565c61;
+  --sello: #4a2390; /* tinta de tampón violeta (AA 9:1 sobre la mesa) */
+  --aviso: #7a4a12; /* provisional / TODO: tinta sepia, distinta del sello */
+  --aviso-claro: #e2b680;
+  --proyector: #0c0d0f;
+  --proyector-texto: #ebece8;
+  --proyector-meta: #a4a8ac;
+  --sello-claro: #c3a6f2;
+
+  --f-serif: 'Newsreader Display', 'Newsreader Fallback', serif;
+  --f-serif-text: 'Newsreader Text', 'Newsreader Fallback', serif;
+  --f-sans: 'Schibsted Grotesk', 'Schibsted Fallback', system-ui, sans-serif;
+
+  /* escala 1.25 */
+  --t-13: 0.8125rem;
+  --t-16: 1rem;
+  --t-20: 1.25rem;
+  --t-25: 1.5625rem;
+  --t-31: 1.9375rem;
+  --t-39: 2.4375rem;
+  --t-49: 3.0625rem;
+  --t-61: 3.8125rem;
+  --t-title: clamp(2.75rem, 8vw, 8.5rem);
+
+  --margin: clamp(16px, 4vw, 64px);
+  --gap: 16px;
+  --measure: 68ch;
+
+  --slide: clamp(220px, 17vw, 300px); /* lado de la montura en la mesa */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-inout: cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+/* Respaldos métricos para que el cambio de fuente no mueva el layout */
+@font-face {
+  font-family: 'Newsreader Fallback';
+  src: local('Times New Roman'), local('Liberation Serif'), local('Times');
+  size-adjust: 100%;
+  ascent-override: 73.5%;
+  descent-override: 26.5%;
+}
+@font-face {
+  font-family: 'Schibsted Fallback';
+  src: local('Arial'), local('Helvetica'), local('Liberation Sans'), local('Roboto');
+  size-adjust: 105%;
+  ascent-override: 93%;
+  descent-override: 24.5%;
+}

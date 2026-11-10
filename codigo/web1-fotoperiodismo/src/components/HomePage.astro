@@ -1,0 +1,128 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactSheet from './ContactSheet.astro';
+import SplitTitle from './SplitTitle.astro';
+import { PERSON, ROUTES, T, type Lang } from '../i18n/strings';
+import { getSeries } from '../lib/series';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+const series = await getSeries();
+const anyProvisional = series.some((s) => s.data.provisional);
+const first = series[0];
+const description =
+  lang === 'es'
+    ? 'Álvaro Rodríguez Valverde, fotoperiodista en Madrid: actualidad, calle y reportaje. Hoja de contactos con sus series.'
+    : 'Álvaro Rodríguez Valverde, Madrid-based photojournalist: news, street and documentary. Contact sheet of his stories.';
+---
+
+<Base
+  title={`${PERSON.name} — ${lang === 'es' ? 'Fotoperiodismo' : 'Photojournalism'}`}
+  description={description}
+  lang={lang}
+  altHref={ROUTES.home[lang === 'es' ? 'en' : 'es']}
+  theme="papel"
+  page="home"
+  ogImage={first?.data.cover}
+  ogAlt={first ? (lang === 'es' ? first.data.photos[0].alt : first.data.photos[0].alt_en) : undefined}
+>
+  <div class="home wrap">
+    <div class="intro">
+      <SplitTitle class="name" text="Álvaro Rodríguez Valverde" />
+      <p class="intro__text">{t.sheetIntro}</p>
+      <p class="intro__editors">
+        <a href={ROUTES.editors[lang]}>{lang === 'es' ? 'Selección rápida para editores gráficos' : 'Quick selection for photo editors'}</a>
+      </p>
+      {anyProvisional && <p class="provisional" role="note">{t.provisional}</p>}
+    </div>
+
+    <ContactSheet lang={lang} />
+  </div>
+  <div class="loupe" aria-hidden="true" data-loupe-el></div>
+</Base>
+
+<style>
+  .home {
+    padding-bottom: clamp(48px, 8vw, 120px);
+  }
+  .intro {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 10px var(--gap);
+    align-items: start;
+    padding-block: clamp(16px, 3vw, 40px) clamp(20px, 2.5vw, 32px);
+    font-size: var(--t-14);
+  }
+  .intro :global(.name) {
+    grid-column: 1 / -1;
+    margin-bottom: clamp(8px, 1.5vw, 20px);
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: clamp(2.75rem, 6.5vw, 7rem);
+    line-height: 0.86;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    color: var(--grafito);
+    white-space: nowrap;
+  }
+  .intro__text {
+    grid-column: 1 / 6;
+    max-width: 52ch;
+  }
+  .intro__editors {
+    grid-column: 6 / 9;
+  }
+  .intro__editors a {
+    color: var(--lapiz-texto);
+    font-weight: 500;
+  }
+  .provisional {
+    grid-column: 10 / -1;
+    justify-self: end;
+    padding: 4px 10px;
+    border: 1px dashed var(--meta);
+    color: var(--meta);
+    font-size: var(--t-12);
+    max-width: 34ch;
+  }
+
+  /* Cuentahílos (capa 1, solo puntero fino) */
+  .loupe {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 180px;
+    height: 180px;
+    /* centrada 24 px abajo-derecha del cursor, para no tapar lo que se señala */
+    margin: -66px 0 0 -66px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 80;
+    opacity: 0;
+    background-color: #050505;
+    background-repeat: no-repeat;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.55),
+      0 0 0 4px rgba(236, 235, 230, 0.9),
+      0 0 0 5px rgba(0, 0, 0, 0.35),
+      0 8px 18px rgba(0, 0, 0, 0.22);
+    will-change: transform;
+    display: none;
+  }
+
+  @media (max-width: 1023px) {
+    .intro :global(.name) {
+      white-space: normal;
+      font-size: clamp(3.25rem, 15vw, 7rem);
+    }
+    .intro__text,
+    .intro__editors,
+    .provisional {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
+  }
+</style>

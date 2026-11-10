@@ -1,0 +1,394 @@
+{
+  "prueba-boda/01.jpg": {
+    "dominant": "#c8c8c8",
+    "palette": [
+      "#dbd6d2",
+      "#c2bdb7",
+      "#a8a39d"
+    ]
+  },
+  "prueba-boda/02.jpg": {
+    "dominant": "#c8c8c8",
+    "palette": [
+      "#dbd6d2",
+      "#c2bdb7",
+      "#a8a39d"
+    ]
+  },
+  "prueba-boda/03.jpg": {
+    "dominant": "#c8c8c8",
+    "palette": [
+      "#dbd6d2",
+      "#c2bdb7",
+      "#a8a39d"
+    ]
+  },
+  "prueba-boda/04.jpg": {
+    "dominant": "#c8c8c8",
+    "palette": [
+      "#dbd6d2",
+      "#c2bdb7",
+      "#a8a39d"
+    ]
+  },
+  "prueba-boda/05.jpg": {
+    "dominant": "#c8c8c8",
+    "palette": [
+      "#c7c2bd",
+      "#ada8a2",
+      "#393532"
+    ]
+  },
+  "prueba-boda/06.jpg": {
+    "dominant": "#c8c8c8",
+    "palette": [
+      "#dbd6d2",
+      "#c2bdb7",
+      "#a8a39d"
+    ]
+  },
+  "prueba-calle/01.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#171717",
+      "#373737",
+      "#575757"
+    ]
+  },
+  "prueba-calle/02.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#151515",
+      "#979797",
+      "#686868"
+    ]
+  },
+  "prueba-calle/03.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#171717",
+      "#363636",
+      "#686868"
+    ]
+  },
+  "prueba-calle/04.jpg": {
+    "dominant": "#181818",
+    "palette": [
+      "#181818",
+      "#353535",
+      "#535353"
+    ]
+  },
+  "prueba-calle/05.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#060606",
+      "#787878",
+      "#989898"
+    ]
+  },
+  "prueba-calle/06.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#181818",
+      "#373737",
+      "#676767"
+    ]
+  },
+  "prueba-calle/07.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#070707",
+      "#272727",
+      "#424242"
+    ]
+  },
+  "prueba-calle/08.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#161616",
+      "#979797",
+      "#787878"
+    ]
+  },
+  "prueba-concentracion/01.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#090909",
+      "#686868",
+      "#474747"
+    ]
+  },
+  "prueba-concentracion/02.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#080808",
+      "#272727",
+      "#575757"
+    ]
+  },
+  "prueba-concentracion/03.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#080808",
+      "#373737",
+      "#575757"
+    ]
+  },
+  "prueba-concentracion/04.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#090909",
+      "#373737",
+      "#686868"
+    ]
+  },
+  "prueba-concentracion/05.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#090909",
+      "#272727",
+      "#575757"
+    ]
+  },
+  "prueba-concentracion/06.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#080808",
+      "#262626",
+      "#474747"
+    ]
+  },
+  "prueba-concierto/01.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#070504",
+      "#382a27",
+      "#57423d"
+    ]
+  },
+  "prueba-concierto/02.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#12141b",
+      "#b4bbd5",
+      "#262a36"
+    ]
+  },
+  "prueba-concierto/03.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#060405",
+      "#88677a",
+      "#281c23"
+    ]
+  },
+  "prueba-concierto/04.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#060503",
+      "#685848",
+      "#2a231b"
+    ]
+  },
+  "prueba-concierto/05.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#130d0b",
+      "#d9bbb4",
+      "#362825"
+    ]
+  },
+  "prueba-concierto/06.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#050507",
+      "#272a36",
+      "#4d5368"
+    ]
+  },
+  "prueba-concierto/07.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#060405",
+      "#3a2933",
+      "#654b5a"
+    ]
+  },
+  "prueba-concierto/08.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#1b1612",
+      "#d4c2ac",
+      "#3c3327"
+    ]
+  },
+  "prueba-fiesta/01.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#060404",
+      "#362825",
+      "#755b55"
+    ]
+  },
+  "prueba-fiesta/02.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#040507",
+      "#262935",
+      "#4d5367"
+    ]
+  },
+  "prueba-fiesta/03.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#050304",
+      "#281c23",
+      "#46323d"
+    ]
+  },
+  "prueba-fiesta/04.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#060503",
+      "#2b241b",
+      "#56493a"
+    ]
+  },
+  "prueba-fiesta/05.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#070504",
+      "#251b19",
+      "#4a3833"
+    ]
+  },
+  "prueba-fiesta/06.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#040406",
+      "#191c25",
+      "#353848"
+    ]
+  },
+  "prueba-manifestacion/01.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#080808",
+      "#585858",
+      "#787878"
+    ]
+  },
+  "prueba-manifestacion/02.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#070707",
+      "#676767",
+      "#a8a8a8"
+    ]
+  },
+  "prueba-manifestacion/03.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#080808",
+      "#282828",
+      "#474747"
+    ]
+  },
+  "prueba-manifestacion/04.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#070707",
+      "#373737",
+      "#585858"
+    ]
+  },
+  "prueba-manifestacion/05.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#070707",
+      "#a7a7a7",
+      "#888888"
+    ]
+  },
+  "prueba-manifestacion/06.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#090909",
+      "#484848",
+      "#676767"
+    ]
+  },
+  "prueba-manifestacion/07.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#070707",
+      "#272727",
+      "#878787"
+    ]
+  },
+  "prueba-manifestacion/08.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#080808",
+      "#777777",
+      "#c7c7c7"
+    ]
+  },
+  "prueba-reportaje/01.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#0a0a0a",
+      "#575757",
+      "#383838"
+    ]
+  },
+  "prueba-reportaje/02.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#0b0b0b",
+      "#575757",
+      "#f9f9f9"
+    ]
+  },
+  "prueba-reportaje/03.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#0a0a0a",
+      "#565656",
+      "#383838"
+    ]
+  },
+  "prueba-reportaje/04.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#0a0a0a",
+      "#575757",
+      "#373737"
+    ]
+  },
+  "prueba-reportaje/05.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#0b0b0b",
+      "#575757",
+      "#393939"
+    ]
+  },
+  "prueba-reportaje/06.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#0a0a0a",
+      "#575757",
+      "#383838"
+    ]
+  },
+  "prueba-reportaje/07.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#0a0a0a",
+      "#373737",
+      "#575757"
+    ]
+  }
+}

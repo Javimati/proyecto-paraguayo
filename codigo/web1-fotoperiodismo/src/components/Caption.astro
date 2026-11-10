@@ -1,0 +1,32 @@
+---
+import { wireCaption, type Lang } from '../i18n/strings';
+interface Props {
+  place: string;
+  date: Date;
+  text: string;
+  lang: Lang;
+  class?: string;
+}
+const { place, date, text, lang, class: cls } = Astro.props;
+const full = wireCaption(place, date, text, lang);
+// El lector de pantalla lee el texto completo (sr-only). La copia visible es aria-hidden
+// y es la que la capa 1 escribe en teletipo. Sin JS, se ve entera.
+---
+<figcaption class:list={['caption', cls]} data-teletype>
+  <span class="sr-only">{full}</span>
+  <span class="caption__wire" aria-hidden="true">{full}</span>
+</figcaption>
+
+<style>
+  .caption {
+    position: relative; /* contiene el texto sr-only (si no, desborda en la tira horizontal) */
+    font-family: var(--f-mono);
+    font-size: var(--t-14);
+    line-height: 1.6;
+    max-width: var(--measure);
+    color: var(--fg);
+  }
+  .caption__wire {
+    white-space: pre-wrap;
+  }
+</style>

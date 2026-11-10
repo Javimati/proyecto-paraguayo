@@ -1,0 +1,100 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import '../styles/global.css';
+import displayFont from '../assets/fonts/bricolage-wght.woff2?url';
+import monoFont from '../assets/fonts/martian-400.woff2?url';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { PERSON, T, type Lang, type PageKey } from '../i18n/strings';
+
+interface Props {
+  title: string;
+  description: string;
+  lang: Lang;
+  altHref: string;
+  page: PageKey;
+  ogImage?: ImageMetadata;
+  ogAlt?: string;
+  jsonld?: Record<string, unknown>[];
+  footer?: boolean;
+  /** 404: noindex, sin canonical ni hreflang */
+  noindex?: boolean;
+}
+const { title, description, lang, altHref, page, ogImage, ogAlt, jsonld = [], footer = true, noindex = false } =
+  Astro.props;
+
+const site = Astro.site!;
+const canonical = new URL(Astro.url.pathname, site).href;
+const altUrl = new URL(altHref, site).href;
+const esUrl = lang === 'es' ? canonical : altUrl;
+const enUrl = lang === 'en' ? canonical : altUrl;
+let og: string | undefined;
+if (ogImage) {
+  const img = await getImage({ src: ogImage, width: 1200, format: 'jpg', quality: 78 });
+  og = new URL(img.src, site).href;
+}
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: PERSON.name,
+  jobTitle: lang === 'es' ? 'Fotógrafo de reportaje y eventos' : 'Reportage and events photographer',
+  address: { '@type': 'PostalAddress', addressLocality: 'Arganda del Rey', addressRegion: 'Madrid', addressCountry: 'ES' },
+  url: new URL('/', site).href,
+  email: `mailto:${PERSON.email}`,
+  telephone: PERSON.phoneIntl,
+  alumniOf: { '@type': 'EducationalOrganization', name: 'Campus FP Atocha' },
+};
+const fullTitle = page === 'home' ? title : `${title} — ${PERSON.shortName}`;
+const t = T[lang];
+---
+
+<!doctype html>
+<html lang={lang} data-page={page}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {!noindex && <link rel="alternate" hreflang="es" href={esUrl} />}
+    {!noindex && <link rel="alternate" hreflang="en" href={enUrl} />}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={esUrl} />}
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoFont} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#0a0b10" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={PERSON.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_GB'} />
+    {og && <meta property="og:image" content={og} />}
+    {og && ogAlt && <meta property="og:image:alt" content={ogAlt} />}
+    <meta name="twitter:card" content={og ? 'summary_large_image' : 'summary'} />
+    <script type="application/ld+json" set:html={JSON.stringify([person, ...jsonld])} />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    {
+      page === 'home' ? (
+        <a class="skip-link" href="#historia" id="skip-story">
+          {t.skipStory}
+        </a>
+      ) : (
+        <a class="skip-link" href="#main">
+          {t.skip}
+        </a>
+      )
+    }
+    <SiteHeader lang={lang} altHref={altHref} page={page} />
+    <slot />
+    {footer && <SiteFooter lang={lang} />}
+  </body>
+</html>

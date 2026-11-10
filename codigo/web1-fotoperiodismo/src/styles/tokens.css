@@ -1,0 +1,63 @@
+/* Tokens — ver docs/PLAN.md §2 */
+
+/* Respaldo métrico: Arial/Liberation Bold escalada al ancho de Big Shoulders 800,
+   para que el cambio de fuente no reparta las líneas de otra forma (CLS). */
+@font-face {
+  font-family: 'BSD Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Roboto Bold'), local('Helvetica Bold');
+  font-weight: 700 800;
+  size-adjust: 62.8%;
+  ascent-override: 128%;
+  descent-override: 30%;
+}
+/* Respaldo métrico de IBM Plex Mono: Courier New tiene el mismo avance (0,6 em); igualamos alturas. */
+@font-face {
+  font-family: 'Plex Fallback';
+  src: local('Courier New'), local('CourierNewPSMT'), local('Liberation Mono'), local('Cousine');
+  size-adjust: 100%;
+  ascent-override: 102.5%;
+  descent-override: 27.5%;
+  line-gap-override: 0%;
+}
+:root {
+  /* Color */
+  --papel: #d4d1c9;
+  --papel-claro: #ecebe6;
+  --grafito: #1f1d1b;
+  --gris-meta: #4a4743;
+  --cuarto-oscuro: #121110;
+  --pelicula: #171615;
+  --borde-pelicula: #8e8a82;
+  --gris-oscuro-meta: #a8a49b; /* metadatos sobre --cuarto-oscuro (AA) */
+  --lapiz: #d0261d;
+  --lapiz-texto: #9e1a13; /* rojo para texto sobre papel (AA) */
+  --lapiz-texto-oscuro: #ff6b5e; /* rojo para texto sobre oscuro (AA) */
+
+  /* Tipografía */
+  --f-display: 'Big Shoulders Display', 'BSD Fallback', sans-serif;
+  --f-mono: 'IBM Plex Mono', 'Plex Fallback', ui-monospace, monospace;
+
+  /* Escala 1.333 */
+  --t-12: 0.75rem;
+  --t-14: 0.875rem;
+  --t-16: 1rem;
+  --t-21: 1.3125rem;
+  --t-28: 1.75rem;
+  --t-38: 2.375rem;
+  --t-50: 3.125rem;
+  --t-67: 4.1875rem;
+  --t-name: clamp(3.5rem, 14vw, 13rem);
+  --t-title: clamp(2.75rem, 9vw, 8.5rem);
+
+  /* Retícula */
+  --margin: clamp(16px, 4vw, 56px);
+  --gap: 16px;
+  --measure: 70ch;
+
+  /* Película */
+  --sprocket: 14px; /* alto de la banda de perforaciones */
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+}

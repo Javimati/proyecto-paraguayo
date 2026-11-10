@@ -1,0 +1,64 @@
+---
+import { type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const es = lang === 'es';
+const facts: [string, string][] = es
+  ? [
+      ['Prácticas', 'Desde el 16/02/2027 hasta completar 440 h. Horario: el que asigne la empresa.'],
+      ['Convenio', 'Vale también una empresa que aún no tenga convenio con el centro.'],
+      ['Formación', '2.º Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha (Madrid).'],
+      ['Edición', 'Lightroom Classic y Photoshop.'],
+      ['Idiomas', 'Español nativo, inglés B1.'],
+      ['Movilidad', 'Sin carné de conducir; me muevo por todo Madrid en transporte público.'],
+      ['Base', 'Arganda del Rey (Madrid).'],
+    ]
+  : [
+      ['Internship', 'From 16/02/2027 until 440 hours are completed. Schedule: whatever the company sets.'],
+      ['Agreement', 'Companies without an agreement with my school yet are welcome too.'],
+      ['Training', '2nd year, Higher Diploma in Lighting, Image Capture and Processing, Campus FP Atocha (Madrid).'],
+      ['Editing', 'Lightroom Classic and Photoshop.'],
+      ['Languages', 'Spanish (native), English B1.'],
+      ['Getting around', 'No driving licence; I get around Madrid by public transport.'],
+      ['Based in', 'Arganda del Rey (Madrid).'],
+    ];
+---
+<dl class="facts">
+  {
+    facts.map(([k, v]) => (
+      <div>
+        <dt class="mono">{k}</dt>
+        <dd>{v}</dd>
+      </div>
+    ))
+  }
+</dl>
+<style>
+  .facts {
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--linea);
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
+    gap: 4px 16px;
+    padding-block: 12px;
+    border-bottom: 1px solid var(--linea);
+  }
+  dt {
+    color: var(--tenue);
+    padding-top: 0.25em;
+  }
+  dd {
+    font-size: var(--t-15);
+    line-height: 1.5;
+  }
+  @media (max-width: 480px) {
+    .facts div {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

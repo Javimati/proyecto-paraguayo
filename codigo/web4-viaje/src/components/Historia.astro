@@ -1,0 +1,527 @@
+---
+/**
+ * La historia en 2D: contenido real, indexable y accesible (capa 0).
+ * También es la versión que ven móvil flojo, sin WebGL2, reduced motion y sin JS.
+ */
+import { PERSON, ROUTES, T, type Lang } from '../i18n/strings';
+import { getChapterViews, type PhotoView } from '../lib/viaje-data';
+import ContactActions from './ContactActions.astro';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = T[lang];
+const chapters = await getChapterViews(lang);
+const total = chapters.reduce((n, c) => n + c.photos.length, 0);
+const anyProvisional = chapters.some((c) => c.provisional);
+const pad = (n: number) => String(n).padStart(2, '0');
+
+// Foto del visor en el hero: la primera destacada (o la primera de todas)
+const all = chapters.flatMap((c) => c.photos);
+const hero = all.find((p) => p.featured) ?? all[0];
+
+/** Hueco de cada foto en la retícula (patrón de 4) y su `sizes` real */
+function slot(p: PhotoView, i: number) {
+  const portrait = p.h > p.w;
+  if (portrait) {
+    const right = i % 2 === 1;
+    return {
+      cls: right ? 'v-right' : 'v-left',
+      sizes: '(min-width: 900px) 34vw, 86vw',
+    };
+  }
+  return [
+    { cls: 's-wide', sizes: '(min-width: 900px) calc(100vw - 128px), 100vw' },
+    { cls: 's-right', sizes: '(min-width: 900px) 56vw, 100vw' },
+    { cls: 's-left', sizes: '(min-width: 900px) 40vw, 100vw' },
+    { cls: 's-mid', sizes: '(min-width: 900px) 64vw, 100vw' },
+  ][i % 4];
+}
+---
+
+<main id="historia" tabindex="-1">
+  <section class="hero" aria-labelledby="hero-title">
+    <span class="frame-marks hero__marks" aria-hidden="true"></span>
+    <p class="hero__readout mono" aria-hidden="true">
+      <span>{t.viewer.iso} 400</span><span>1/250</span><span>f/2.8</span>
+      <span class="hero__shots">[{String(total).padStart(3, '0')}] {t.viewer.shots}</span>
+    </p>
+    <div class="hero__viewfinder">
+      <img
+        src={hero.srcMid}
+        srcset={hero.srcset}
+        sizes="(min-width: 900px) min(1100px, 72vw), 92vw"
+        width={hero.w}
+        height={hero.h}
+        alt={hero.alt}
+        fetchpriority="high"
+        decoding="async"
+      />
+      <span class="hero__af" aria-hidden="true"></span>
+    </div>
+    <h1 class="hero__title" id="hero-title">
+      <span class="hero__line">{t.heroLine}</span>
+      <span class="hero__who mono">{PERSON.name} / {t.heroSub}</span>
+    </h1>
+    <a class="hero__scroll mono" href="#capitulos">{t.scroll}</a>
+  </section>
+
+  <nav class="index wrap" id="capitulos" aria-labelledby="index-title">
+    <h2 class="index__title mono meta" id="index-title">{t.chapters}</h2>
+    <ol role="list" class="index__list">
+      {
+        chapters.map((c) => (
+          <li>
+            <a href={`#cap-${c.id}`} class="index__item">
+              <span class="index__thumb">
+                <img
+                  src={c.photos[0].srcSmall}
+                  width={c.photos[0].w}
+                  height={c.photos[0].h}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="frame-marks" aria-hidden="true" />
+              </span>
+              <span class="index__n mono">{pad(c.n)}</span>
+              <span class="index__name">{c.title}</span>
+              <span class="index__count mono meta">{t.photosN(c.photos.length)}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+    {anyProvisional && <p class="provisional mono">{t.provisional}</p>}
+  </nav>
+
+  {
+    chapters.map((c) => (
+      <section class="chapter wrap" id={`cap-${c.id}`} aria-labelledby={`t-${c.id}`}>
+        <header class="chapter__head">
+          <p class="chapter__count mono">
+            {t.labels.chapter} {pad(c.n)} <span class="meta">/ {pad(chapters.length)}</span>
+          </p>
+          <h2 class="chapter__title" id={`t-${c.id}`}>
+            {c.title}
+          </h2>
+          <p class="chapter__text">{c.text}</p>
+        </header>
+        <div class="chapter__photos">
+          {c.photos.map((p, i) => {
+            const s = slot(p, i);
+            return (
+              <figure class:list={['shot', s.cls]} id={`f-${p.id}`}>
+                <div class="shot__frame" style={`--ar:${p.w}/${p.h};--dom:${p.dominant}`}>
+                  <img
+                    src={p.srcMid}
+                    srcset={p.srcset}
+                    sizes={s.sizes}
+                    width={p.w}
+                    height={p.h}
+                    alt={p.alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="frame-marks shot__marks" aria-hidden="true" />
+                </div>
+                <figcaption class="mono">{p.caption}</figcaption>
+              </figure>
+            );
+          })}
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="close wrap" aria-labelledby="close-title">
+    <p class="mono meta">{t.labels.chapter} {pad(chapters.length + 1)}</p>
+    <h2 class="close__title" id="close-title">{t.closeTitle}</h2>
+    <p class="close__text">{t.closeText}</p>
+    <ContactActions lang={lang} />
+    <p class="close__editors">
+      <a href={ROUTES.editors[lang]} class="btn">{t.forEditors}</a>
+    </p>
+  </section>
+</main>
+
+<style>
+  /* ── Hero: una foto dentro del visor ── */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto 1fr auto;
+    column-gap: var(--gap);
+    padding: calc(var(--header-h) + 18px) var(--margin) 28px;
+    color: var(--texto);
+    overflow: hidden;
+  }
+  .hero__marks {
+    inset: calc(var(--header-h) + 4px) calc(var(--margin) - 8px) 12px;
+    --m: 28px;
+    color: var(--tenue);
+  }
+  .hero__readout {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 22px;
+    padding: 6px 12px;
+    color: var(--tenue);
+  }
+  .hero__shots {
+    margin-left: auto;
+    color: var(--texto);
+  }
+  .hero__viewfinder {
+    grid-column: 1 / -1;
+    align-self: center;
+    justify-self: center;
+    position: relative;
+    width: min(1100px, 76vw, calc((100svh - 330px) * 1.5));
+    margin-block: 12px;
+  }
+  .hero__viewfinder img {
+    width: 100%;
+  }
+  /* Recuadro AF: el único momento orquestado de la versión 2D (confirma el foco una vez) */
+  .hero__af {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 18%;
+    aspect-ratio: 3 / 2;
+    translate: -50% -50%;
+    border: 1.5px solid var(--peaking);
+    box-shadow: 0 0 0 1px rgb(10 11 16 / 0.35);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__af {
+      animation: af-lock 0.9s var(--ease-out) 0.35s both;
+    }
+    .hero__viewfinder img {
+      animation: af-sharp 0.9s var(--ease-out) 0.2s both;
+    }
+  }
+  @keyframes af-lock {
+    0% {
+      scale: 1.9;
+      opacity: 0;
+      border-color: var(--texto);
+    }
+    60% {
+      scale: 0.92;
+      opacity: 1;
+      border-color: var(--texto);
+    }
+    100% {
+      scale: 1;
+      border-color: var(--peaking);
+    }
+  }
+  @keyframes af-sharp {
+    from {
+      filter: blur(6px);
+    }
+    to {
+      filter: none;
+    }
+  }
+  .hero__title {
+    grid-column: 1 / 10;
+    align-self: end;
+    font-weight: inherit;
+  }
+  .hero__line {
+    display: block;
+    font-size: var(--t-hero);
+    font-weight: 760;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .hero__who {
+    display: block;
+    margin-top: 12px;
+    color: var(--tenue);
+  }
+  .hero__scroll {
+    grid-column: 10 / -1;
+    align-self: end;
+    justify-self: end;
+    padding: 10px 0;
+    text-decoration: none;
+    color: var(--tenue);
+  }
+  .hero__scroll::after {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 14px;
+    margin-left: 10px;
+    vertical-align: -3px;
+    background: currentColor;
+  }
+
+  /* ── Índice de capítulos (secuencia real 01–06) ── */
+  .index {
+    padding-block: clamp(56px, 9vw, 120px) clamp(40px, 6vw, 80px);
+  }
+  .index__title {
+    margin-bottom: 18px;
+    font-weight: 400;
+  }
+  .index__list {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+  .index__item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 10px;
+    text-decoration: none;
+  }
+  .index__thumb {
+    grid-column: 1 / -1;
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background: var(--pantalla);
+    margin-bottom: 10px;
+    color: transparent;
+  }
+  .index__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.85) brightness(0.85);
+    transition:
+      filter 0.3s,
+      scale 0.5s var(--ease-out);
+  }
+  .index__item:hover .index__thumb img,
+  .index__item:focus-visible .index__thumb img {
+    filter: none;
+  }
+  .index__item:hover .index__thumb,
+  .index__item:focus-visible .index__thumb {
+    color: var(--peaking);
+  }
+  .index__item .frame-marks {
+    inset: -6px;
+    --m: 12px;
+    transition: color 0.2s;
+  }
+  .index__n {
+    color: var(--peaking);
+    padding-top: 0.35em;
+  }
+  .index__name {
+    font-size: var(--t-21);
+    font-weight: 640;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+  .index__count {
+    grid-column: 2;
+  }
+  .provisional {
+    margin-top: 28px;
+    color: var(--tenue);
+    max-width: 60ch;
+  }
+  .provisional::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 10px;
+    background: var(--peaking);
+    vertical-align: 1px;
+  }
+
+  /* ── Capítulos ── */
+  .chapter {
+    padding-block: clamp(80px, 12vw, 180px) 0;
+  }
+  .chapter__head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    margin-bottom: clamp(40px, 6vw, 88px);
+  }
+  .chapter__count {
+    grid-column: 1 / -1;
+    margin-bottom: 10px;
+  }
+  .chapter__title {
+    grid-column: 1 / -1;
+    font-size: var(--t-chapter);
+    font-weight: 780;
+    line-height: 0.86;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+  .chapter__text {
+    grid-column: 7 / -1;
+    margin-top: clamp(20px, 3vw, 36px);
+    max-width: var(--measure);
+    font-size: var(--t-21);
+    line-height: 1.45;
+    color: var(--texto);
+  }
+  .chapter__photos {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(48px, 8vw, 120px) var(--gap);
+    align-items: start;
+  }
+  .shot {
+    display: grid;
+    gap: 12px;
+  }
+  .s-wide {
+    grid-column: 1 / -1;
+  }
+  .s-right {
+    grid-column: 6 / -1;
+  }
+  .s-left {
+    grid-column: 1 / 6;
+  }
+  .s-mid {
+    grid-column: 3 / 11;
+  }
+  .v-left {
+    grid-column: 2 / 6;
+  }
+  .v-right {
+    grid-column: 8 / 12;
+  }
+  .shot__frame {
+    position: relative;
+    aspect-ratio: var(--ar);
+    background: color-mix(in srgb, var(--dom) 18%, var(--pantalla));
+    color: transparent;
+  }
+  .shot__frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .shot__marks {
+    inset: -10px;
+    transition:
+      color 0.25s,
+      inset 0.35s var(--ease-out);
+  }
+  .shot:hover .shot__marks {
+    color: var(--peaking);
+    inset: -5px;
+  }
+  .shot figcaption {
+    max-width: 70ch;
+    color: var(--tenue);
+    line-height: 1.6;
+  }
+
+  /* Apertura de diafragma acoplada al scroll (CSS puro; sin soporte = foto visible) */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .shot__frame img {
+        animation: abrir linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 38%;
+      }
+      .chapter__title {
+        animation: entrar linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 30%;
+      }
+    }
+  }
+  @keyframes abrir {
+    from {
+      clip-path: inset(16% 20%);
+      scale: 1.08;
+    }
+    to {
+      clip-path: inset(0);
+      scale: 1;
+    }
+  }
+  @keyframes entrar {
+    from {
+      opacity: 0.15;
+      translate: 0 0.25em;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  /* ── Cierre ── */
+  .close {
+    padding-block: clamp(120px, 16vw, 220px) clamp(80px, 10vw, 140px);
+  }
+  .close__title {
+    margin-top: 10px;
+    max-width: 16ch;
+    font-size: clamp(2.4rem, 7vw, 6.5rem);
+    font-weight: 760;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+  .close__text {
+    margin-block: 24px 32px;
+    max-width: 52ch;
+    font-size: var(--t-21);
+    line-height: 1.45;
+  }
+  .close__editors {
+    margin-top: 16px;
+  }
+
+  @media (max-width: 899px) {
+    .index__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 28px;
+    }
+    .chapter__text {
+      grid-column: 1 / -1;
+    }
+    .s-wide,
+    .s-right,
+    .s-left,
+    .s-mid {
+      grid-column: 1 / -1;
+    }
+    .v-left {
+      grid-column: 1 / 11;
+    }
+    .v-right {
+      grid-column: 3 / -1;
+    }
+    .chapter__photos {
+      row-gap: 56px;
+    }
+    .hero__title {
+      grid-column: 1 / -1;
+    }
+    .hero__scroll {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
+    .hero__viewfinder {
+      width: 100%;
+    }
+    .hero__readout {
+      gap: 12px;
+      padding-inline: 4px;
+    }
+  }
+</style>

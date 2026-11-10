@@ -1,0 +1,9 @@
+---
+import { chronicleCaption, type Lang } from '../i18n/strings';
+interface Props { venue?: string; city?: string; date?: Date; text: string; lang: Lang; }
+const { venue, city, date, text, lang } = Astro.props;
+---
+<figcaption class="caption">{chronicleCaption(venue, city, date, text, lang)}</figcaption>
+<style>
+  .caption { font-size: var(--t-14); line-height: 1.6; max-width: var(--measure); color: var(--fg); }
+</style>

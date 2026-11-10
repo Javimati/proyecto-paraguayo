@@ -1,0 +1,28 @@
+---
+/**
+ * Titular partido en caracteres EN EL BUILD (sin SplitText ni JS): el h1 lleva el texto
+ * completo en aria-label y los spans son aria-hidden. El estado inicial ya pinta (LCP).
+ */
+interface Props {
+  text: string;
+  as?: 'h1' | 'h2';
+  class?: string;
+}
+const { text, as: Tag = 'h1', class: cls } = Astro.props;
+let i = 0;
+const words = text.split(' ').map((w) => [...w].map((c) => ({ c, i: i++ })));
+---
+<Tag class={cls} aria-label={text}>
+  {
+    words.map((chars, wi) => (
+      <>
+        <span class="split-word" aria-hidden="true">
+          {chars.map(({ c, i }) => (
+            <span class="split-char" style={`--i:${i}`}>{c}</span>
+          ))}
+        </span>
+        {wi < words.length - 1 && ' '}
+      </>
+    ))
+  }
+</Tag>

@@ -1,0 +1,277 @@
+@import '@fontsource/schibsted-grotesk/latin-400.css';
+@import '@fontsource/schibsted-grotesk/latin-500.css';
+@import './tokens.css';
+
+/* Newsreader en dos cortes estáticos (ver scripts/make-fonts.py) */
+@font-face {
+  font-family: 'Newsreader Display';
+  src: url('../assets/fonts/newsreader-display-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Newsreader Text';
+  src: url('../assets/fonts/newsreader-text-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  min-height: 100svh;
+  font-family: var(--f-sans);
+  font-size: var(--t-16);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--fg);
+  transition: background-color 1.2s var(--ease-out);
+}
+img,
+svg,
+picture {
+  display: block;
+  max-width: 100%;
+}
+img {
+  height: auto;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--f-serif);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.theme-mesa {
+  --bg: var(--mesa);
+  --fg: var(--tinta);
+  --meta: var(--tinta-2);
+  --accent: var(--sello);
+  --warn: var(--aviso);
+  color-scheme: light;
+}
+.theme-proyector {
+  --bg: var(--proyector);
+  --fg: var(--proyector-texto);
+  --meta: var(--proyector-meta);
+  --accent: var(--sello-claro);
+  --warn: var(--aviso-claro);
+  color-scheme: dark;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+a:hover {
+  color: var(--accent);
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+::selection {
+  background: var(--sello);
+  color: #fff;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: absolute;
+  left: var(--margin);
+  top: -100px;
+  z-index: 200;
+  padding: 8px 12px;
+  background: var(--fg);
+  color: var(--bg);
+}
+.skip-link:focus {
+  top: 8px;
+}
+.wrap {
+  padding-inline: var(--margin);
+}
+.todo {
+  display: inline-block;
+  padding: 0 0.4em;
+  border: 1px dashed currentColor;
+  color: var(--warn);
+  font-size: 0.9em;
+}
+.meta {
+  color: var(--meta);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.label {
+  font-size: var(--t-13);
+  color: var(--meta);
+  letter-spacing: 0.01em;
+}
+
+/* Botones: sello de archivo, sin sombras */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: var(--fg);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn--solid {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+.btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.btn--solid:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Capa 1: estados iniciales con salida de seguridad ── */
+@keyframes failsafe-visible {
+  to {
+    visibility: visible;
+  }
+}
+/* Mesa de luz: mientras carga la capa 1 en escritorio no se enseña el índice (evita el salto)
+   y, si toca encendido, la mesa está "apagada". */
+html.wide:not(.mesa-live) body[data-page='home'] .home {
+  visibility: hidden;
+  animation: failsafe-visible 0s 2.5s forwards;
+}
+/* Antes de encenderse la mesa ya es mesa (luminancia ≈ 0,89): ningún cambio previo baja de 0,8
+   y no puede contar como destello (WCAG 2.3.1). Con el JS roto, el texto conserva su contraste. */
+html.intro-pending:not(.mesa-live) body[data-page='home'] {
+  background: var(--mesa);
+  transition: none;
+}
+@keyframes failsafe-show {
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+.motion [data-reveal] {
+  opacity: 0.0;
+  filter: brightness(0.2);
+  animation: failsafe-show 0s 3s forwards;
+}
+/* como la lámpara de un proyector: sube la luz, sin desplazamientos */
+.motion [data-reveal].is-in {
+  animation: none;
+  opacity: 1;
+  filter: none;
+  transition:
+    opacity 0.7s var(--ease-out),
+    filter 1.1s var(--ease-out);
+}
+.motion [data-reveal].no-anim {
+  transition: none;
+}
+
+/* Transición diapositiva → serie */
+::view-transition-group(photo) {
+  animation-duration: 0.8s;
+  animation-timing-function: var(--ease-inout);
+  z-index: 50;
+}
+::view-transition-old(photo),
+::view-transition-new(photo) {
+  height: 100%;
+  object-fit: cover;
+}
+::view-transition-old(root) {
+  animation: 0.5s var(--ease-out) both vt-dim;
+}
+::view-transition-new(root) {
+  animation: 0.5s 0.15s var(--ease-out) both vt-in;
+}
+@keyframes vt-dim {
+  to {
+    opacity: 0;
+    filter: brightness(0.2);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+  }
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 150ms !important;
+    animation-delay: 0s !important;
+  }
+}

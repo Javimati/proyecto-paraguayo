@@ -1,0 +1,347 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { PERSON, ROUTES, T, fichaParts, type Lang } from '../i18n/strings';
+import { getEvents, photoId, gelFor, fileName, showName } from '../lib/events';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = T[lang];
+const es = lang === 'es';
+const events = await getEvents();
+const anyProvisional = events.some((e) => e.data.provisional);
+
+// La portada es siempre photos[0] (ver getEvents): el enlace va al evento sin ancla
+// y la transición lleva la portada a la primera foto de la galería.
+const shows = events.map((e, i) => ({
+  e,
+  i,
+  no: String(i + 1).padStart(2, '0'),
+  name: showName(e, lang),
+  href: ROUTES.event[lang](e.id),
+  vt: photoId(e.id, 0),
+  gel: gelFor(e.id, fileName({ file: e.data.cover })),
+  ficha: fichaParts(e.data, lang),
+}));
+const first = events[0];
+---
+
+<Base
+  title={`${PERSON.name} — ${es ? 'Fotografía de directo' : 'Live photography'}`}
+  description={es
+    ? 'Álvaro Rodríguez Valverde, fotografía de conciertos, festivales, salas y fiestas en Madrid. Setlist de sus últimos shows.'
+    : 'Álvaro Rodríguez Valverde, concert, festival, club and party photography in Madrid. Setlist of his latest shows.'}
+  lang={lang}
+  altHref={ROUTES.home[es ? 'en' : 'es']}
+  theme="escenario"
+  page="home"
+  preloadMarker
+  ogImage={first?.data.cover}
+  ogAlt={first ? (es ? first.data.photos[0].alt : first.data.photos[0].alt_en) : undefined}
+>
+  <div class="home wrap">
+    <article class="paper" aria-labelledby="setlist-name" data-paper>
+      <span class="tape tape--l" aria-hidden="true"></span>
+      <span class="tape tape--r" aria-hidden="true"></span>
+      <header class="paper__head">
+        <h1 id="setlist-name" class="paper__name">Álvaro Rodríguez</h1>
+        <p class="paper__sub ficha">{t.setlistSub}</p>
+      </header>
+
+      <h2 class="sr-only">{t.setlistLabel}</h2>
+      <ol class="setlist" role="list" data-setlist>
+        {
+          shows.map((s) => (
+            <li class="show" style={`--gel:${s.gel};--i:${s.i}`} data-show data-slug={s.e.id}>
+              <a href={s.href} class="show__link" data-show-link data-vt-id={s.vt}>
+                <span class="show__no ficha" aria-hidden="true">{s.no}</span>
+                <span class="show__title">{s.name}</span>
+                <span class="show__ficha ficha">
+                  {s.ficha.place}<span class="show__sep" aria-hidden="true"> · </span><span class="sr-only">, </span>{s.ficha.date}
+                </span>
+                <span class="show__stage" data-stage-img>
+                  <Image
+                    src={s.e.data.cover}
+                    alt=""
+                    widths={[640, 960, 1280, 1600]}
+                    sizes="(min-width: 1024px) 50vw, calc(100vw - 100px)"
+                    loading={s.i === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={s.i === 0 ? 'high' : undefined}
+                    decoding="async"
+                    class="show__img"
+                  />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+
+      <h2 class="encore"><span>{t.encore}</span></h2>
+      <ul class="encore__list" role="list">
+        <li><a href={ROUTES.promoters[lang]}>{t.nav.promoters}</a></li>
+        <li><a href={ROUTES.about[lang]}>{t.nav.about}</a></li>
+      </ul>
+      {anyProvisional && <p class="paper__provisional">{t.provisional}</p>}
+    </article>
+  </div>
+</Base>
+
+<style>
+  .home {
+    position: relative;
+    padding-block: clamp(12px, 2vw, 32px) clamp(48px, 8vw, 96px);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    overflow-x: clip;
+  }
+
+  /* ── La hoja: folio liso, con grano y la marca de un doblez ── */
+  .paper {
+    grid-column: 1 / 6;
+    position: relative;
+    color: var(--rotulador);
+    padding: clamp(28px, 3vw, 44px) clamp(22px, 2.5vw, 40px) 36px;
+    isolation: isolate;
+  }
+  .paper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(to bottom, transparent 41%, rgba(0, 0, 0, 0.045) 41.1%, rgba(255, 255, 255, 0.55) 41.35%, transparent 41.9%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      var(--papel);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+    transform: rotate(-1.1deg);
+  }
+  .tape {
+    position: absolute;
+    top: -14px;
+    width: 128px;
+    height: 34px;
+    z-index: 2;
+    background:
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 5px),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 3px),
+      var(--cinta);
+    opacity: 0.92;
+    clip-path: polygon(3% 0, 97% 4%, 100% 22%, 98% 45%, 100% 70%, 97% 100%, 2% 96%, 0 74%, 2% 50%, 0 26%);
+  }
+  .tape--l { left: -18px; transform: rotate(-24deg); }
+  .tape--r { right: -22px; transform: rotate(18deg); }
+
+  .paper__name {
+    font-family: var(--f-marker);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 3.6vw, 3.4rem);
+    line-height: 1;
+    text-transform: uppercase;
+    transform: rotate(-1.5deg);
+  }
+  .paper__sub {
+    margin-top: 10px;
+    font-size: var(--t-14);
+    color: var(--meta-papel);
+    max-width: 38ch;
+  }
+
+  /* ── El setlist ── */
+  .setlist {
+    margin-top: clamp(20px, 3vw, 36px);
+    display: grid;
+    gap: clamp(8px, 1.4vw, 16px);
+  }
+  .show { min-width: 0; }
+  .show__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.1em minmax(0, 1fr);
+    column-gap: 6px;
+    text-decoration: none;
+    color: inherit;
+    padding: 6px 10px 8px 4px;
+    margin-inline: -4px -10px;
+  }
+  /* luz de trabajo sobre la línea activa */
+  .show__link::before {
+    content: '';
+    position: absolute;
+    inset: -6px -14px;
+    z-index: -1;
+    background: radial-gradient(70% 90% at 28% 50%, rgba(240, 166, 64, 0.24), rgba(240, 166, 64, 0.08) 55%, transparent 75%);
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-out);
+    pointer-events: none;
+  }
+  .show__link:hover::before,
+  .show__link:focus-visible::before,
+  :global(.l1) .show.is-active .show__link::before { opacity: 1; }
+
+  .show__no {
+    grid-row: 1 / span 2;
+    padding-top: 0.55em;
+    font-size: var(--t-14);
+    color: var(--meta-papel);
+  }
+  .show__title {
+    grid-column: 2;
+    display: block;
+    font-family: var(--f-marker);
+    font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+    line-height: 1.04;
+    text-transform: uppercase;
+    transform: rotate(calc((var(--i) - 1.5) * -0.6deg));
+    transform-origin: left center;
+    width: fit-content;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    transition: opacity 0.3s var(--ease-out);
+  }
+  .show__ficha {
+    grid-column: 2;
+    margin-top: 2px;
+    font-size: var(--t-14);
+    color: var(--meta-papel);
+  }
+  .show__link:hover .show__title,
+  .show__link:focus-visible .show__title {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-decoration-color: var(--gel);
+    text-underline-offset: 0.12em;
+  }
+  .show__link:focus-visible { outline-offset: 2px; }
+
+  /* Apagan la sala: fuera del papel todo baja; en el papel solo se atenúa el título de las otras líneas */
+  .setlist:hover .show:not(:hover) .show__title,
+  .setlist:focus-within .show:not(:focus-within) .show__title {
+    opacity: 0.55;
+  }
+  :global(body:has(.setlist:hover)),
+  :global(body:has(.setlist:focus-within)) {
+    background-color: var(--escenario-apagado);
+  }
+
+  /* ── El escenario (foto del show activo): píxeles fieles, sin baños de color ── */
+  .show__stage {
+    grid-column: 2;
+    position: relative;
+    display: block;
+    margin-top: 10px;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: #000;
+  }
+  .show__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 1024px) {
+    /* columnas 7–12 de la retícula, borde superior alineado con el papel */
+    .show__stage {
+      --col: calc((100vw - 2 * var(--margin) - 11 * var(--gap)) / 12);
+      position: fixed;
+      z-index: 2;
+      left: calc(var(--margin) + 6 * (var(--col) + var(--gap)));
+      top: var(--stage-top, 104px);
+      width: min(calc(6 * var(--col) + 5 * var(--gap)), calc((100vh - var(--stage-top, 104px) - 32px) * 1.5));
+      margin: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.45s var(--ease-out), visibility 0s 0.45s;
+      pointer-events: none;
+    }
+    /* Sin JS: hover/foco; sin interacción, la primera */
+    :global(html:not(.l1)) .show:hover .show__stage,
+    :global(html:not(.l1)) .show:focus-within .show__stage,
+    :global(html:not(.l1)) .setlist:not(:hover):not(:focus-within) .show:first-child .show__stage,
+    :global(.l1) .show.is-active .show__stage {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.45s var(--ease-out), visibility 0s;
+    }
+    :global(.l1) .show.is-active .show__stage { pointer-events: auto; cursor: pointer; }
+  }
+
+  .encore {
+    margin-top: clamp(24px, 3vw, 36px);
+    font-family: var(--f-marker);
+    font-weight: 400;
+    font-size: var(--t-25);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .encore::before, .encore::after {
+    content: '';
+    height: 3px;
+    flex: 1;
+    background: var(--rotulador);
+    border-radius: 2px;
+    transform: rotate(-1deg);
+  }
+  .encore__list {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+  }
+  .encore__list a {
+    display: inline-block;
+    padding-block: 4px;
+    font-family: var(--f-marker);
+    font-size: clamp(1.25rem, 1.9vw, 1.6rem);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .encore__list a:hover { text-decoration: underline; text-decoration-color: var(--luz-trabajo); color: inherit; }
+  .paper__provisional {
+    margin-top: 22px;
+    font-size: var(--t-12);
+    color: #8a4a00;
+    border: 1px dashed currentColor;
+    padding: 6px 8px;
+  }
+
+  /* Momento orquestado: las líneas se escriben (todo termina en ≈1 s) */
+  @keyframes escribir {
+    from { clip-path: inset(-10% 100% -10% 0); }
+    to { clip-path: inset(-10% -2% -10% 0); }
+  }
+  @keyframes aparecer {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  :global(.motion) .paper__name,
+  :global(.motion) .show__title,
+  :global(.motion) .encore,
+  :global(.motion) .encore__list a {
+    animation: escribir 0.32s cubic-bezier(0.55, 0.1, 0.45, 1) both;
+  }
+  :global(.motion) .show__ficha,
+  :global(.motion) .show__no {
+    animation: aparecer 0.3s ease-out both;
+  }
+  :global(.motion) .paper__name { animation-delay: 0.05s; animation-duration: 0.4s; }
+  :global(.motion) .show__title,
+  :global(.motion) .show__ficha,
+  :global(.motion) .show__no { animation-delay: calc(0.12s + var(--i) * 0.1s); }
+  :global(.motion) .encore { animation-delay: 0.6s; }
+  :global(.motion) .encore__list li:nth-child(1) a { animation-delay: 0.66s; }
+  :global(.motion) .encore__list li:nth-child(2) a { animation-delay: 0.72s; }
+
+  @media (max-width: 1023px) {
+    .home { display: block; }
+    .paper { padding-inline: clamp(18px, 4vw, 32px); }
+    .tape { width: 96px; height: 28px; }
+    .tape--l { left: -8px; }
+    .tape--r { right: -8px; }
+    .setlist:hover .show:not(:hover) .show__title,
+    .setlist:focus-within .show:not(:focus-within) .show__title { opacity: 1; }
+  }
+</style>

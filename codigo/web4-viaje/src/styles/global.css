@@ -1,0 +1,256 @@
+@import './tokens.css';
+
+@font-face {
+  font-family: 'Bricolage';
+  src: url('../assets/fonts/bricolage-wght.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Martian';
+  src: url('../assets/fonts/martian-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Martian';
+  src: url('../assets/fonts/martian-500.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+/* Respaldos métricos para que el cambio de fuente no mueva el layout */
+@font-face {
+  font-family: 'Bricolage Fallback';
+  src: local('Arial'), local('Liberation Sans'), local('Helvetica'), local('Roboto');
+  size-adjust: 96%;
+  ascent-override: 98%;
+  descent-override: 26%;
+}
+@font-face {
+  font-family: 'Martian Fallback';
+  src: local('Courier New'), local('Liberation Mono'), local('Menlo'), local('DejaVu Sans Mono');
+  size-adjust: 112%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--noche);
+  color-scheme: dark;
+  scroll-padding-top: calc(var(--header-h) + 12px);
+}
+body {
+  min-height: 100svh;
+  background: var(--noche);
+  color: var(--texto);
+  font-family: var(--f-display);
+  font-size: var(--t-17);
+  font-weight: 400;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+img,
+svg,
+canvas,
+picture {
+  display: block;
+  max-width: 100%;
+}
+img {
+  height: auto;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+a:hover {
+  color: var(--peaking);
+}
+:focus-visible {
+  outline: 2px solid var(--peaking);
+  outline-offset: 3px;
+}
+::selection {
+  background: var(--peaking);
+  color: var(--noche);
+}
+
+.wrap {
+  padding-inline: var(--margin);
+}
+.mono {
+  font-family: var(--f-mono);
+  font-size: var(--t-12);
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.meta {
+  color: var(--tenue);
+}
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: fixed;
+  left: var(--margin);
+  top: 8px;
+  z-index: 1000;
+  padding: 10px 14px;
+  background: var(--peaking);
+  color: var(--noche);
+  font-family: var(--f-mono);
+  font-size: var(--t-13);
+  text-decoration: none;
+  transform: translateY(-160%);
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: none;
+  outline-color: var(--texto);
+}
+.todo {
+  display: inline-block;
+  padding: 0 0.45em;
+  border: 1px dashed currentColor;
+  color: var(--peaking);
+  font-family: var(--f-mono);
+  font-size: 0.78em;
+  font-weight: 400;
+  letter-spacing: 0;
+  vertical-align: 0.1em;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid var(--texto);
+  background: none;
+  color: var(--texto);
+  font-family: var(--f-mono);
+  font-size: var(--t-13);
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover {
+  border-color: var(--peaking);
+  color: var(--peaking);
+}
+.btn--solid {
+  background: var(--texto);
+  color: var(--noche);
+}
+.btn--solid:hover {
+  background: var(--peaking);
+  border-color: var(--peaking);
+  color: var(--noche);
+}
+
+/* Marcas de encuadre del visor (esquinas). Uso: <span class="frame-marks" aria-hidden="true"></span> */
+.frame-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --m: 18px;
+  --c: currentColor;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--m) 1px,
+    linear-gradient(var(--c), var(--c)) top left / 1px var(--m),
+    linear-gradient(var(--c), var(--c)) top right / var(--m) 1px,
+    linear-gradient(var(--c), var(--c)) top right / 1px var(--m),
+    linear-gradient(var(--c), var(--c)) bottom left / var(--m) 1px,
+    linear-gradient(var(--c), var(--c)) bottom left / 1px var(--m),
+    linear-gradient(var(--c), var(--c)) bottom right / var(--m) 1px,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px var(--m);
+  background-repeat: no-repeat;
+}
+
+/* ── Capas de la home (contrato) ── */
+#viaje-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: none;
+}
+#viaje-ui {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  display: none;
+}
+/* Solo los controles de la capa de interfaz reciben eventos; el resto deja pasar el puntero al canvas */
+#viaje-ui :is(a, button, input, select, textarea, [role='dialog'], [tabindex]:not([tabindex='-1']), [data-ui-interactive]) {
+  pointer-events: auto;
+}
+#intro-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none;
+}
+/* Mientras carga / con la experiencia activa (clases que pone src/scripts/home.ts) */
+html.exp-loading #viaje-root,
+html.exp-on #viaje-root,
+html.exp-on #viaje-ui {
+  display: block;
+}
+html.intro-on #intro-root {
+  display: block;
+}
+/* La historia sigue en el DOM (inert) pero no se ve mientras manda la experiencia */
+html.exp-on #historia,
+html.exp-on .site-footer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+}
+/* El scroll en modo 3D lo gestiona la experiencia (src/experience): el shell no bloquea el body. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Durante la intro, la cabecera del sitio no compite con el visor (la intro tiene su propio «Entrar sin intro») */
+html.intro-on .site-header {
+  opacity: 0;
+  pointer-events: none;
+}

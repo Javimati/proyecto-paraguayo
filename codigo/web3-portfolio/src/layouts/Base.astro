@@ -1,0 +1,123 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import '../styles/global.css';
+import serifFont from '../assets/fonts/newsreader-display-400.woff2?url';
+import sansFont from '@fontsource/schibsted-grotesk/files/schibsted-grotesk-latin-400-normal.woff2?url';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import AppScripts from '../components/AppScripts.astro';
+import { PERSON, type Lang } from '../i18n/strings';
+
+interface Props {
+  title: string;
+  description: string;
+  lang: Lang;
+  altHref: string;
+  theme?: 'mesa' | 'proyector';
+  ogImage?: ImageMetadata;
+  ogAlt?: string;
+  jsonld?: Record<string, unknown>[];
+  /** false en /editores: sin router ni efectos */
+  enhanced?: boolean;
+  page?: string;
+  footer?: boolean;
+  /** 404: noindex, sin canonical ni hreflang */
+  noindex?: boolean;
+}
+const {
+  title,
+  description,
+  lang,
+  altHref,
+  theme = 'mesa',
+  ogImage,
+  ogAlt,
+  jsonld = [],
+  enhanced = true,
+  page = 'other',
+  footer = true,
+  noindex = false,
+} = Astro.props;
+
+const site = Astro.site!;
+const canonical = new URL(Astro.url.pathname, site).href;
+const altUrl = new URL(altHref, site).href;
+const esUrl = lang === 'es' ? canonical : altUrl;
+const enUrl = lang === 'en' ? canonical : altUrl;
+let og: string | undefined;
+if (ogImage) {
+  const img = await getImage({ src: ogImage, width: 1200, format: 'jpg', quality: 78 });
+  og = new URL(img.src, site).href;
+}
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: PERSON.name,
+  jobTitle: lang === 'es' ? 'Fotoperiodista' : 'Photojournalist',
+  address: { '@type': 'PostalAddress', addressLocality: 'Madrid', addressCountry: 'ES' },
+  url: new URL('/', site).href,
+  ...(PERSON.email ? { email: `mailto:${PERSON.email}` } : {}),
+  ...(PERSON.phoneIntl ? { telephone: PERSON.phoneIntl } : {}),
+};
+const fullTitle = page === 'home' ? title : `${title} — ${PERSON.shortName}`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {!noindex && <link rel="alternate" hreflang="es" href={esUrl} />}
+    {!noindex && <link rel="alternate" hreflang="en" href={enUrl} />}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={esUrl} />}
+    <link rel="preload" href={serifFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={sansFont} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content={theme === 'proyector' ? '#0c0d0f' : '#f2f4f1'} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={PERSON.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_GB'} />
+    {og && <meta property="og:image" content={og} />}
+    {og && ogAlt && <meta property="og:image:alt" content={ogAlt} />}
+    <meta name="twitter:card" content={og ? 'summary_large_image' : 'summary'} />
+    <script type="application/ld+json" set:html={JSON.stringify([person, ...jsonld])} />
+    {
+      enhanced && (
+        <script is:inline data-astro-rerun>
+          (function (d) {
+            var m = window.matchMedia;
+            d.classList.add('js');
+            if (m('(prefers-reduced-motion: reduce)').matches) return;
+            d.classList.add('motion');
+            if (m('(min-width: 1024px) and (pointer: fine)').matches) {
+              d.classList.add('wide');
+              try {
+                if (sessionStorage.getItem('mesa-intro') !== '1') d.classList.add('intro-pending');
+              } catch (e) {}
+            }
+          })(document.documentElement);
+        </script>
+      )
+    }
+    {enhanced && <ClientRouter fallback="swap" />}
+  </head>
+  <body class={`theme-${theme}`} data-page={page}>
+    <a class="skip-link" href="#main">{lang === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
+    <SiteHeader lang={lang} altHref={altHref} page={page} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    {footer && <SiteFooter lang={lang} />}
+    {enhanced && <AppScripts />}
+  </body>
+</html>

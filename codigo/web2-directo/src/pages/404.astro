@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import { T } from '../i18n/strings';
+---
+<Base title="404 — Se fue la luz" description="La página no existe." lang="es" altHref="/en/" page="notfound" enhanced={false} noindex preloadMarker>
+  <div class="nf wrap">
+    <div class="ghost" aria-hidden="true">
+      <span class="ghost__glow"></span>
+      <span class="ghost__bulb"></span>
+      <span class="ghost__cage"></span>
+      <span class="ghost__pole"></span>
+      <span class="ghost__base"></span>
+    </div>
+    <div class="nf__text">
+      <p class="nf__code">404</p>
+      <h1>{T.es.notFoundTitle}</h1>
+      <p>{T.es.notFoundText}</p>
+      <p><a href="/">{T.es.notFoundBack}</a></p>
+      <p class="nf__note">La bombilla que se queda encendida en un escenario vacío se llama <i lang="en">ghost light</i>.</p>
+      <div lang="en" class="nf__en">
+        <h2 class="nf__en-title">{T.en.notFoundTitle}</h2>
+        <p>{T.en.notFoundText}</p>
+        <p><a href="/en/">{T.en.notFoundBack}</a></p>
+        <p class="nf__note">The bare bulb left burning on an empty stage is called the ghost light.</p>
+      </div>
+    </div>
+  </div>
+</Base>
+<style>
+  :global(body) { background: #0b0a0c; }
+  .nf {
+    overflow-x: clip;
+    min-height: calc(100svh - 80px);
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 2fr;
+    align-items: center;
+    gap: clamp(24px, 6vw, 96px);
+    padding-block: 40px;
+  }
+  .ghost { position: relative; height: min(70vh, 520px); justify-self: center; width: 160px; }
+  .ghost__glow {
+    position: absolute; left: 50%; top: 40px; width: 520px; height: 520px; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255, 214, 150, 0.32) 0, rgba(255, 190, 110, 0.08) 30%, transparent 62%);
+    animation: zumbido 4s ease-in-out infinite;
+  }
+  .ghost__bulb {
+    position: absolute; left: 50%; top: 18px; width: 34px; height: 44px; transform: translateX(-50%);
+    border-radius: 50% 50% 45% 45%; background: radial-gradient(circle at 50% 40%, #fff8e6, #ffd48a 55%, #c98a2a);
+    box-shadow: 0 0 24px 6px rgba(255, 210, 140, 0.55);
+  }
+  .ghost__cage {
+    position: absolute; left: 50%; top: 10px; width: 52px; height: 62px; transform: translateX(-50%);
+    border: 2px solid #3a3836; border-radius: 40% 40% 30% 30%;
+    background: repeating-linear-gradient(90deg, transparent 0 10px, rgba(58, 56, 54, 0.9) 10px 12px);
+  }
+  .ghost__pole { position: absolute; left: 50%; top: 70px; bottom: 18px; width: 6px; transform: translateX(-50%); background: #2e2c2b; }
+  .ghost__base { position: absolute; left: 50%; bottom: 0; width: 120px; height: 20px; transform: translateX(-50%); background: #2e2c2b; border-radius: 4px 4px 0 0; }
+  @keyframes zumbido { 0%, 100% { opacity: 0.92; } 50% { opacity: 1; } }
+  .nf__code { font-size: var(--t-14); font-stretch: 72%; font-weight: 600; color: var(--muted); }
+  h1 { margin-top: 6px; font-family: var(--f-marker); font-weight: 400; font-size: clamp(2.6rem, 7vw, 5.5rem); line-height: 1; text-transform: uppercase; }
+  .nf__text > p { margin-top: 14px; max-width: 50ch; }
+  .nf__en { margin-top: 36px; padding-top: 18px; border-top: 1px solid rgba(236, 235, 231, 0.18); }
+  .nf__en p { margin-top: 8px; }
+  .nf__en-title { font-weight: 400; font-family: var(--f-marker); font-size: var(--t-25); text-transform: uppercase; }
+  .nf__note { color: var(--muted); font-size: var(--t-14); margin-top: 18px !important; }
+  @media (max-width: 767px) { .nf { grid-template-columns: 1fr; } .ghost { height: 260px; } }
+</style>

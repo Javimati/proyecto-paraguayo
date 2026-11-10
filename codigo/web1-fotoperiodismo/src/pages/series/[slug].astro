@@ -1,0 +1,10 @@
+---
+import SeriesPage from '../../components/SeriesPage.astro';
+import { getSeries } from '../../lib/series';
+export async function getStaticPaths() {
+  const all = await getSeries();
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+---
+<SeriesPage lang="es" entry={entry} />

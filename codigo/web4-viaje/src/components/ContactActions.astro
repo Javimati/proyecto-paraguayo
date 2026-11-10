@@ -1,0 +1,71 @@
+---
+import { PERSON, T, type Lang } from '../i18n/strings';
+interface Props {
+  lang: Lang;
+  showPdf?: boolean;
+}
+const { lang, showPdf = true } = Astro.props;
+const t = T[lang];
+---
+<div class="contact-actions">
+  <p class="contact-actions__lines">
+    <a class="contact-actions__big" href={`mailto:${PERSON.email}`}>{PERSON.email}</a>
+    <a class="contact-actions__big" href={`tel:${PERSON.phoneIntl}`}>{PERSON.phone}</a>
+  </p>
+  <div class="contact-actions__btns">
+    <button type="button" class="btn btn--solid" data-copy={PERSON.email} data-ok={t.copied} data-fail={t.copyFail}>
+      {t.copyEmail}
+    </button>
+    <a class="btn" href={`tel:${PERSON.phoneIntl}`}>{t.call}</a>
+    {showPdf && PERSON.portfolioPdf && <a class="btn" href={PERSON.portfolioPdf} download>{t.downloadPdf}</a>}
+    {showPdf && PERSON.cvPdf && <a class="btn" href={PERSON.cvPdf} download>{t.downloadCv}</a>}
+    <span class="contact-actions__status mono" role="status" aria-live="polite"></span>
+  </div>
+</div>
+<script is:inline>
+  (function () {
+    document.querySelectorAll('[data-copy]').forEach(function (b) {
+      if (b.dataset.bound) return;
+      b.dataset.bound = '1';
+      b.addEventListener('click', function () {
+        var s = b.parentNode.querySelector('[role=status]');
+        var say = function (m) {
+          if (s) s.textContent = m;
+        };
+        var v = b.dataset.copy;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(v).then(function () { say(b.dataset.ok); }, function () { say(b.dataset.fail); });
+        } else {
+          say(b.dataset.fail);
+        }
+      });
+    });
+  })();
+</script>
+<style>
+  .contact-actions__lines {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+  .contact-actions__big {
+    width: fit-content;
+    font-size: clamp(1.4rem, 3.2vw, 2.4rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .contact-actions__big:hover {
+    color: var(--peaking);
+  }
+  .contact-actions__btns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .contact-actions__status {
+    color: var(--peaking);
+  }
+</style>

@@ -1,0 +1,333 @@
+---
+import { Picture, Image, getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Caption from './Caption.astro';
+import { PERSON, ROUTES, T, SECTION_NAMES, monthYear, wireCaption, type Lang } from '../i18n/strings';
+import { getSeries, photoId, anchor, isPortrait, ambient, type Series } from '../lib/series';
+
+interface Props {
+  lang: Lang;
+  entry: Series;
+}
+const { lang, entry } = Astro.props;
+const t = T[lang];
+const all = await getSeries();
+const idx = all.findIndex((s) => s.id === entry.id);
+const next = all[(idx + 1) % all.length];
+const d = entry.data;
+const title = lang === 'es' ? d.title : d.title_en;
+const summary = lang === 'es' ? d.summary : d.summary_en;
+const other: Lang = lang === 'es' ? 'en' : 'es';
+const total = String(d.photos.length).padStart(2, '0');
+const site = Astro.site!;
+const imageObjects = await Promise.all(
+  d.photos.map(async (p) => {
+    const img = await getImage({ src: p.file, width: 1400, format: 'jpg' });
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ImageObject',
+      contentUrl: new URL(img.src, site).href,
+      caption: wireCaption(p.place, p.date, lang === 'es' ? p.caption : p.caption_en, lang),
+      description: lang === 'es' ? p.alt : p.alt_en,
+      creator: { '@type': 'Person', name: PERSON.name },
+      creditText: PERSON.credit,
+      copyrightNotice: `© ${p.date.getUTCFullYear()} ${PERSON.name}`,
+      dateCreated: p.date.toISOString().slice(0, 10),
+      contentLocation: { '@type': 'Place', name: p.place },
+    };
+  }),
+);
+---
+
+<Base
+  title={title}
+  description={summary}
+  lang={lang}
+  altHref={ROUTES.series[other](entry.id)}
+  theme="proyector"
+  page="series"
+  ogImage={d.cover}
+  ogAlt={lang === 'es' ? d.photos[0].alt : d.photos[0].alt_en}
+  jsonld={imageObjects}
+>
+  <article class="series" data-series data-home={ROUTES.home[lang]}>
+    <header class="series__head wrap">
+      <p class="series__crumbs label">
+        <a href={ROUTES.section[lang](d.section)}>{SECTION_NAMES[lang][d.section]}</a>
+        <a href={ROUTES.home[lang]} data-back>{t.backToTable}</a>
+      </p>
+      <h1 class="series__title">{title}</h1>
+      <p class="series__where">{d.place}, {monthYear(d.date, lang)}<span class="meta">{t.photos(d.photos.length)}</span></p>
+      <p class="series__summary">{summary}</p>
+      {d.provisional && <p class="series__prov label">{t.provisional}</p>}
+    </header>
+
+    <p class="counter num" aria-hidden="true" data-counter>
+      <span data-counter-current>01</span> / {total}
+    </p>
+    <ol
+      class="reel"
+      role="list"
+      data-reel
+      tabindex="0"
+      aria-label={lang === 'es' ? `Fotos de la serie (${d.photos.length})` : `Photos in the story (${d.photos.length})`}
+    >
+      {
+        d.photos.map((p, i) => (
+          <li
+            class:list={['shot', { 'shot--v': isPortrait(p) }]}
+            id={anchor(i)}
+            data-shot={i + 1}
+            data-ambient={ambient(entry.id, i, p)}
+          >
+            <figure style={`--ar:${(p.file.width / p.file.height).toFixed(4)}`} tabindex="-1">
+              <div class="shot__frame" data-vt-id={photoId(entry.id, i)} data-gl-photo data-reveal={i === 0 ? undefined : true}>
+                <Picture
+                  src={p.file}
+                  alt={lang === 'es' ? p.alt : p.alt_en}
+                  formats={['avif', 'webp']}
+                  widths={isPortrait(p) ? [600, 1000, 1500] : [900, 1500, 2200]}
+                  sizes={isPortrait(p) ? '(min-width: 1024px) 56vh, 88vw' : '(min-width: 1024px) min(1300px, 126vh), 92vw'}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : undefined}
+                  decoding="async"
+                  class="shot__img"
+                />
+              </div>
+              <Caption place={p.place} date={p.date} text={lang === 'es' ? p.caption : p.caption_en} lang={lang} />
+            </figure>
+          </li>
+        ))
+      }
+    </ol>
+
+
+    <div class="bar" aria-hidden="true" data-bar>
+      <a href={ROUTES.home[lang]} tabindex="-1">{t.nav.table}</a>
+      <span class="bar__sep">/</span>
+      <a href={ROUTES.section[lang](d.section)} tabindex="-1">{SECTION_NAMES[lang][d.section]}</a>
+      <span class="bar__sep">/</span>
+      <span class="bar__title">{title}</span>
+      <span class="bar__count num"><span data-bar-current>01</span> / {total}</span>
+    </div>
+
+    <nav class="next wrap" aria-label={t.nextSeries}>
+      <a href={ROUTES.series[lang](next.id)} data-astro-prefetch="viewport" class="next__link">
+        <span class="label">{t.nextSeries}: {SECTION_NAMES[lang][next.data.section]}</span>
+        <span class="next__title">{lang === 'es' ? next.data.title : next.data.title_en}</span>
+        <Image src={next.data.cover} alt="" widths={[360, 640]} sizes="(min-width: 1024px) 360px, 70vw" loading="lazy" decoding="async" class="next__img" />
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .series__head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px var(--gap);
+    padding-block: clamp(12px, 2vw, 24px) clamp(32px, 5vw, 64px);
+  }
+  .series__crumbs {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 20px;
+  }
+  .series__title {
+    grid-column: 1 / -1;
+    margin-top: clamp(12px, 2vw, 24px);
+    font-size: clamp(2.5rem, 6.5vw, 6.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 16ch;
+  }
+  .series__where {
+    grid-column: 1 / 5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 12px;
+  }
+  .series__summary {
+    grid-column: 5 / 11;
+    margin-top: 12px;
+    max-width: 58ch;
+    font-family: var(--f-serif-text);
+    font-size: var(--t-20);
+    line-height: 1.45;
+  }
+  .series__prov {
+    grid-column: 5 / -1;
+    color: var(--warn);
+  }
+
+  .reel {
+    position: relative; /* contiene cualquier .sr-only absoluto: nada escapa de la tira horizontal */
+    display: grid;
+    gap: clamp(72px, 14vh, 160px);
+    padding-inline: var(--margin);
+  }
+  .shot figure {
+    width: min(100%, calc(84vh * var(--ar)), 1300px);
+    margin-inline: auto;
+    display: grid;
+    gap: 14px;
+  }
+  .shot {
+    scroll-margin-top: 72px;
+  }
+  .shot figure:focus {
+    outline: none;
+  }
+  .shot figure:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 6px;
+  }
+  .shot figure:global(.is-arrival):focus-visible {
+    outline: none;
+  }
+  .shot__frame {
+    width: 100%;
+    aspect-ratio: var(--ar);
+    background: #050506;
+  }
+  /* destino de la transición: sin rectángulo negro mientras crece la foto */
+  .shot__frame:global(.no-anim) {
+    background: transparent;
+  }
+  .reel:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+  /* Barra mínima: aparece al subir */
+  .bar {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 40;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 12px var(--margin);
+    background: color-mix(in srgb, var(--proyector) 92%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--proyector-texto) 12%, transparent);
+    font-size: var(--t-13);
+    color: var(--proyector-meta);
+    transform: translateY(-100%);
+    transition: transform 0.3s var(--ease-out);
+    white-space: nowrap;
+  }
+  .bar a {
+    text-decoration: none;
+    flex: none;
+  }
+  @media (max-width: 600px) {
+    .bar a:first-child,
+    .bar a:first-child + .bar__sep {
+      display: none;
+    }
+  }
+  .bar__title {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--proyector-texto);
+  }
+  .bar__count {
+    margin-left: auto;
+  }
+  .bar.is-shown {
+    transform: none;
+  }
+  .shot__frame :global(picture),
+  .shot__frame :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+  .shot__frame:global(.gl-on) :global(img) {
+    opacity: 0;
+  }
+  .counter {
+    position: fixed;
+    right: var(--margin);
+    bottom: 18px;
+    z-index: 20;
+    font-size: var(--t-13);
+    color: var(--meta);
+    display: none;
+  }
+  :global(.js) .counter {
+    display: block;
+    transition: opacity 0.2s;
+  }
+  /* cuando aparece la barra fija (que ya lleva el contador), se oculta el de abajo */
+  @media (min-width: 1024px) {
+    :global(body:has(.bar.is-shown)) .counter {
+      opacity: 0;
+    }
+  }
+  .next {
+    padding-block: clamp(96px, 16vw, 200px) 0;
+  }
+  .next__link {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 360px);
+    gap: 10px 32px;
+    align-items: end;
+    text-decoration: none;
+  }
+  .next__link .label {
+    grid-column: 1 / -1;
+  }
+  .next__title {
+    font-family: var(--f-serif);
+    font-size: var(--t-61);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .next__img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+  .next__link:hover .next__title {
+    color: var(--accent);
+  }
+  @media (max-width: 1023px) {
+    /* en móvil el contador va en el flujo, justo encima de la tira: no tapa ningún pie */
+    .counter {
+      position: static;
+      padding: 0 var(--margin) 10px;
+      text-align: right;
+    }
+    .series__where,
+    .series__summary,
+    .series__prov {
+      grid-column: 1 / -1;
+    }
+    .reel {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scroll-padding-inline: var(--margin);
+      padding-bottom: 12px;
+    }
+    .shot {
+      flex: 0 0 calc(100vw - 2 * var(--margin));
+      scroll-snap-align: start;
+    }
+    .shot figure {
+      width: min(100%, calc(70svh * var(--ar)));
+      margin-inline: 0;
+    }
+    .next__link {
+      grid-template-columns: 1fr;
+    }
+    .next__title {
+      font-size: var(--t-39);
+    }
+  }
+</style>
