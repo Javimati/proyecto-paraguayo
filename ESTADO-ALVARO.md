@@ -67,7 +67,7 @@ Herramientas en `herramientas/` del repo:
 - Los dos: build `npm run build`, salida `dist`, variables `NODE_VERSION=22` y `SITE_URL=<su URL .pages.dev>`. Rama de producción `main`; las demás ramas generan previsualizaciones.
 - Comprobado el 10/11/2026: las dos URLs cargan; eventos ya muestra el commit `40eb592` (fotos reales).
 - Límites del plan gratuito: 500 builds/mes y 1 build a la vez (por cuenta); tráfico ilimitado. Con los watch paths, un push solo reconstruye la web cuya carpeta cambió.
-- **Pendiente de Marlon:** borrar el Worker suelto `alvarorodriguezeventos` (Compute → Workers & Pages, el de tipo *Worker*, no el de Pages): fue un primer intento fallido, no publica nada.
+- Comprobado: un push que no toca la carpeta de una web aparece en Cloudflare como «No deployment available» (build omitido, no gasta).
 - **Por confirmar:** Marlon dijo «portfolio = web 4», pero la carpeta `web3-portfolio` es la 3. Si era la 3, cambiar en el proyecto `alvarorodriguezportfolio` el directorio raíz y el watch path.
 - Dominio propio: pendiente. Cuando lo haya: Custom domains en el proyecto, cambiar `SITE_URL` y la línea `Sitemap:` de `public/robots.txt`. Guía: `LEEME-DESPLIEGUE.md`.
 
