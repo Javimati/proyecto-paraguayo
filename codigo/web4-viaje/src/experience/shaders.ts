@@ -27,9 +27,17 @@ export const PHOTO_FRAG = /* glsl */ `
   uniform float uHero;       // 1 = foto en el lightbox / foto activa: nunca niebla
   uniform float uLum;        // 1 = foto activa (píxeles tal cual) · <1 = foto secundaria atenuada
   uniform float uDevelop;    // 1 = revelada (tal cual) · <1 = papel sin revelar (capítulo «Lo que viene»)
-  uniform float uFade;       // 0..1 opacidad extra (planos que la cámara atraviesa)
+  uniform float uFade;       // 0..1 los planos que la cámara atraviesa se deshacen en ascuas (recuerdo que se va)
+  uniform float uSoft;       // 0..1 recuerdo lejano: desenfocado; 0 en reposo (foto intacta)
+  uniform vec2 uAspect;      // ancho/alto del plano (para el grano del deshacer)
   varying vec2 vUv;
   varying float vDist;
+  float h21(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+  float n21(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(h21(i), h21(i + vec2(1, 0)), u.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), u.x), u.y);
+  }
 
   void main() {
     vec2 inner = (vUv - uMargin) / (1.0 - 2.0 * uMargin);
@@ -37,6 +45,16 @@ export const PHOTO_FRAG = /* glsl */ `
     vec3 col;
     if (inImage) {
       col = uHasTex > 0.5 ? texture2D(uTex, inner).rgb : vec3(0.02);
+      if (uSoft > 0.01 && uHasTex > 0.5) {
+        // enfoque de recuerdo: anillo de 8 muestras, solo mientras la foto no es la activa
+        vec3 acc = col;
+        float rad = uSoft * 0.014;
+        for (int i = 0; i < 8; i++) {
+          float a = float(i) * 0.785398 + 0.39;
+          acc += texture2D(uTex, inner + vec2(cos(a), sin(a) * uAspect.x) * rad).rgb;
+        }
+        col = acc / 9.0;
+      }
       if (uDevelop < 0.999) {
         // revelado: las sombras aparecen antes que las luces sobre papel claro
         float l = dot(col, vec3(0.299, 0.587, 0.114));
@@ -53,7 +71,18 @@ export const PHOTO_FRAG = /* glsl */ `
     // niebla por distancia: lejos se funde con el espacio; cerca (y en el lightbox) la foto queda intacta
     float fog = (1.0 - uHero) * smoothstep(uFogRange.x, uFogRange.y, vDist);
     col = mix(col, uFog, fog);
-    gl_FragColor = vec4(col, uReveal * uFade);
+    float alpha = uReveal;
+    if (uFade < 0.999) {
+      // se deshace en ascuas desde los bordes, con el filo encendido
+      float n = n21(vUv * uAspect * 7.0) * 0.65 + n21(vUv * uAspect * 23.0) * 0.35;
+      n = n * 0.85 + (1.0 - min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y)) * 2.0) * 0.15;
+      float th = uFade * 1.12 - 0.06;
+      float keep = smoothstep(n - 0.015, n + 0.015, th);
+      float ember = (1.0 - smoothstep(0.0, 0.07, th - n)) * keep * step(0.001, uFade);
+      col = mix(col, vec3(1.0, 0.52, 0.18) * 1.6, ember);
+      alpha *= keep;
+    }
+    gl_FragColor = vec4(col, alpha);
   }
 `;
 
@@ -200,8 +229,23 @@ export const SKY_FRAG = /* glsl */ `
     vec3 col = mix(horizon, uFog * 0.25, smoothstep(0.0, 0.55, h));
     col = mix(col, uFog * 0.6, smoothstep(0.0, -0.3, h));
     col += uTint * 0.016 * exp(-abs(h) * 14.0);            // banda de bruma
-    float stars = step(0.9993, hash(floor(vDir * 420.0))) * smoothstep(0.1, 0.6, h) * 0.5;
+    float stars = step(0.9993, hash(floor(vDir * 420.0))) * smoothstep(0.1, 0.6, h) * 0.35;
     col += vec3(stars);
+    // perfil de ciudad lejana con ventanas encendidas (Madrid de noche al fondo)
+    float az = atan(vDir.x, vDir.z);
+    float bc = floor(az * 70.0);
+    float bh = 0.012 + pow(hash(vec3(bc, 1.0, 2.0)), 3.0) * 0.075 + step(0.985, hash(vec3(bc, 5.0, 1.0))) * 0.07;
+    float far = floor(az * 33.0);
+    float bh2 = 0.03 + pow(hash(vec3(far, 7.0, 3.0)), 2.0) * 0.06;
+    float sil2 = step(h, bh2) * step(-0.02, h);
+    float sil = step(h, bh) * step(-0.02, h);
+    col = mix(col, uFog * 0.95 + uTint * 0.01, sil2 * 0.6);
+    col = mix(col, uFog * 0.7, sil);
+    vec2 wc = floor(vec2(az * 900.0, h * 900.0));
+    float win = step(0.86, hash(vec3(wc, bc))) * sil * step(0.004, h);
+    col += vec3(1.0, 0.7, 0.4) * win * 0.22 * (0.7 + 0.3 * sin(uTime * 0.5 + wc.x));
+    // resplandor anaranjado de la ciudad en la bruma baja
+    col += vec3(1.0, 0.55, 0.25) * 0.02 * exp(-abs(h - 0.02) * 18.0);
     gl_FragColor = vec4(col, 1.0);
   }
 `;
@@ -280,6 +324,11 @@ export const POST_FRAG = /* glsl */ `
     if (uSweep > 0.001) {
       float band = exp(-pow((vUv.x + (vUv.y - 0.5) * 0.35 - uSweepPos) * 3.2, 2.0));
       col += uTint * band * uSweep * 0.11 * (1.0 - photo);
+      // quemado de película entre capítulos: luz cálida que entra por el borde, como un carrete velado
+      float bandL = exp(-pow((vUv.x - (uSweepPos * 1.3 - 0.4)) * 3.0, 2.0));
+      float edge = smoothstep(0.35, 0.0, min(vUv.x, 1.0 - vUv.x)) * 0.6 + smoothstep(0.3, 0.0, vUv.y) * 0.4;
+      float leak = bandL * edge * (0.55 + 0.45 * noise(vUv * vec2(2.0, 6.0) + uTime * 0.4));
+      col += mix(vec3(1.0, 0.3, 0.06), vec3(1.0, 0.72, 0.38), leak) * leak * uSweep * 0.22 * (1.0 - photo);
     }
 
     // viñeta y grano: fuera de las fotos

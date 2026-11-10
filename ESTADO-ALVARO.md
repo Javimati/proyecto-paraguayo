@@ -1,6 +1,5 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 10/11/2026 (chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
-
+_Última actualización: 10/11/2026 (chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 ## 1. Álvaro (datos confirmados)
 - 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha. Antes: **Grado Medio de Técnico en Vídeo Disc-jockey y Sonido, Campus FP Arganda** (dato de Marlon, 10/11/2026; puesto en /sobre de la web 2).
 - Quiere fotoperiodismo, calle, reportaje y actualidad. También eventos, conciertos y bodas, en segundo plano. Vídeo no.
@@ -34,6 +33,16 @@ _Última actualización: 10/11/2026 (chat 3: webs 2 y 4 en Cloudflare Pages; cha
 | 4 | `alvaro-viaje` | «A través del visor»: intro de visor de cámara (mantén para enfocar), viaje 3D Three.js por 6 estaciones, final con hoja de contactos. Bricolage Grotesque + Martian Mono, acento #ffe14d | https://claude.ai/artifact/8wpoRMP9kGTApD9hAHhjz9 (slug 4057979a-e935-4705-b6a5-112e324de2ba) |
 
 Datos reales metidos en las 4 webs (email, teléfono, prácticas, software, inglés, movilidad, Alex Webb). Instagram quitado y botones de PDF ocultos mientras no haya archivo. Fotos: de muestra generadas (PROVISIONAL) en las webs 1, 3 y 4. **La web 2 ya tiene las fotos reales** (10/11/2026).
+
+## 3b. Web 4 — «La calle de los recuerdos» (10/11/2026, versión publicada 1794340257-c416)
+El vacío oscuro entre estaciones es ahora una **calle de Madrid de noche** (`src/experience/street.ts`):
+- Edificios procedurales a ambos lados del recorrido (ventanas encendidas que cambian despacio, teles, balcones, persianas, locales abiertos, algún neón), aceras de baldosa y skyline lejano con ventanas en el cielo.
+- Farolas de sodio (alguna LED) con cono de luz, halo y estrella de diafragma; asfalto mojado con charcos, estelas reflejadas de las farolas, ondas de lluvia y destellos. Lluvia fina iluminada por las farolas (solo gama alta escritorio; no llueve dentro del cuarto de Arganda).
+- Colocación automática a partir del recorrido real de la cámara: prueba exacta de rectángulos orientados contra fotos, cámaras, líneas de visión y zonas de estación (nunca tapa una foto).
+- Fotos como recuerdos: desenfocadas hasta que llegas (nítidas e intactas en reposo), se deshacen en ascuas al atravesarlas, reflejo en los charcos (gama alta), **fecha de carrete** naranja bajo cada foto (fuera del cuadro), **placa de calle esmaltada** por capítulo en cada transición y quemado de película entre capítulos.
+- Etiqueta AF movida a la esquina superior derecha (ya no choca con el título 3D).
+- Gancho de pruebas `window.__viaje.go(n)` (solo con `__VIAJE_NO_FPS_GUARD`) para capturas sin animar.
+- Comprobado: build ok, `check:js` 166 KB/350, `photos:check` ok, Lighthouse móvil 99/100/100/100 en `/`, `/editores/`, `/en/`. Capturas escritorio 1280×800 y móvil 390×844 (renderizado por software, ~1–2 fps: **fps reales en GPU sin medir**).
 
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
@@ -79,6 +88,8 @@ Herramientas en `herramientas/` del repo:
 ## 7. Problemas conocidos
 - **WebGL solo probado con renderizado por software:** fps reales sin medir en una GPU.
 - **Web 4:**
+  - Calle nueva: medir fps en GPU real (portátil normal y móvil). Si va justa, bajar edificios de la 2ª fila, lluvia o reflejos (ya se apagan solos al degradar).
+  - En móvil, la foto siguiente asoma como rectángulo oscuro bajo la actual (eje recto).
   - Auditoría de accesibilidad y rendimiento sin repetir tras el rediseño.
   - La ventana del cuarto de Arganda se ve como un rectángulo claro desde una parada.
   - En móvil no se ha recapturado tras el último ajuste.

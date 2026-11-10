@@ -22,6 +22,7 @@ import {
   HalfFloatType,
   LinearFilter,
   LinearSRGBColorSpace,
+  Matrix4,
   Mesh,
   NoColorSpace,
   NoToneMapping,
@@ -40,12 +41,27 @@ import {
   UnsignedByteType,
   Vector2,
   Vector3,
+  Vector4,
   WebGLRenderer,
   WebGLRenderTarget,
   ZeroFactor,
   type Material,
 } from 'three';
 import { buildLayout, type Slot } from './layout';
+import {
+  buildStreet,
+  makeLampUniforms,
+  FLOOR2_FRAG,
+  FLOOR2_VERT,
+  FLOOR_Y,
+  REFL_FRAG,
+  REFL_VERT,
+  additive,
+  type Circle,
+  type Rect,
+  type Seg,
+  type Street,
+} from './street';
 import { TextureLoader } from './textures';
 import { ExperienceUI } from './ui';
 import { ViajeSound } from './sound';
@@ -53,8 +69,6 @@ import {
   DIM_FRAG,
   DUST_FRAG,
   DUST_VERT,
-  FLOOR_FRAG,
-  FLOOR_VERT,
   PHOTO_FRAG,
   PHOTO_VERT,
   POINTS_FRAG,
@@ -104,12 +118,53 @@ interface PhotoObj {
   hover: number;
   spot: Mesh<CylinderGeometry, ShaderMaterial> | null;
   backs: Mesh<CylinderGeometry, ShaderMaterial>[];
+  refl: Mesh<PlaneGeometry, ShaderMaterial> | null;
+  stamp: Mesh<PlaneGeometry, ShaderMaterial> | null;
 }
 
 interface Pose {
   p: Vector3;
   l: Vector3;
 }
+
+const LABEL_VERT = /* glsl */ `
+  varying vec2 vUv;
+  varying float vDist;
+  void main() {
+    vUv = uv;
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vDist = -mv.z;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+/** placa de calle esmaltada (se ilumina un poco con la linterna y se funde en la niebla) */
+const PLAQUE_FRAG = /* glsl */ `
+  uniform sampler2D uTex;
+  uniform vec3 uFog;
+  uniform float uI;
+  varying vec2 vUv;
+  varying float vDist;
+  void main() {
+    vec4 t = texture2D(uTex, vUv);
+    vec3 col = t.rgb * (0.55 + 0.45 * uI);
+    // brillo especular del esmalte
+    col += vec3(0.25, 0.25, 0.3) * pow(1.0 - abs(vUv.x + vUv.y * 0.4 - 0.7), 12.0) * t.a * uI;
+    col = mix(col, uFog, smoothstep(10.0, 46.0, vDist));
+    gl_FragColor = vec4(col, t.a);
+  }
+`;
+/** fecha de carrete en naranja LED, fuera del cuadro (la foto no se toca) */
+const STAMP_FRAG = /* glsl */ `
+  uniform sampler2D uTex;
+  uniform float uO;
+  varying vec2 vUv;
+  varying float vDist;
+  void main() {
+    vec4 t = texture2D(uTex, vUv);
+    float fog = 1.0 - smoothstep(9.0, 30.0, vDist);
+    gl_FragColor = vec4(t.rgb * t.a * uO * fog, 1.0);
+  }
+`;
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const smoother = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
@@ -170,12 +225,20 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   sky.frustumCulled = false;
   scene.add(sky);
 
+  const lampU = makeLampUniforms();
+  const uRoom = { value: new Vector4(1e5, 1e5, 1e5 + 1, 1e5 + 1) };
   const floor = new Mesh(
     new PlaneGeometry(360, 360, 1, 1),
-    new ShaderMaterial({ vertexShader: FLOOR_VERT, fragmentShader: FLOOR_FRAG, uniforms: { uCam: shared.uCam, uBeamDir: shared.uBeamDir, uTint: shared.uTint, uFog: shared.uFog, uTime } }),
+    new ShaderMaterial({
+      vertexShader: FLOOR2_VERT,
+      fragmentShader: FLOOR2_FRAG,
+      uniforms: { uCam: shared.uCam, uBeamDir: shared.uBeamDir, uTint: shared.uTint, uFog: shared.uFog, uTime, uRoom, uWet: { value: high ? 1 : 0.7 }, uLamps: lampU.lamps, uLampCol: lampU.lampCols },
+      depthWrite: false,
+    }),
   );
   floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -2.6;
+  floor.position.y = FLOOR_Y;
+  floor.renderOrder = -9;
   scene.add(floor);
 
   /* ───────── polvo ───────── */
@@ -329,6 +392,8 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         uLum: { value: 0.35 },
         uDevelop: { value: isDevelop ? 0 : 1 },
         uFade: { value: 1 },
+        uSoft: { value: 0 },
+        uAspect: { value: new Vector2(W / H, 1) },
       },
       transparent: true,
       depthWrite: true,
@@ -373,9 +438,27 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         backs.push(b);
       }
     }
+    // reflejo en el suelo mojado (gama alta)
+    let refl: PhotoObj['refl'] = null;
+    if (high && slot.role !== 'thumb') {
+      const rm = new ShaderMaterial({
+        vertexShader: REFL_VERT,
+        fragmentShader: REFL_FRAG,
+        uniforms: { uTex: mat.uniforms.uTex, uHasTex: mat.uniforms.uHasTex, uMargin: mat.uniforms.uMargin, uK: { value: 0 }, uCam: shared.uCam, uTime, uRoom },
+        side: DoubleSide,
+      });
+      additive(rm);
+      refl = new Mesh(planeGeo, rm);
+      refl.matrixAutoUpdate = false;
+      refl.renderOrder = -3;
+      refl.visible = false;
+      scene.add(refl);
+    }
     return {
       slot,
       mesh,
+      refl,
+      stamp: null,
       points: null,
       base: { p: slot.pos.clone(), q: slot.quat.clone(), s: new Vector3(W, H, 1) },
       mos: { p: new Vector3(), q: new Quaternion(), s: new Vector3(1, 1, 1) },
@@ -514,15 +597,110 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       mesh.visible = false;
       scene.add(mesh);
       titles.push({ mesh, chapter: z.index, prog: 0 });
+
+      // placa de calle a la entrada de cada capítulo (salvo el primero, que empieza en casa)
+      if (z.index > 0) {
+        const pc = document.createElement('canvas');
+        pc.width = 1024;
+        pc.height = 360;
+        const g = pc.getContext('2d');
+        if (g) {
+          const rr = (x: number, y: number, w: number, h: number, r: number) => {
+            g.beginPath();
+            g.moveTo(x + r, y);
+            g.arcTo(x + w, y, x + w, y + h, r);
+            g.arcTo(x + w, y + h, x, y + h, r);
+            g.arcTo(x, y + h, x, y, r);
+            g.arcTo(x, y, x + w, y, r);
+            g.closePath();
+          };
+          const grd = g.createLinearGradient(0, 0, 0, 360);
+          grd.addColorStop(0, '#24456f');
+          grd.addColorStop(1, '#152a47');
+          rr(6, 6, 1012, 348, 34);
+          g.fillStyle = grd;
+          g.fill();
+          rr(26, 26, 972, 308, 22);
+          g.lineWidth = 9;
+          g.strokeStyle = '#f2efe6';
+          g.stroke();
+          g.fillStyle = '#f2efe6';
+          g.textAlign = 'center';
+          g.font = '500 40px Martian, "Martian Fallback", monospace';
+          const num = String(ch.n).padStart(2, '0');
+          g.fillText(`${data.lang === 'en' ? 'CHAPTER' : 'CAPÍTULO'} ${num}`, 512, 102);
+          let fs2 = 150;
+          const ttl = ch.title.toUpperCase();
+          g.font = `800 ${fs2}px Bricolage, "Bricolage Fallback", sans-serif`;
+          while (g.measureText(ttl).width > 880 && fs2 > 60) {
+            fs2 -= 6;
+            g.font = `800 ${fs2}px Bricolage, "Bricolage Fallback", sans-serif`;
+          }
+          g.fillText(ttl, 512, 240 + fs2 * 0.18);
+          // tornillos
+          for (const [x, y] of [[60, 60], [964, 60], [60, 300], [964, 300]]) {
+            g.beginPath();
+            g.arc(x, y, 9, 0, Math.PI * 2);
+            g.fillStyle = '#c9c4b8';
+            g.fill();
+          }
+          const pt = new CanvasTexture(pc);
+          pt.colorSpace = NoColorSpace;
+          pt.anisotropy = 4;
+          const pm = new ShaderMaterial({ vertexShader: LABEL_VERT, fragmentShader: PLAQUE_FRAG, uniforms: { uTex: { value: pt }, uFog: shared.uFog, uI: { value: 0.6 } }, transparent: true, side: DoubleSide });
+          keepAlpha(pm, false);
+          const plate = new Mesh(planeGeo, pm);
+          plate.scale.set(1.9, 1.9 * (360 / 1024), 1);
+          plate.visible = false;
+          plate.renderOrder = 2;
+          scene.add(plate);
+          const pole = new Mesh(new CylinderGeometry(0.035, 0.035, 1, 8), new ShaderMaterial({ vertexShader: LABEL_VERT, fragmentShader: 'uniform vec3 uFog; varying float vDist; void main(){ gl_FragColor = vec4(mix(vec3(0.05,0.05,0.055), uFog, smoothstep(10.0,46.0,vDist)), 1.0); }', uniforms: { uFog: shared.uFog } }));
+          pole.visible = false;
+          scene.add(pole);
+          plaques.push({ plate, pole, chapter: z.index });
+        }
+      }
+    }
+    // fechas de carrete bajo cada foto con parada
+    for (const p of photos) {
+      if (p.slot.stop < 0) continue;
+      const m = /(\d{2})\/(\d{2})\/(\d{4})/.exec(p.slot.photo.caption);
+      if (!m) continue;
+      const txt = `'${m[3].slice(2)}  ${+m[2]}  ${+m[1]}`;
+      const sc = document.createElement('canvas');
+      sc.width = 512;
+      sc.height = 112;
+      const g = sc.getContext('2d');
+      if (!g) continue;
+      g.font = '500 66px Martian, "Martian Fallback", monospace';
+      g.textAlign = 'right';
+      g.textBaseline = 'middle';
+      g.shadowColor = 'rgba(255,110,20,0.95)';
+      g.shadowBlur = 22;
+      g.fillStyle = '#ff9a3c';
+      g.fillText(txt, 496, 58);
+      g.shadowBlur = 0;
+      g.fillStyle = '#ffd2a0';
+      g.fillText(txt, 496, 58);
+      const st = new CanvasTexture(sc);
+      st.colorSpace = NoColorSpace;
+      const sm = new ShaderMaterial({ vertexShader: LABEL_VERT, fragmentShader: STAMP_FRAG, uniforms: { uTex: { value: st }, uO: { value: 0 } } });
+      additive(sm);
+      const stamp = new Mesh(planeGeo, sm);
+      stamp.matrixAutoUpdate = false;
+      stamp.visible = false;
+      stamp.renderOrder = 7;
+      scene.add(stamp);
+      p.stamp = stamp;
     }
     placeTitles();
   };
+  const plaques: { plate: Mesh<PlaneGeometry, ShaderMaterial>; pole: Mesh; chapter: number }[] = [];
   /** en escritorio el título se coloca respecto al encuadre de la parada héroe: empieza dentro del cuadro, a la
    *  izquierda, y pasa por detrás de la foto (que lo tapa en parte) */
   const placeTitles = () => {
-    if (mobile) return;
     const P: Pose = { p: new Vector3(), l: new Vector3() };
-    for (const t of titles) {
+    for (const t of mobile ? [] : titles) {
       const z = zones[t.chapter];
       const heroS = slots[z.hero];
       stopPose(z.firstStop, P);
@@ -547,6 +725,28 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         .addScaledVector(up, vh * 0.345);
       t.mesh.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), dir.clone().negate());
     }
+    // placas: en la curva de transición hacia el capítulo, a la derecha, colgadas de un poste
+    for (const pq of plaques) {
+      const z = zones[pq.chapter];
+      const s0 = z.firstStop - 1 + 0.5;
+      poseAt(s0);
+      const a = camPos.clone();
+      poseAt(s0 + 0.04);
+      const fwd = camPos.clone().sub(a).setY(0);
+      if (fwd.lengthSq() < 1e-6) fwd.set(0, 0, -1);
+      fwd.normalize();
+      const right = new Vector3().crossVectors(fwd, UP).normalize();
+      const at = a.clone().addScaledVector(fwd, 5.5).addScaledVector(right, 2.1);
+      at.y = Math.max(a.y - 0.6, FLOOR_Y + 2.2);
+      pq.plate.position.copy(at);
+      pq.plate.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), fwd.clone().negate().addScaledVector(right, -0.35).normalize());
+      // poste por detrás de la placa, del suelo hasta su borde superior
+      const nrm = new Vector3(0, 0, 1).applyQuaternion(pq.plate.quaternion);
+      const top = at.y + pq.plate.scale.y / 2 + 0.08;
+      const ph = top - FLOOR_Y;
+      pq.pole.position.set(at.x - nrm.x * 0.07, FLOOR_Y + ph / 2, at.z - nrm.z * 0.07);
+      pq.pole.scale.set(1, ph, 1);
+    }
   };
 
   /* ───────── lightbox: plano héroe que se dibuja encima del post ───────── */
@@ -565,6 +765,8 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       uLum: { value: 1 },
       uDevelop: { value: 1 },
       uFade: { value: 1 },
+      uSoft: { value: 0 },
+      uAspect: { value: new Vector2(1, 1) },
     },
     transparent: true,
     depthTest: false,
@@ -755,7 +957,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       }
     } else {
       // cambio de capítulo: grúa por encima, con barrido de luz
-      bezier(PA.p, PB.p, eu, 3.2, camPos);
+      bezier(PA.p, PB.p, eu, 2.2, camPos);
       camLook.lerpVectors(PA.l, PB.l, smoother(clamp(u * 1.25 - 0.12, 0, 1)));
       segSweep = Math.pow(Math.sin(Math.PI * u), 2);
       segSweepPos = u * 1.5 - 0.25;
@@ -1118,6 +1320,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     if (dust) dust.material.uniforms.uPixelRatio.value = renderer.getPixelRatio();
     makeRT();
     placeTitles();
+    street?.setViewport(s.y, renderer.getPixelRatio());
     if (lbOpen && lbIndex >= 0) fitHero(photos[lbIndex]);
   };
   let visible = !document.hidden;
@@ -1133,6 +1336,8 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     fallback('context-lost');
   };
 
+  let street: Street | null = null;
+  let roomRect: Rect | null = null;
   const prevHtmlOverflow = document.documentElement.style.overflow;
   const listen = () => {
     addEventListener('wheel', onWheel, { passive: false });
@@ -1151,6 +1356,54 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   canvas.addEventListener('webglcontextlost', onContextLost);
   onResize();
 
+  /* ───────── la calle: se construye a partir del recorrido real de la cámara ───────── */
+  try {
+    const path: Vector3[] = [];
+    for (let s = 0; s <= nStops + 1e-6; s += 0.04) {
+      poseAt(s);
+      path.push(camPos.clone());
+    }
+    const rects: Rect[] = [];
+    const circles: Circle[] = [];
+    const segs: Seg[] = [];
+    const P: Pose = { p: new Vector3(), l: new Vector3() };
+    for (const z of zones) {
+      let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+      const grow = (x: number, zz: number, r: number) => {
+        x0 = Math.min(x0, x - r); x1 = Math.max(x1, x + r); z0 = Math.min(z0, zz - r); z1 = Math.max(z1, zz + r);
+      };
+      for (const sl of slots) if (sl.chapter === z.index) {
+        grow(sl.pos.x, sl.pos.z, Math.max(sl.width, sl.height) / 2 + 0.6);
+        circles.push({ c: new Vector2(sl.pos.x, sl.pos.z), r: sl.width / 2 + 0.8 });
+      }
+      for (let k = z.firstStop; k <= z.lastStop; k++) {
+        stopPose(k, P);
+        grow(P.p.x, P.p.z, 1.2);
+        const sl = slots[stops[k].slot];
+        segs.push({ a: new Vector2(P.p.x, P.p.z), b: new Vector2(sl.pos.x, sl.pos.z), r: 1.1 });
+      }
+      if (z.preset === 'room') {
+        roomRect = { x0: z.anchor.x - 5.05, x1: z.anchor.x + 5.05, z0: z.anchor.z - 6.55, z1: z.anchor.z + 4.25 };
+        grow(z.anchor.x, z.anchor.z - 1.2, 6.2);
+      }
+      if (z.center) grow(z.center.x, z.center.z, 7.6);
+      rects.push({ x0: x0 - 0.8, x1: x1 + 0.8, z0: z0 - 0.8, z1: z1 + 0.8 });
+    }
+    finalPose(P);
+    rects.push({ x0: finalAnchor.x - gridW / 2 - 1, x1: finalAnchor.x + gridW / 2 + 1, z0: finalAnchor.z - 1, z1: P.p.z + 1.5 });
+    if (roomRect) {
+      const rr = roomRect as Rect;
+      uRoom.value.set(rr.x0, rr.z0, rr.x1, rr.z1);
+    }
+    street = buildStreet({ path, rects, circles, segs, room: roomRect, high, mobile, shared, pixelRatio: renderer.getPixelRatio(), lamps: lampU.lamps, lampCols: lampU.lampCols });
+    scene.add(street.group);
+    street.setViewport(renderer.getDrawingBufferSize(new Vector2()).y, renderer.getPixelRatio());
+  } catch (e) {
+    console.warn('[viaje] calle no disponible', e);
+  }
+  let rainK = 0;
+  const mirrorM = new Matrix4().makeTranslation(0, FLOOR_Y, 0).multiply(new Matrix4().makeScale(1, -1, 1)).multiply(new Matrix4().makeTranslation(0, -FLOOR_Y, 0));
+
   /* ───────── calidad y vigilancia de fps ───────── */
   let quality = high ? 2 : 1;
   let fpsFrames = 0;
@@ -1161,6 +1414,11 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     usePost = false;
     postMat.uniforms.uFx.value = 0;
     if (dust) dust.visible = false;
+    street?.setLowQuality();
+    for (const p of photos) if (p.refl) {
+      p.refl.visible = false;
+      p.refl = null;
+    }
     renderer.setPixelRatio(1);
     onResize();
   };
@@ -1207,6 +1465,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
 
   /* ───────── bucle ───────── */
   const tmpV = new Vector3();
+  const tmpS = new Vector3();
   const corners = [new Vector3(), new Vector3(), new Vector3(), new Vector3()];
   const metaOf = (caption: string) => {
     const m = /^([^,]+),\s*(\d{2}\/\d{2}\/\d{4})/.exec(caption);
@@ -1294,6 +1553,8 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       const u = p.mesh.material.uniforms;
       if (!inWindow) {
         p.mesh.visible = false;
+        if (p.refl) p.refl.visible = false;
+        if (p.stamp) p.stamp.visible = false;
         if (p.spot) p.spot.visible = false;
         p.backs.forEach((b) => (b.visible = false));
         continue;
@@ -1354,6 +1615,31 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       tmpV.normalize();
       const inBeam = clamp((tmpV.dot(beamDir) - 0.94) / 0.06, 0, 1);
       u.uGlow.value = Math.max(hov, inBeam * 0.6, a * 0.25);
+      // recuerdo: desenfocado mientras no es la foto activa; nítido (intacto) al llegar
+      u.uSoft.value = high && !lbOpen ? clamp(1 - Math.max(a * 1.15, hov, mosaic * 3), 0, 1) * 0.9 : 0;
+      if (p.refl || p.stamp) p.mesh.updateMatrix();
+      if (p.refl) {
+        const k = u.uReveal.value * u.uFade.value * u.uLum.value * (1 - mosaic);
+        p.refl.visible = p.mesh.visible && k > 0.01;
+        if (p.refl.visible) {
+          p.refl.matrix.multiplyMatrices(mirrorM, p.mesh.matrix);
+          p.refl.matrixWorldNeedsUpdate = true;
+          p.refl.material.uniforms.uK.value = k;
+        }
+      }
+      if (p.stamp) {
+        const o2 = u.uReveal.value * u.uFade.value * (0.25 + 0.75 * Math.pow(a, 2)) * (1 - mosaic) * (lbOpen ? 0 : 1);
+        p.stamp.visible = p.mesh.visible && o2 > 0.01;
+        if (p.stamp.visible) {
+          const sx = p.mesh.scale.x, sy = p.mesh.scale.y;
+          const sh = Math.min(0.15, sy * 0.07);
+          const sw = sh * (512 / 112);
+          tmpV.set(0.5 - sw / (2 * sx), -0.5 - (sh * 0.5 + 0.05) / sy, 0).applyMatrix4(p.mesh.matrix);
+          p.stamp.matrix.compose(tmpV, p.mesh.quaternion, tmpS.set(sw, sh, 1));
+          p.stamp.matrixWorldNeedsUpdate = true;
+          p.stamp.material.uniforms.uO.value = o2;
+        }
+      }
       const lightI = u.uReveal.value * u.uFade.value * (1 - mosaic) * (0.3 + 0.9 * a + 0.4 * hov + 0.3 * inBeam);
       if (p.spot) {
         p.spot.visible = lightI > 0.01;
@@ -1368,6 +1654,21 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     for (const d of decor) {
       const z = zones[d.userData.chapter as number];
       d.visible = mosaic < 0.95 && cs > z.firstStop - 1.8 && cs < z.lastStop + 1.8;
+    }
+    if (street) {
+      const rr = roomRect as Rect | null;
+      const inside = !!rr && camera.position.x > rr.x0 - 0.5 && camera.position.x < rr.x1 + 0.5 && camera.position.z > rr.z0 - 0.5 && camera.position.z < rr.z1 + 0.5;
+      rainK += ((inside ? 0 : 1) - rainK) * (1 - Math.exp(-dt * 1.5));
+      street.update(camera.position, rainK * (1 - mosaic * 0.7));
+    }
+    for (const pq of plaques) {
+      const z = zones[pq.chapter];
+      const vis = mosaic < 0.9 && cs > z.firstStop - 2.2 && cs < z.firstStop + 1.5;
+      pq.plate.visible = pq.pole.visible = vis;
+      if (vis) {
+        tmpV.copy(pq.plate.position).sub(camera.position).normalize();
+        pq.plate.material.uniforms.uI.value = 0.55 + 0.45 * clamp((tmpV.dot(beamDir) - 0.9) / 0.1, 0, 1);
+      }
     }
     for (const w of windowLights) {
       const z = zones[w.chapter];
@@ -1559,6 +1860,20 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   }
   raf = requestAnimationFrame(frame);
   void buildTitles();
+  // gancho solo para pruebas automáticas (capturas): salta a una posición sin animar
+  if (window.__VIAJE_NO_FPS_GUARD) {
+    (window as unknown as { __viaje: unknown }).__viaje = {
+      go: (v: number) => {
+        ts = cs = clamp(v, 0, nStops);
+        vel = 0;
+        lastInput = 0;
+      },
+      stops: nStops,
+      cam: () => [camera.position.x, camera.position.y, camera.position.z, camLook.x, camLook.y, camLook.z],
+      street: () => street?.debug,
+      zones: zones.map((z) => [z.firstStop, z.lastStop]),
+    };
+  }
 
   /* ───────── API ───────── */
   let focusAnim = 0;
@@ -1604,6 +1919,9 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       document.documentElement.style.overflow = prevHtmlOverflow;
       loader.dispose();
       sound.destroy();
+      street?.dispose();
+      for (const pq of plaques) (pq.plate.material.uniforms.uTex.value as Texture)?.dispose();
+      for (const p of photos) (p.stamp?.material.uniforms.uTex.value as Texture | undefined)?.dispose();
       const mats = new Set<Material>();
       scene.traverse((obj) => {
         const m = obj as Mesh;

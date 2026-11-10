@@ -123,7 +123,7 @@ const CSS = /* css */ `
 .vx-af.is-lock b{opacity:0}
 .vx-af.is-confirm{animation:vx-confirm .32s steps(1,end) 1}
 @keyframes vx-confirm{0%{opacity:1}35%{opacity:.25}70%{opacity:1}}
-.vx-af-label{position:absolute;left:0;bottom:calc(100% + 8px);white-space:nowrap;color:var(--vx-accent);text-transform:uppercase;opacity:0;transition:opacity .2s;background:rgba(6,7,10,.6);padding:3px 6px}
+.vx-af-label{position:absolute;right:0;bottom:calc(100% + 8px);white-space:nowrap;color:var(--vx-accent);text-transform:uppercase;opacity:0;transition:opacity .2s;background:rgba(6,7,10,.6);padding:3px 6px}
 .vx-af.is-lock .vx-af-label{opacity:1}
 .vx-hint{position:absolute;left:50%;bottom:calc(var(--vx-m) + 26px);transform:translateX(-50%);padding:8px 12px;background:color-mix(in srgb,#000 70%,transparent);color:var(--vx-fg);text-transform:uppercase;opacity:0;transition:opacity .25s;white-space:nowrap}
 .vx-hint.is-on{opacity:1}
