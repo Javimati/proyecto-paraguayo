@@ -6,7 +6,8 @@ _Última actualización: 10/11/2026 (chat 4: web 4 «la calle de los recuerdos»
 - Objetivo: prácticas (FCT) en agencias (Europa Press, EFE, Servimedia, Contacto, Getty, AFP, Reuters, AP, El País…).
 - **Email:** alvadar2@gmail.com · **Teléfono:** 660 458 606
 - **Prácticas:** desde el 16/02/2027 hasta completar 440 h; horario el que asigne la empresa. Acepta empresas sin convenio previo (el centro lo tramita).
-- Edita con Lightroom Classic y Photoshop. Inglés B1. Sin carné de conducir; se mueve en transporte público por la Comunidad de Madrid.
+- Edita con Lightroom Classic y Photoshop. Inglés B1. Sin carné de conducir; se mueve en transporte público por la Comunidad de Madrid (**no publicar**: decisión de Marlon, 10/11/2026; tampoco el «acepta empresas sin convenio»).
+- Formación previa: Grado Medio de Técnico en Vídeo Disc-jockey y Sonido, Campus FP Arganda (dato de la bio de la web 2).
 - Referente: Alex Webb (Magnum); le gustan sus fotos de niños jugando en un patio en México (sin título ni año exactos).
 - **No tiene:** Instagram ni web de fotos aparte, portfolio PDF, CV PDF, experiencia en manifestaciones, ruedas de prensa ni actos públicos, serie de reportaje de 6–8 fotos, fotos de temas sociales. Cámara y objetivos: sin respuesta.
 - **Bio (dada por Álvaro, 10/11/2026, reescrita más cercana en la web 2):** estudiante del Grado Superior de Técnico en Iluminación, Captación y Tratamiento de la Imagen; le apasiona la fotografía de eventos; le encanta capturar momentos que pasan en un segundo y se recuerdan siempre (energía de un directo, emoción en una celebración, detalles que casi nadie ve); su formación en iluminación y postproducción le permite trabajar con cualquier luz (salas oscuras, exteriores) y entregar imágenes cuidadas con acabado profesional; está construyendo su trayectoria y busca colaborar en conciertos, fiestas y eventos («Si quieres que tu evento quede bien contado, escríbeme»).
@@ -55,6 +56,14 @@ Ahora (mismo criterio que la web 2):
 - `build-photos` (webs 2 y 4) ya borra de la caché las versiones que no tocan: si se cambiaba una foto por otra más pequeña, se seguían sirviendo las versiones grandes de la foto anterior.
 - Prototipo en Claude: 2 versiones por foto (640 y la mayor ≤ 2400 px) con `herramientas/preview-fotos.py` (el visor admite 256 archivos); la calidad nativa completa está en Cloudflare.
 - **Negros en bandas:** la web 4 hereda el arreglo de la web 2 (sin `.gamma()`, reducción a 16 bits, `VERSION v2-q95-444-rgb16`). Comprobado en `fiesta-naranja/12`: mismo brillo que una reducción de referencia (diferencia media 1,5/255; con la gamma de 8 bits era 7/255 y los negros salían aplastados).
+
+## 3d. Web 4 — ajustes de Marlon (10/11/2026, prototipo 1794350165-ac97)
+- **Sobre mí:** bio en primera persona con el texto de la web 2 adaptado (sin quitar nada de lo que había), retrato real (`src/assets/retrato/01.jpg`, mismo archivo que la web 2) por la cadena nativa (`/fotos/retrato/`), bloque «Qué fotografío» (fotoperiodismo primero), contacto con copiar email. Fuera «Equipo».
+- **Ficha (Facts, en Sobre mí, Editores y Contacto):** fuera Movilidad y Convenio; Formación incluye el Grado Medio. Quitado también el convenio del cierre y el transporte del capítulo 6.
+- Capítulo 1 renombrado **«Desde Madrid»** (la carpeta sigue siendo `01-desde-arganda`).
+- **Viaje 3D:** AF recalculado cada fotograma y enganchado solo a la foto activa (sin mover el ratón); etiqueta solo «AF · 00N» (fuera lugar/fecha, también en la lectura de arriba a la derecha); fuera las fechas de carrete; nunca un marco colgado fuera de la foto. Índice lateral con todos los capítulos visibles y el actual marcado. Nombre de la cabecera dentro de la esquina del visor. Sin botón de sonido (viaje e intro).
+- **Transiciones:** cámara con muelle críticamente amortiguado (arranca y frena suave); los tramos largos entre capítulos duran según su longitud (≈0,7 s dentro de un capítulo, ≈2–2,2 s al 90 % en los saltos largos; antes ~0,6 s fijos).
+- **Ciudad:** las ventanas «a puntitos» eran z-fighting (edificios y aceras solapados con caras coplanarias). Ahora 0 solapes (prueba SAT), fachadas desplazadas entre sí y aceras a alturas distintas; además antialiasing analítico de ventanas, persianas y barandillas.
 
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.

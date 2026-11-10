@@ -158,19 +158,6 @@ const PLAQUE_FRAG = /* glsl */ `
     gl_FragColor = vec4(col, t.a);
   }
 `;
-/** fecha de carrete en naranja LED, fuera del cuadro (la foto no se toca) */
-const STAMP_FRAG = /* glsl */ `
-  uniform sampler2D uTex;
-  uniform float uO;
-  varying vec2 vUv;
-  varying float vDist;
-  void main() {
-    vec4 t = texture2D(uTex, vUv);
-    float fog = 1.0 - smoothstep(9.0, 30.0, vDist);
-    gl_FragColor = vec4(t.rgb * t.a * uO * fog, 1.0);
-  }
-`;
-
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const smoother = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -671,38 +658,6 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         }
       }
     }
-    // fechas de carrete bajo cada foto con parada
-    for (const p of photos) {
-      if (p.slot.stop < 0) continue;
-      const m = /(\d{2})\/(\d{2})\/(\d{4})/.exec(p.slot.photo.caption);
-      if (!m) continue;
-      const txt = `'${m[3].slice(2)}  ${+m[2]}  ${+m[1]}`;
-      const sc = document.createElement('canvas');
-      sc.width = 512;
-      sc.height = 112;
-      const g = sc.getContext('2d');
-      if (!g) continue;
-      g.font = '500 66px Martian, "Martian Fallback", monospace';
-      g.textAlign = 'right';
-      g.textBaseline = 'middle';
-      g.shadowColor = 'rgba(255,110,20,0.95)';
-      g.shadowBlur = 22;
-      g.fillStyle = '#ff9a3c';
-      g.fillText(txt, 496, 58);
-      g.shadowBlur = 0;
-      g.fillStyle = '#ffd2a0';
-      g.fillText(txt, 496, 58);
-      const st = new CanvasTexture(sc);
-      st.colorSpace = NoColorSpace;
-      const sm = new ShaderMaterial({ vertexShader: LABEL_VERT, fragmentShader: STAMP_FRAG, uniforms: { uTex: { value: st }, uO: { value: 0 } } });
-      additive(sm);
-      const stamp = new Mesh(planeGeo, sm);
-      stamp.matrixAutoUpdate = false;
-      stamp.visible = false;
-      stamp.renderOrder = 7;
-      scene.add(stamp);
-      p.stamp = stamp;
-    }
     placeTitles();
   };
   const plaques: { plate: Mesh<PlaneGeometry, ShaderMaterial>; pole: Mesh; chapter: number }[] = [];
@@ -857,6 +812,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   let raf = 0;
   let last = performance.now();
   let cs = 0; // posición actual (en paradas)
+  let csV = 0; // velocidad del muelle de la cámara (paradas/s)
   let ts = 0; // posición objetivo
   let vel = 0;
   let focus = 0;
@@ -928,6 +884,29 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
 
   const PA: Pose = { p: new Vector3(), l: new Vector3() };
   const PB: Pose = { p: new Vector3(), l: new Vector3() };
+  /** longitud real (mundo) de cada tramo parada k → k+1 (el último va a la hoja de contactos) */
+  let segLen: number[] = [];
+  const computeSegs = () => {
+    const A: Pose = { p: new Vector3(), l: new Vector3() };
+    const B: Pose = { p: new Vector3(), l: new Vector3() };
+    segLen = [];
+    for (let k = 0; k < nStops; k++) {
+      stopPose(k, A);
+      if (k + 1 < nStops) stopPose(k + 1, B);
+      else finalPose(B);
+      const cross = k + 1 >= nStops || stops[k].chapter !== stops[k + 1].chapter;
+      segLen.push(A.p.distanceTo(B.p) * (cross ? 1.25 : 1) + (cross ? 4 : 0));
+    }
+  };
+  /** 1 en tramos cortos (dentro de un capítulo) · ~0,4 en los saltos largos entre capítulos */
+  const segScale = (a: number, b: number) => {
+    if (!segLen.length) return 1;
+    const lo = clamp(Math.floor(Math.min(a, b)), 0, nStops - 1);
+    const hi = clamp(Math.ceil(Math.max(a, b)) - 1, lo, nStops - 1);
+    let L = 0;
+    for (let k = lo; k <= hi; k++) L = Math.max(L, segLen[k]);
+    return clamp(Math.sqrt(4.5 / Math.max(L, 0.1)), 0.26, 1);
+  };
   const camPos = new Vector3();
   const camLook = new Vector3();
   let segSweep = 0;
@@ -1098,6 +1077,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     if (Math.abs(curChapter - z.index) > 1) {
       ui.curtainJump(() => {
         ts = cs = target;
+        csV = 0;
         vel = 0;
       });
     } else ts = target;
@@ -1130,6 +1110,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       const target = p.slot.stop >= 0 ? p.slot.stop : nearestStopInChapter(p);
       if (Math.abs(cs - target) > 0.6) {
         ts = cs = target;
+        csV = 0;
         vel = 0;
         poseAt(cs);
         camera.position.copy(camPos);
@@ -1373,6 +1354,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     for (const p of photos) if (p.points) p.points.material.uniforms.uViewportH.value = s.y;
     if (dust) dust.material.uniforms.uPixelRatio.value = renderer.getPixelRatio();
     makeRT();
+    computeSegs();
     placeTitles();
     street?.setViewport(s.y, renderer.getPixelRatio());
     if (lbOpen && lbIndex >= 0) fitHero(photos[lbIndex]);
@@ -1526,10 +1508,6 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   const tmpV = new Vector3();
   const tmpS = new Vector3();
   const corners = [new Vector3(), new Vector3(), new Vector3(), new Vector3()];
-  const metaOf = (caption: string) => {
-    const m = /^([^,]+),\s*(\d{2}\/\d{2}\/\d{4})/.exec(caption);
-    return m ? `${m[1]} · ${m[2]}` : '';
-  };
   const camFwd = new Vector3();
   let lastLock = -1;
 
@@ -1548,9 +1526,26 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       lastInput = 0;
     }
     const prev = cs;
-    const k = 1 - Math.exp(-dt * (Math.abs(ts - cs) > 2 ? 2.6 : 3.6));
-    cs += (ts - cs) * k;
-    if (Math.abs(ts - cs) < 1e-4) cs = ts;
+    // cámara con muelle críticamente amortiguado: arranca suave y frena suave (antes: arranque brusco).
+    // Los tramos largos (cambio de capítulo) van más despacio, en proporción a su longitud real.
+    {
+      const omega = 5.6 * segScale(cs, ts);
+      const n = Math.max(1, Math.ceil(dt / (1 / 120)));
+      const h = dt / n;
+      for (let i = 0; i < n; i++) {
+        const acc = omega * omega * (ts - cs) - 2 * omega * csV;
+        csV += acc * h;
+        cs += csV * h;
+      }
+      if (cs < 0 || cs > nStops) {
+        cs = clamp(cs, 0, nStops);
+        csV = 0;
+      }
+      if (Math.abs(ts - cs) < 1e-4 && Math.abs(csV) < 2e-3) {
+        cs = ts;
+        csV = 0;
+      }
+    }
     const v = (cs - prev) / Math.max(dt, 1e-4);
     vel += (v - vel) * (1 - Math.exp(-dt * 10));
     const ps = 1 - Math.exp(-dt * 5);
@@ -1763,14 +1758,18 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
 
     // HUD y cursor AF
     if (started && !lbOpen) {
-      if (pointerDirty && hasPointer) {
+      // se recalcula en cada fotograma: si la cámara se mueve, lo que hay bajo el cursor cambia aunque el ratón esté quieto
+      if (hasPointer) {
         pointerDirty = false;
         hovered = pick(pointer.x * width, pointer.y * height);
-      }
-      const lockIndex = focusIndex >= 0 ? focusIndex : hovered;
+      } else hovered = -1;
+      // sin foto bajo el cursor, el AF se engancha solo a la foto en la que está la cámara
+      const autoLock = focusIndex < 0 && hovered < 0 && activeIdx >= 0 && activeA > 0.92 && mosaic < 0.01;
+      const lockIndex = focusIndex >= 0 ? focusIndex : hovered >= 0 ? hovered : autoLock ? activeIdx : -1;
       let focusDist: number | null = null;
       const metaIdx = lockIndex >= 0 ? lockIndex : activeIdx;
-      ui.setMeta(metaIdx >= 0 ? metaOf(photos[metaIdx].slot.photo.caption) : '');
+      ui.setMeta('');
+      let rect: { x: number; y: number; w: number; h: number } | null = null;
       if (lockIndex >= 0 && photos[lockIndex].mesh.visible) {
         const p = photos[lockIndex];
         const mx = p.mesh.material.uniforms.uMargin.value;
@@ -1779,27 +1778,37 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         corners[2].set(-0.5 + mx.x, 0.5 - mx.y, 0);
         corners[3].set(0.5 - mx.x, 0.5 - mx.y, 0);
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        let behind = false;
         p.mesh.updateMatrixWorld();
         for (const c of corners) {
           c.applyMatrix4(p.mesh.matrixWorld).project(camera);
+          if (c.z > 1 || c.z < -1) behind = true;
           const sx = (c.x * 0.5 + 0.5) * width;
           const sy = (-c.y * 0.5 + 0.5) * height;
           x0 = Math.min(x0, sx); y0 = Math.min(y0, sy); x1 = Math.max(x1, sx); y1 = Math.max(y1, sy);
         }
+        // solo si la foto está de verdad en pantalla (al menos la mitad): nunca un marco colgado en el vacío
+        const visW = Math.max(0, Math.min(x1, width) - Math.max(x0, 0));
+        const visH = Math.max(0, Math.min(y1, height) - Math.max(y0, 0));
+        if (!behind && visW * visH > 0.5 * (x1 - x0) * (y1 - y0)) rect = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+      }
+      if (rect) {
+        const p = photos[lockIndex];
         const n = String(lockIndex + 1).padStart(3, '0');
-        const meta = metaOf(p.slot.photo.caption);
-        const fresh = ui.afLock({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, meta ? `AF · ${n} — ${meta}` : `AF · ${n}`);
+        const fresh = ui.afLock(rect, `AF · ${n}`, lockIndex);
         if (fresh && lockIndex !== lastLock) sound.af();
         lastLock = lockIndex;
         focusDist = p.mesh.position.distanceTo(camera.position);
+        ui.setAFVisible(true);
         if (focusIndex >= 0) {
-          ui.setAFVisible(true);
           ui.showHint(`${data.lang === 'en' ? 'Photo' : 'Foto'} ${n}/${String(photos.length).padStart(3, '0')} · ${data.lang === 'en' ? 'Enter to open' : 'Enter para abrir'}`);
         }
-        canvas.style.cursor = 'none';
+        // si el AF se ha enganchado solo (ratón fuera de la foto), el cursor normal sigue a la vista
+        canvas.style.cursor = hovered === lockIndex ? 'none' : '';
       } else {
         lastLock = -1;
         ui.afFree(pointer.x * width, pointer.y * height);
+        ui.setAFVisible(hasPointer);
         canvas.style.cursor = hasPointer ? 'none' : '';
         if (activeIdx >= 0 && activeA > 0.9) focusDist = photos[activeIdx].mesh.position.distanceTo(camera.position);
       }
@@ -1825,6 +1834,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         lbIndex = n;
         if (!inMosaic() && p.slot.stop >= 0) {
           ts = cs = p.slot.stop;
+          csV = 0;
         }
         ensureTex(p);
         ensureHires(p);
@@ -1981,6 +1991,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     (window as unknown as { __viaje: unknown }).__viaje = {
       go: (v: number) => {
         ts = cs = clamp(v, 0, nStops);
+        csV = 0;
         vel = 0;
         lastInput = 0;
       },

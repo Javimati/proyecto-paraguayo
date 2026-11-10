@@ -1,9 +1,9 @@
 ---
 n: 1
-kicker: Capítulo 01 — Desde Arganda
-kicker_en: Chapter 01 — From Arganda
-title: Desde Arganda
-title_en: From Arganda
+kicker: Capítulo 01 — Desde Madrid
+kicker_en: Chapter 01 — From Madrid
+title: Desde Madrid
+title_en: From Madrid
 text: "Vivo en Arganda del Rey, al sureste de Madrid. [PROVISIONAL] Aquí van dos
   o tres frases tuyas: cuándo empezaste a hacer fotos, con qué y por qué. TODO."
 text_en: "I live in Arganda del Rey, south-east of Madrid. [PROVISIONAL] Two or

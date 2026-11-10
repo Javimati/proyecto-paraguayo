@@ -89,6 +89,11 @@ const NOISE = /* glsl */ `
     return s;
   }
   // charcos: mismo patrón en el suelo y en los reflejos
+  // rectángulo [lo, hi] con bordes filtrados (antialiasing analítico); fw = tamaño de un píxel en esas unidades
+  float fbox(vec2 f, vec2 lo, vec2 hi, vec2 fw) {
+    vec2 a = smoothstep(lo - fw, lo + fw, f) * (1.0 - smoothstep(hi - fw, hi + fw, f));
+    return a.x * a.y;
+  }
   float puddleAt(vec2 p) { return smoothstep(0.52, 0.6, fbm(p * 0.21 + 3.7)); }
 `;
 
@@ -157,73 +162,73 @@ export const FACADE_FRAG = /* glsl */ `
     } else if (vFace > 0.5) {
       col = uFog * 0.7 + vec3(0.012);
     } else {
+      // Fachada con antialiasing analítico: cada borde se filtra con su tamaño en pantalla (fwidth) y los
+      // detalles más finos que un píxel (persianas, barandillas, marcos) se funden en su media en vez de
+      // parpadear. De lejos, la rejilla entera pasa a su color medio.
       float storey = 3.1;
       float bay = 2.2 + vSeed.x * 0.9;
-      vec2 cell = floor(vec2(vFac.x / bay, vFac.y / storey));
-      vec2 f = vec2(fract(vFac.x / bay), fract(vFac.y / storey));
+      vec2 g = vec2(vFac.x / bay, vFac.y / storey);
+      vec2 cell = floor(g);
+      vec2 f = fract(g);
+      vec2 fw = max(fwidth(g), vec2(1e-4));
       float nb = floor(vSize.x / bay + 0.001);
       float h = hash1(cell + vSeed.yz * 91.0);
-      // revoco oscuro con algo de mancha de humedad
       float stain = vnoise(vFac * vec2(0.6, 0.25) + vSeed.y * 40.0);
       vec3 wall = mix(vec3(0.032, 0.03, 0.03), vec3(0.05, 0.043, 0.038), vSeed.z) * (0.75 + 0.5 * stain);
-      col = wall * (0.35 + light * 2.2) + uFog * 0.55;
+      vec3 wallLit = wall * (0.35 + light * 2.2) + uFog * 0.55;
+      col = wallLit;
       bool edgeBay = cell.x < 0.5 || cell.x > nb - 0.5;
+      float topZone = step(vFac.y, vSize.y - 0.7);
       if (cell.y < 0.5) {
-        // planta baja: persianas metálicas, algún local abierto y algún neón
-        float inShop = step(0.08, f.x) * step(f.x, 0.92) * step(0.0, f.y) * step(f.y, 0.78);
-        if (inShop > 0.5 && !edgeBay) {
-          float slats = 0.5 + 0.5 * sin(vFac.y * 60.0);
-          vec3 shutter = vec3(0.07, 0.07, 0.075) * (0.6 + 0.4 * slats) * (0.3 + light * 2.4);
-          if (h > 0.78) {
-            // local abierto: luz cálida del interior
-            vec3 warm = mix(vec3(1.0, 0.62, 0.3), vec3(0.75, 0.85, 1.0), step(0.93, h));
-            shutter = warm * (0.22 + 0.1 * vnoise(vFac * 3.0)) * smoothstep(0.0, 0.6, f.y + 0.2);
-            emissive = 0.8;
-          }
-          col = shutter + uFog * 0.3;
-        }
-        float neonBand = step(0.82, f.y) * step(f.y, 0.87) * step(0.18, f.x) * step(f.x, 0.82);
-        if (neonBand > 0.5 && h > 0.55 && h < 0.66 && !edgeBay) {
-          vec3 neonC = h < 0.59 ? vec3(1.0, 0.18, 0.42) : h < 0.63 ? vec3(0.2, 0.85, 1.0) : vec3(1.0, 0.35, 0.12);
-          float flick = step(0.06, fract(sin(floor(uTime * 7.0) + h * 99.0) * 431.7));
-          col = neonC * (0.75 + 0.25 * flick);
-          emissive = 1.0;
-        }
-      } else if (vFac.y < vSize.y - 0.7) {
-        // ventanas
-        float inWin = step(0.27, f.x) * step(f.x, 0.73) * step(0.3, f.y) * step(f.y, 0.86);
-        float frame = inWin * (1.0 - step(0.3, f.x) * step(f.x, 0.70) * step(0.33, f.y) * step(f.y, 0.83));
-        float mullion = inWin * (1.0 - step(0.012, abs(f.x - 0.5)));
-        if (inWin > 0.5) {
-          vec3 glass = vec3(0.012, 0.014, 0.02) + light * 0.05;
-          float lit = step(0.7 - vSeed.x * 0.12, h);
-          // alguna ventana se enciende o se apaga despacio (la ciudad vive)
-          float slowT = floor(uTime / (7.0 + h * 13.0) + h * 5.0);
-          lit = mix(lit, step(0.5, hash1(cell + slowT)), step(0.965, h));
-          vec3 warm = mix(vec3(1.0, 0.66, 0.34), vec3(1.0, 0.82, 0.58), hash1(cell * 1.7));
-          float tv = step(0.985, hash1(cell + 3.3));
-          vec3 tvC = vec3(0.45, 0.6, 1.0) * (0.55 + 0.45 * sin(uTime * 9.0 + h * 50.0) * sin(uTime * 3.1 + h * 20.0));
-          // cortina: degradado y silueta suave
-          float curtain = 0.6 + 0.4 * smoothstep(0.3, 0.86, f.y) * (0.75 + 0.25 * hash1(cell + 7.0));
-          vec3 inside = mix(warm, tvC, tv) * curtain * (0.55 + 0.45 * h);
-          col = mix(glass, inside, lit);
-          emissive = lit;
-          col *= 1.0 - mullion * 0.8;
-          col = mix(col, wall * 0.6, frame);
-        }
-        // lejos, la rejilla de ventanas se funde en su media (sin muaré)
-        float aa = clamp(max(fwidth(vFac.x / bay), fwidth(vFac.y / storey)) * 2.2 - 0.25, 0.0, 1.0);
-        vec3 avg = wall * (0.35 + light * 2.2) * 0.8 + vec3(1.0, 0.68, 0.38) * 0.07 * (0.6 + vSeed.x);
-        col = mix(col, avg + uFog * 0.5, aa);
-        emissive = mix(emissive, 0.35, aa);
-        // balcones (cada dos plantas): barandilla
-        float rail = step(mod(cell.y, 2.0), 0.5) * step(0.24, f.x) * step(f.x, 0.76);
-        float bar = rail * (step(0.18, f.y) * step(f.y, 0.2) + step(0.29, f.y) * step(f.y, 0.31) * 0.6);
-        col = mix(col, vec3(0.02) + light * 0.12, bar);
+        // planta baja: persianas, algún local abierto y algún neón
+        float inShop = edgeBay ? 0.0 : fbox(f, vec2(0.08, 0.0), vec2(0.92, 0.78), fw);
+        float sf = fwidth(vFac.y * 60.0 / 6.2832);
+        float slats = 0.5 + 0.5 * sin(vFac.y * 60.0) * (1.0 - smoothstep(0.2, 0.55, sf));
+        vec3 shop = vec3(0.07, 0.07, 0.075) * (0.6 + 0.4 * slats) * (0.3 + light * 2.4);
+        float open_ = step(0.78, h);
+        vec3 warmS = mix(vec3(1.0, 0.62, 0.3), vec3(0.75, 0.85, 1.0), step(0.93, h));
+        shop = mix(shop, warmS * 0.26 * smoothstep(0.0, 0.6, f.y + 0.2), open_);
+        col = mix(col, shop + uFog * 0.3, inShop);
+        emissive = inShop * open_ * 0.8;
+        float isNeon = (!edgeBay && h > 0.55 && h < 0.66) ? 1.0 : 0.0;
+        float neon = isNeon * fbox(f, vec2(0.18, 0.82), vec2(0.82, 0.87), fw);
+        vec3 neonC = h < 0.59 ? vec3(1.0, 0.18, 0.42) : h < 0.63 ? vec3(0.2, 0.85, 1.0) : vec3(1.0, 0.35, 0.12);
+        float flick = step(0.06, fract(sin(floor(uTime * 7.0) + h * 99.0) * 431.7));
+        col = mix(col, neonC * (0.75 + 0.25 * flick), neon);
+        emissive = max(emissive, neon);
       } else {
+        // ventanas
+        float inWin = fbox(f, vec2(0.27, 0.3), vec2(0.73, 0.86), fw) * topZone;
+        float inner = fbox(f, vec2(0.3, 0.33), vec2(0.70, 0.83), fw);
+        float frame = clamp(inWin - inner, 0.0, 1.0) * (1.0 - smoothstep(0.03, 0.08, fw.x));
+        float mullion = inWin * (1.0 - smoothstep(0.012 - fw.x, 0.012 + fw.x, abs(f.x - 0.5))) * (1.0 - smoothstep(0.02, 0.06, fw.x));
+        vec3 glass = vec3(0.012, 0.014, 0.02) + light * 0.05;
+        float lit = step(0.7 - vSeed.x * 0.12, h);
+        // alguna ventana se enciende o se apaga despacio (la ciudad vive)
+        float slowT = floor(uTime / (7.0 + h * 13.0) + h * 5.0);
+        lit = mix(lit, step(0.5, hash1(cell + slowT)), step(0.965, h));
+        vec3 warm = mix(vec3(1.0, 0.66, 0.34), vec3(1.0, 0.82, 0.58), hash1(cell * 1.7));
+        float tv = step(0.985, hash1(cell + 3.3));
+        vec3 tvC = vec3(0.45, 0.6, 1.0) * (0.55 + 0.45 * sin(uTime * 9.0 + h * 50.0) * sin(uTime * 3.1 + h * 20.0));
+        float curtain = 0.6 + 0.4 * smoothstep(0.3, 0.86, f.y) * (0.75 + 0.25 * hash1(cell + 7.0));
+        vec3 inside = mix(warm, tvC, tv) * curtain * (0.55 + 0.45 * h);
+        vec3 win = mix(glass, inside, lit) * (1.0 - mullion * 0.8);
+        win = mix(win, wall * 0.6, frame);
+        col = mix(col, win, inWin);
+        emissive = inWin * lit;
+        // balcones (cada dos plantas): barandilla fina que se funde con la distancia
+        float railOn = step(mod(cell.y, 2.0), 0.5) * fbox(vec2(f.x, 0.5), vec2(0.24, 0.0), vec2(0.76, 1.0), fw) * topZone;
+        float thin = 1.0 - smoothstep(0.015, 0.05, fw.y);
+        float bar = railOn * thin * (fbox(vec2(0.5, f.y), vec2(0.0, 0.18), vec2(1.0, 0.2), fw) + fbox(vec2(0.5, f.y), vec2(0.0, 0.29), vec2(1.0, 0.31), fw) * 0.6);
+        col = mix(col, vec3(0.02) + light * 0.12, clamp(bar, 0.0, 1.0));
         // cornisa
-        col *= 0.7;
+        col *= mix(0.7, 1.0, topZone);
       }
+      // lejos: la rejilla se funde en su media antes de que aparezcan dientes o muaré
+      float aa = smoothstep(0.05, 0.22, max(fw.x, fw.y));
+      vec3 avg = wall * (0.35 + light * 2.2) * 0.8 + vec3(1.0, 0.68, 0.38) * 0.07 * (0.6 + vSeed.x) + uFog * 0.5;
+      col = mix(col, avg, aa);
+      emissive = mix(emissive, 0.35, aa);
     }
     float dist = length(vWorld - uCam);
     float fogK = smoothstep(9.0, 70.0, dist) * (1.0 - emissive * 0.55);
@@ -442,6 +447,17 @@ function distSeg(p: Vector2, a: Vector2, b: Vector2) {
   const t = Math.max(0, Math.min(1, ((p.x - a.x) * abx + (p.y - a.y) * aby) / (abx * abx + aby * aby || 1)));
   return Math.hypot(p.x - (a.x + abx * t), p.y - (a.y + aby * t));
 }
+/** ¿se solapan dos rectángulos orientados (centro, eje del ancho, semiancho, semifondo)? (teorema del eje separador) */
+function obbOverlap(c1: Vector2, t1: Vector2, hw1: number, hd1: number, c2: Vector2, t2: Vector2, hw2: number, hd2: number) {
+  const n1 = new Vector2(-t1.y, t1.x), n2 = new Vector2(-t2.y, t2.x);
+  const d = c2.clone().sub(c1);
+  for (const ax of [t1, n1, t2, n2]) {
+    const r1 = hw1 * Math.abs(t1.dot(ax)) + hd1 * Math.abs(n1.dot(ax));
+    const r2 = hw2 * Math.abs(t2.dot(ax)) + hd2 * Math.abs(n2.dot(ax));
+    if (Math.abs(d.dot(ax)) > r1 + r2) return false;
+  }
+  return true;
+}
 const inRect = (p: Vector2, r: Rect, m = 0) => p.x > r.x0 - m && p.x < r.x1 + m && p.y > r.z0 - m && p.y < r.z1 + m;
 
 export function additive(m: ShaderMaterial) {
@@ -546,8 +562,12 @@ export function buildStreet(o: StreetOpts): Street {
           if (inRect(q, rc)) return false;
         }
     }
-    const rad = Math.min(w, d) * 0.5;
-    for (const b of blds) if (b.kind === 0 && b.c.distanceTo(c) < (rad + b.rad) * 0.92) return false;
+    // ningún solape con otro edificio: dos fachadas en el mismo plano hacen z-fighting (ventanas a puntitos)
+    for (const b of blds) {
+      if (b.kind !== 0) continue;
+      if (b.c.distanceTo(c) > (Math.hypot(w, d) + Math.hypot(b.w, b.d)) / 2 + 0.2) continue;
+      if (obbOverlap(c, t, hw + 0.15, hd + 0.15, b.c, b.t, b.w / 2 + 0.15, b.d / 2 + 0.15)) return false;
+    }
     return true;
   };
   const L = path.length;
@@ -568,14 +588,17 @@ export function buildStreet(o: StreetOpts): Street {
         const d = 6 + r() * 4;
         let placed = false;
         for (const off of row.offs) {
-          const c = P.clone().addScaledVector(N, off + d / 2);
+          const c = P.clone().addScaledVector(N, off + r() * 0.7 + d / 2);
           if (fits(c, T, w, d, row.clear)) {
             const h = row.hMin + Math.pow(r(), 1.6) * (row.hMax - row.hMin);
             blds.push({ c, t: T.clone(), w, d, h, kind: 0, rad: Math.min(w, d) * 0.5 });
             // acera delante de la fachada
             if (row === rows[0]) {
               const sc = P.clone().addScaledVector(N, off - 1.1);
-              if (!blocked(sc, 1.6, 0.4)) blds.push({ c: sc, t: T.clone(), w: w + 0.3, d: 2.2, h: 0.16, kind: 1, rad: 0 });
+              const sw = { c: sc, t: T.clone(), w: w + 0.1, d: 2.2, h: 0.14 + blds.length * 0.0007, kind: 1, rad: 0 };
+              let clash = false;
+              for (const o2 of blds) if (o2.kind === 1 && o2.c.distanceTo(sc) < (o2.w + sw.w) / 2 + 2.5 && obbOverlap(sc, sw.t, sw.w / 2, sw.d / 2, o2.c, o2.t, o2.w / 2, o2.d / 2)) clash = true;
+              if (!clash && !blocked(sc, 1.6, 0.4)) blds.push(sw);
             }
             placed = true;
             break;

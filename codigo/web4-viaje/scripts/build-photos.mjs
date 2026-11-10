@@ -32,6 +32,8 @@ const QUALITY = 95;
 const MAX_ORIGINAL = 24 * 1024 * 1024;
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const SRC = path.join(ROOT, 'src/content/fotos');
+// otras fotos que no son de un capítulo (salida en public/fotos/<slug>/): el retrato de /sobre
+const EXTRA = { retrato: path.join(ROOT, 'src/assets/retrato') };
 const CACHE = path.join(ROOT, 'node_modules/.astro/fotos');
 const OUT = path.join(ROOT, 'public/fotos');
 // v2: SIN .gamma() (en sharp va en 8 bits y aplastaba los negros en bandas) y reducción a 16 bits por canal.
@@ -48,8 +50,10 @@ async function fresh(out, srcStat) {
   return s.mtimeMs >= srcStat.mtimeMs && s.size > 0;
 }
 
+const srcDir = (slug) => EXTRA[slug] ?? path.join(SRC, slug);
+
 async function one(slug, file) {
-  const src = path.join(SRC, slug, file);
+  const src = path.join(srcDir(slug), file);
   const base = file.replace(/\.jpe?g$/i, '');
   const dir = path.join(CACHE, VERSION, slug);
   await mkdir(dir, { recursive: true });
@@ -93,8 +97,9 @@ async function one(slug, file) {
 const t0 = Date.now();
 let made = 0, total = 0;
 const slugs = (await readdir(SRC, { withFileTypes: true })).filter((d) => d.isDirectory()).map((d) => d.name);
+for (const [k, d] of Object.entries(EXTRA)) if (existsSync(d)) slugs.push(k);
 for (const slug of slugs) {
-  const files = (await readdir(path.join(SRC, slug))).filter((f) => /^\d+\.jpe?g$/i.test(f)).sort();
+  const files = (await readdir(srcDir(slug))).filter((f) => /^\d+\.jpe?g$/i.test(f)).sort();
   for (const f of files) {
     made += await one(slug, f);
     total++;
@@ -109,7 +114,7 @@ for (const slug of slugs) {
 }
 // quita de public/fotos las versiones de fotos que ya no están en el contenido
 for (const slug of slugs) {
-  const keep = new Set((await readdir(path.join(SRC, slug))).filter((f) => /^\d+\.jpe?g$/i.test(f)).map((f) => f.replace(/\.jpe?g$/i, '')));
+  const keep = new Set((await readdir(srcDir(slug))).filter((f) => /^\d+\.jpe?g$/i.test(f)).map((f) => f.replace(/\.jpe?g$/i, '')));
   const dir = path.join(OUT, slug);
   if (!existsSync(dir)) continue;
   for (const f of await readdir(dir)) if (!keep.has(f.split('-')[0])) await rm(path.join(dir, f));

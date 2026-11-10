@@ -212,7 +212,7 @@ export function mountIntro(o: IntroOptions): Promise<void> {
     paintSound();
     const skipBtn = el('button', 'vf__ctl vf__skip', `${t.skip} <kbd>Esc</kbd>`) as HTMLButtonElement;
     skipBtn.type = 'button';
-    ctls.append(soundBtn, skipBtn);
+    ctls.append(skipBtn); // sin botón de sonido (decisión de Marlon): el sonido queda apagado
     top.append(kicker, ctls);
     vf.append(top);
 

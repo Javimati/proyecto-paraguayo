@@ -5,12 +5,12 @@ kicker_en: Chapter 06 — What comes next
 title: Lo que viene
 title_en: What comes next
 text: Estudio 2.º del Grado Superior de Iluminación, Captación y Tratamiento de
-  Imagen en Campus FP Atocha. Edito en Lightroom Classic y Photoshop y me muevo
-  por todo Madrid en transporte público. Disponible para prácticas desde el 16
+  Imagen en Campus FP Atocha. Edito en Lightroom Classic y Photoshop.
+  Disponible para prácticas desde el 16
   de febrero de 2027 (440 horas).
 text_en: I am in my second year of the Higher Diploma in Lighting, Image Capture
-  and Processing at Campus FP Atocha. I edit in Lightroom Classic and Photoshop
-  and get around Madrid by public transport. Available for an internship from 16
+  and Processing at Campus FP Atocha. I edit in Lightroom Classic and Photoshop.
+  Available for an internship from 16
   February 2027 (440 hours).
 provisional: true
 photos:

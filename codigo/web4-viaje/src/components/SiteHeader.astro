@@ -92,6 +92,11 @@ const items = [
     backdrop-filter: none;
     box-shadow: none;
   }
+  /* Sobre el visor 3D, el nombre va DENTRO de la esquina superior izquierda de la cámara (marcas .vx-frame) */
+  :global(html.exp-on) .site-header {
+    height: calc(clamp(12px, 2.2vw, 28px) * 2 + 26px);
+    padding-inline: calc(clamp(12px, 2.2vw, 28px) + 16px);
+  }
   .brand__short {
     display: none;
   }

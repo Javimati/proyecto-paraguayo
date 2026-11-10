@@ -78,6 +78,7 @@ const CSS = /* css */ `
 .vx-ui :focus-visible{outline:2px solid var(--vx-accent);outline-offset:3px}
 .vx-sr{position:absolute!important;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0}
 .vx-frame{position:absolute;inset:var(--vx-m);pointer-events:none}
+.vx-snd{display:none!important}
 .vx-frame i{position:absolute;width:22px;height:22px;border-color:color-mix(in srgb,var(--vx-fg) 55%,transparent);border-style:solid;border-width:0}
 .vx-frame i:nth-child(1){left:0;top:0;border-left-width:1px;border-top-width:1px}
 .vx-frame i:nth-child(2){right:0;top:0;border-right-width:1px;border-top-width:1px}
@@ -96,12 +97,12 @@ const CSS = /* css */ `
 /* capítulos: número siempre visible; etiqueta del activo siempre visible */
 .vx-nav{position:absolute;right:clamp(14px,2.4vw,32px);top:50%;transform:translateY(-50%);pointer-events:auto}
 .vx-nav ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.vx-nav button{display:flex;align-items:center;gap:10px;justify-content:flex-end;min-height:26px;padding:2px 0;color:var(--vx-meta)}
-.vx-nav .vx-nav-l{opacity:0;transform:translateX(6px);transition:opacity .25s,transform .25s;text-transform:uppercase}
+.vx-nav button{display:flex;align-items:center;gap:10px;justify-content:flex-end;min-height:26px;padding:2px 0;color:var(--vx-meta);opacity:.62;transition:opacity .25s,color .25s;text-shadow:0 1px 6px rgba(0,0,0,.9)}
+.vx-nav button:hover,.vx-nav button:focus-visible{opacity:1}
+.vx-nav .vx-nav-l{text-transform:uppercase}
 .vx-nav .vx-nav-n{min-width:2ch;text-align:right}
 .vx-nav button::after{content:'';width:14px;height:1px;background:currentColor;transition:width .3s,background .3s}
-.vx-nav:hover .vx-nav-l,.vx-nav button:focus-visible .vx-nav-l,.vx-nav button[aria-current="step"] .vx-nav-l{opacity:1;transform:none}
-.vx-nav button[aria-current="step"]{color:var(--vx-fg)}
+.vx-nav button[aria-current="step"]{color:var(--vx-fg);opacity:1}
 .vx-nav button[aria-current="step"]::after{width:30px;background:var(--vx-accent)}
 /* texto del capítulo (el título grande vive en 3D, detrás de la foto héroe) */
 .vx-chap{position:absolute;left:clamp(20px,5vw,80px);bottom:clamp(58px,10vh,110px);max-width:min(40ch,36vw);pointer-events:none;opacity:0;transition:opacity .45s ease}
@@ -125,6 +126,7 @@ const CSS = /* css */ `
 @keyframes vx-confirm{0%{opacity:1}35%{opacity:.25}70%{opacity:1}}
 .vx-af-label{position:absolute;right:0;bottom:calc(100% + 8px);white-space:nowrap;color:var(--vx-accent);text-transform:uppercase;opacity:0;transition:opacity .2s;background:rgba(6,7,10,.6);padding:3px 6px}
 .vx-af.is-lock .vx-af-label{opacity:1}
+.vx-af.is-below .vx-af-label{bottom:auto;top:calc(100% + 8px)}
 .vx-hint{position:absolute;left:50%;bottom:calc(var(--vx-m) + 26px);transform:translateX(-50%);padding:8px 12px;background:color-mix(in srgb,#000 70%,transparent);color:var(--vx-fg);text-transform:uppercase;opacity:0;transition:opacity .25s;white-space:nowrap}
 .vx-hint.is-on{opacity:1}
 .vx-scrollcue{position:absolute;left:50%;bottom:calc(var(--vx-m) + 22px);transform:translateX(-50%);color:var(--vx-meta);text-transform:uppercase;transition:opacity .6s}
@@ -526,20 +528,26 @@ export class ExperienceUI {
   afFree(x: number, y: number) {
     if (this.locked) {
       this.locked = false;
+      this.lockId = -1;
       this.af.classList.remove('is-lock');
     }
     this.afTarget = { x: x - 30, y: y - 30, w: 60, h: 60 };
   }
   /** devuelve true si es un enganche nuevo (para el clic de AF) */
-  afLock(rect: { x: number; y: number; w: number; h: number }, label: string) {
+  private lockId = -1;
+  afLock(rect: { x: number; y: number; w: number; h: number }, label: string, id = -1) {
     const pad = 10;
     const vw = innerWidth, vh = innerHeight, m = 6;
     const x0 = Math.max(rect.x - pad, m), y0 = Math.max(rect.y - pad, m + 26);
     const x1 = Math.min(rect.x + rect.w + pad, vw - m), y1 = Math.min(rect.y + rect.h + pad, vh - m);
     this.afTarget = { x: x0, y: y0, w: Math.max(x1 - x0, 24), h: Math.max(y1 - y0, 24) };
+    // si el marco toca la cabecera, la etiqueta va debajo para no quedar tapada
+    this.af.classList.toggle('is-below', y0 < 96);
     let fresh = false;
-    if (!this.locked) {
+    // confirma el foco al engancharse y cada vez que cambia de foto
+    if (!this.locked || id !== this.lockId) {
       this.locked = true;
+      this.lockId = id;
       fresh = true;
       this.af.classList.add('is-lock');
       this.af.classList.remove('is-confirm');
