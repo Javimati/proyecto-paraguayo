@@ -16,6 +16,22 @@
     ]
   },
   "fiesta-naranja/03.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#131517",
+      "#4b4c53",
+      "#666c75"
+    ]
+  },
+  "fiesta-naranja/04.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#070709",
+      "#858a96",
+      "#666c75"
+    ]
+  },
+  "fiesta-naranja/05.jpg": {
     "dominant": "#f8f8f8",
     "palette": [
       "#fffffe",
@@ -23,7 +39,23 @@
       "#b98875"
     ]
   },
-  "fiesta-naranja/07.jpg": {
+  "fiesta-naranja/06.jpg": {
+    "dominant": "#f85828",
+    "palette": [
+      "#f75925",
+      "#d8391a",
+      "#151715"
+    ]
+  },
+  "fiesta-naranja/18.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#021227",
+      "#022848",
+      "#974827"
+    ]
+  },
+  "fiesta-naranja/19.jpg": {
     "dominant": "#080818",
     "palette": [
       "#07121a",
@@ -31,7 +63,31 @@
       "#fd6749"
     ]
   },
+  "fiesta-naranja/07.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#000000",
+      "#383838",
+      "#747474"
+    ]
+  },
   "fiesta-naranja/08.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#050303",
+      "#381506",
+      "#162437"
+    ]
+  },
+  "fiesta-naranja/09.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#030606",
+      "#03232a",
+      "#350706"
+    ]
+  },
+  "fiesta-naranja/20.jpg": {
     "dominant": "#080808",
     "palette": [
       "#061727",
@@ -39,7 +95,7 @@
       "#044677"
     ]
   },
-  "fiesta-naranja/04.jpg": {
+  "fiesta-naranja/10.jpg": {
     "dominant": "#080808",
     "palette": [
       "#060a0b",
@@ -47,7 +103,7 @@
       "#c61808"
     ]
   },
-  "fiesta-naranja/09.jpg": {
+  "fiesta-naranja/21.jpg": {
     "dominant": "#080818",
     "palette": [
       "#0c0b15",
@@ -55,7 +111,23 @@
       "#e6bb96"
     ]
   },
-  "fiesta-naranja/10.jpg": {
+  "fiesta-naranja/11.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#050609",
+      "#072439",
+      "#274966"
+    ]
+  },
+  "fiesta-naranja/12.jpg": {
+    "dominant": "#080818",
+    "palette": [
+      "#0c1219",
+      "#fc8708",
+      "#252c35"
+    ]
+  },
+  "fiesta-naranja/22.jpg": {
     "dominant": "#080808",
     "palette": [
       "#474747",
@@ -63,7 +135,7 @@
       "#2a2928"
     ]
   },
-  "fiesta-naranja/05.jpg": {
+  "fiesta-naranja/13.jpg": {
     "dominant": "#f8f8f8",
     "palette": [
       "#fdfeff",
@@ -71,7 +143,31 @@
       "#0237c9"
     ]
   },
-  "fiesta-naranja/06.jpg": {
+  "fiesta-naranja/14.jpg": {
+    "dominant": "#080838",
+    "palette": [
+      "#010738",
+      "#010a67",
+      "#0123c9"
+    ]
+  },
+  "fiesta-naranja/15.jpg": {
+    "dominant": "#080818",
+    "palette": [
+      "#0a0517",
+      "#060446",
+      "#340a46"
+    ]
+  },
+  "fiesta-naranja/16.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#060c17",
+      "#013658",
+      "#780207"
+    ]
+  },
+  "fiesta-naranja/17.jpg": {
     "dominant": "#080808",
     "palette": [
       "#050608",
@@ -90,12 +186,28 @@
   "mas-trabajos/02.jpg": {
     "dominant": "#080808",
     "palette": [
+      "#020202",
+      "#f9f9f9",
+      "#d8d8d8"
+    ]
+  },
+  "mas-trabajos/03.jpg": {
+    "dominant": "#080808",
+    "palette": [
       "#020606",
       "#021637",
       "#26261a"
     ]
   },
-  "mas-trabajos/03.jpg": {
+  "mas-trabajos/04.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#01020d",
+      "#181a25",
+      "#664739"
+    ]
+  },
+  "mas-trabajos/05.jpg": {
     "dominant": "#080818",
     "palette": [
       "#050616",
@@ -103,7 +215,7 @@
       "#030846"
     ]
   },
-  "mas-trabajos/04.jpg": {
+  "mas-trabajos/06.jpg": {
     "dominant": "#080808",
     "palette": [
       "#050505",
@@ -111,7 +223,7 @@
       "#383838"
     ]
   },
-  "mas-trabajos/05.jpg": {
+  "mas-trabajos/07.jpg": {
     "dominant": "#080808",
     "palette": [
       "#060609",
@@ -119,7 +231,39 @@
       "#092429"
     ]
   },
-  "mas-trabajos/06.jpg": {
+  "mas-trabajos/08.jpg": {
+    "dominant": "#080818",
+    "palette": [
+      "#040613",
+      "#292527",
+      "#56463b"
+    ]
+  },
+  "mas-trabajos/09.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#040404",
+      "#282828",
+      "#474747"
+    ]
+  },
+  "mas-trabajos/10.jpg": {
+    "dominant": "#080818",
+    "palette": [
+      "#010617",
+      "#070a47",
+      "#8849fc"
+    ]
+  },
+  "mas-trabajos/11.jpg": {
+    "dominant": "#e8e8e8",
+    "palette": [
+      "#e9e7e5",
+      "#061916",
+      "#b8caca"
+    ]
+  },
+  "mas-trabajos/12.jpg": {
     "dominant": "#080808",
     "palette": [
       "#0c0c0c",
@@ -127,7 +271,7 @@
       "#474747"
     ]
   },
-  "mas-trabajos/07.jpg": {
+  "mas-trabajos/13.jpg": {
     "dominant": "#080808",
     "palette": [
       "#0a0a0a",
@@ -135,7 +279,15 @@
       "#474747"
     ]
   },
-  "mas-trabajos/08.jpg": {
+  "mas-trabajos/14.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#040304",
+      "#181627",
+      "#292758"
+    ]
+  },
+  "mas-trabajos/15.jpg": {
     "dominant": "#080808",
     "palette": [
       "#08090a",
@@ -144,6 +296,14 @@
     ]
   },
   "supernoventeros/01.jpg": {
+    "dominant": "#181808",
+    "palette": [
+      "#fcfcfb",
+      "#1b170e",
+      "#482915"
+    ]
+  },
+  "supernoventeros/02.jpg": {
     "dominant": "#081828",
     "palette": [
       "#071526",
@@ -151,7 +311,23 @@
       "#fe8737"
     ]
   },
-  "supernoventeros/02.jpg": {
+  "supernoventeros/03.jpg": {
+    "dominant": "#082858",
+    "palette": [
+      "#02275a",
+      "#031728",
+      "#024788"
+    ]
+  },
+  "supernoventeros/04.jpg": {
+    "dominant": "#080818",
+    "palette": [
+      "#031428",
+      "#012767",
+      "#044887"
+    ]
+  },
+  "supernoventeros/05.jpg": {
     "dominant": "#081838",
     "palette": [
       "#011736",
@@ -159,7 +335,7 @@
       "#fcfdfe"
     ]
   },
-  "supernoventeros/03.jpg": {
+  "supernoventeros/06.jpg": {
     "dominant": "#080808",
     "palette": [
       "#04080a",
@@ -167,7 +343,23 @@
       "#364a46"
     ]
   },
-  "supernoventeros/04.jpg": {
+  "supernoventeros/07.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#060607",
+      "#172727",
+      "#364946"
+    ]
+  },
+  "supernoventeros/08.jpg": {
+    "dominant": "#282818",
+    "palette": [
+      "#282517",
+      "#474738",
+      "#feeab7"
+    ]
+  },
+  "supernoventeros/09.jpg": {
     "dominant": "#180808",
     "palette": [
       "#140c0c",
@@ -175,7 +367,7 @@
       "#4b5649"
     ]
   },
-  "supernoventeros/05.jpg": {
+  "supernoventeros/10.jpg": {
     "dominant": "#080808",
     "palette": [
       "#040508",
@@ -183,7 +375,23 @@
       "#464866"
     ]
   },
-  "supernoventeros/06.jpg": {
+  "supernoventeros/11.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#06080b",
+      "#182627",
+      "#fefefe"
+    ]
+  },
+  "supernoventeros/12.jpg": {
+    "dominant": "#080808",
+    "palette": [
+      "#040a0b",
+      "#022737",
+      "#0287c8"
+    ]
+  },
+  "supernoventeros/13.jpg": {
     "dominant": "#280848",
     "palette": [
       "#390956",
@@ -191,7 +399,15 @@
       "#ac39d5"
     ]
   },
-  "supernoventeros/07.jpg": {
+  "supernoventeros/14.jpg": {
+    "dominant": "#382828",
+    "palette": [
+      "#3b3632",
+      "#191514",
+      "#524d49"
+    ]
+  },
+  "supernoventeros/15.jpg": {
     "dominant": "#280808",
     "palette": [
       "#28050a",
@@ -199,7 +415,7 @@
       "#57020a"
     ]
   },
-  "supernoventeros/08.jpg": {
+  "supernoventeros/16.jpg": {
     "dominant": "#080808",
     "palette": [
       "#090909",

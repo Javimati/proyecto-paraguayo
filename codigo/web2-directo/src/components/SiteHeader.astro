@@ -16,11 +16,6 @@ const cur = (p: string) => (page === p ? 'page' : undefined);
   <nav aria-label={lang === 'es' ? 'Principal' : 'Main'}>
     <ul role="list">
       <li class="nav-setlist"><a href={ROUTES.home[lang]} aria-current={cur('home')}>{t.nav.setlist}</a></li>
-      <li>
-        <a href={ROUTES.promoters[lang]} aria-current={cur('promoters')}>
-          <span class="long">{t.nav.promoters}</span><span class="short" aria-hidden="true">{t.navShort.promoters}</span>
-        </a>
-      </li>
       <li><a href={ROUTES.about[lang]} aria-current={cur('about')}>{t.nav.about}</a></li>
       <li class="lang">
         <a href={altHref} hreflang={other} lang={other}>

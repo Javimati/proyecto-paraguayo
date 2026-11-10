@@ -24,7 +24,7 @@ const name = showName(entry, lang);
 const site = Astro.site!;
 const imageObjects = await Promise.all(
   d.photos.map(async (p) => {
-    const img = await getImage({ src: p.file, width: 1600, format: 'jpg' });
+    const img = await getImage({ src: p.file, width: 2000, format: 'jpg', quality: 92 });
     const date = p.date ?? d.date;
     const place = [p.venue ?? d.venue, p.city ?? d.city].filter(Boolean).join(', ');
     return {
@@ -72,7 +72,6 @@ const ficha = fichaParts(d, lang);
             <>
               {d.venue ? <span>{d.venue}</span> : <span>{t.placePending}</span>}
               {d.city && <span>{d.city}</span>}
-              <span>{d.date ? numDate(d.date) : t.datePending}</span>
             </>
           )}
           {d.time && <span>{d.time}</span>}
@@ -107,9 +106,9 @@ const ficha = fichaParts(d, lang);
                       src={p.file}
                       alt={es ? p.alt : p.alt_en}
                       formats={['avif', 'webp']}
-                      widths={isPortrait(p) ? [480, 720, 1000] : [640, 800, 1280, 1800]}
+                      widths={isPortrait(p) ? [600, 1000, 1500, 2000] : [800, 1280, 1920, 2560]}
                       sizes={isPortrait(p) ? '(min-width: 1024px) 57vh, min(calc(100vw - 32px), 32vh)' : '(min-width: 1024px) min(66vw, 1100px), calc(100vw - 32px)'}
-                      quality={i === 0 ? 62 : 74}
+                      quality={92}
                       loading={i === 0 ? 'eager' : 'lazy'}
                       fetchpriority={i === 0 ? 'high' : undefined}
                       decoding="async"
@@ -281,7 +280,7 @@ const ficha = fichaParts(d, lang);
     text-decoration: none;
   }
   .next__label { grid-area: label; font-size: var(--t-14); text-transform: uppercase; color: var(--muted); }
-  .next__img { grid-area: img; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .next__img { grid-area: img; width: auto; max-width: 100%; height: auto; max-height: 320px; }
   .next__title {
     grid-area: title;
     font-family: var(--f-marker);

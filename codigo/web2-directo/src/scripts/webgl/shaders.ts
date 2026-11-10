@@ -37,15 +37,21 @@ uniform vec2 uPrevRes;
 uniform vec4 uRect;
 uniform float uMix;
 uniform float uIntro;
-vec2 cover(vec2 uv, vec2 res) {
+// «contain»: la foto entera, sin recortar; lo que sobra del marco queda negro
+vec2 fit(vec2 uv, vec2 res) {
   float ra = uRect.z / uRect.w;
   float ri = res.x / res.y;
-  vec2 s = ra > ri ? vec2(1.0, ri / ra) : vec2(ra / ri, 1.0);
+  vec2 s = ra > ri ? vec2(ra / ri, 1.0) : vec2(1.0, ri / ra);
   return (uv - 0.5) * s + 0.5;
 }
+vec3 sampleFit(sampler2D t, vec2 res) {
+  vec2 uv = fit(vUv, res);
+  float inside = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
+  return texture2D(t, clamp(uv, 0.0, 1.0)).rgb * inside;
+}
 void main() {
-  vec3 cur = texture2D(tCur, cover(vUv, uCurRes)).rgb;
-  vec3 prev = texture2D(tPrev, cover(vUv, uPrevRes)).rgb;
+  vec3 cur = sampleFit(tCur, uCurRes);
+  vec3 prev = sampleFit(tPrev, uPrevRes);
   vec3 col = mix(prev, cur, uMix);
   // la sala se enciende una vez al cargar (0,8 s); en reposo, píxeles fieles
   col *= mix(0.25, 1.0, uIntro);

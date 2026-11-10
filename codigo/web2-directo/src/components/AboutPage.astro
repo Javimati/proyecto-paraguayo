@@ -39,8 +39,25 @@ const es = lang === 'es';
       </figure>
       <div class="ab__lead">
         <h1 id="ab-title" class="ab__title">{es ? 'Sobre mí' : 'About'}</h1>
-        {/* TODO(bio): 60–90 palabras en primera persona, escritas por Álvaro */}
-        <p class="ab__bio"><span class="todo">TODO: {es ? 'bio en primera persona, 60–90 palabras' : 'first-person bio, 60–90 words'}</span></p>
+        <div class="ab__bio">
+          {es ? (
+            <>
+              <p class="ab__hello">Soy Álvaro Rodríguez, tengo 20 años y vivo en Madrid.</p>
+              <p>Me encanta la fotografía, y donde más la disfruto es en un evento: con la música a tope, la gente a lo suyo y la cámara en la mano.</p>
+              <p>Me quedo con lo que pasa en un segundo y se recuerda para siempre: la energía de un directo, un abrazo en mitad de la pista, los detalles que casi nadie ve.</p>
+              <p>Estudio el Grado Superior de Técnico en Iluminación, Captación y Tratamiento de la Imagen. Gracias a eso me muevo bien con cualquier luz, desde una sala a oscuras hasta un exterior, y entrego fotos cuidadas, con acabado profesional.</p>
+              <p>Estoy empezando y tengo muchas ganas. Busco colaborar en conciertos, fiestas y eventos. Si quieres que tu evento quede bien contado, <a href={`mailto:${PERSON.email}`}>escríbeme</a>.</p>
+            </>
+          ) : (
+            <>
+              <p class="ab__hello">I’m Álvaro Rodríguez, I’m 20 and I live in Madrid.</p>
+              <p>I love photography, and where I enjoy it most is at an event: music up loud, people lost in the moment and a camera in my hand.</p>
+              <p>I go after what happens in a second and stays with you forever: the energy of a live show, a hug in the middle of the dance floor, the details almost nobody notices.</p>
+              <p>I’m studying a Higher Vocational Diploma in Lighting, Image Capture and Processing. That means I’m comfortable in any light, from a pitch-dark venue to outdoors, and I deliver carefully finished, professional images.</p>
+              <p>I’m just starting out and I’m hungry for it. I’m looking to work on gigs, parties and events. If you want your event told well, <a href={`mailto:${PERSON.email}`}>get in touch</a>.</p>
+            </>
+          )}
+        </div>
       </div>
     </section>
 
@@ -57,8 +74,13 @@ const es = lang === 'es';
       <h2 id="ab-edu" class="ab__h2 ficha">{es ? 'Formación' : 'Training'}</h2>
       <p>
         {es
-          ? '2.º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen. Campus FP Atocha, Madrid.'
+          ? '2.º del Grado Superior de Técnico en Iluminación, Captación y Tratamiento de la Imagen. Campus FP Atocha, Madrid.'
           : 'Second year, Higher Vocational Diploma in Lighting, Image Capture and Processing. Campus FP Atocha, Madrid.'}
+      </p>
+      <p>
+        {es
+          ? 'Grado Medio de Técnico en Vídeo Disc-jockey y Sonido. Campus FP Arganda.'
+          : 'Intermediate Vocational Diploma in Video DJ and Sound. Campus FP Arganda.'}
       </p>
     </section>
 
@@ -86,18 +108,6 @@ const es = lang === 'es';
       <p class="ab__status" role="status" aria-live="polite" data-copy-status></p>
     </section>
 
-    <section class="ab__block" aria-labelledby="ab-gear">
-      <h2 id="ab-gear" class="ab__h2 ficha">{es ? 'Herramientas y referencias' : 'Tools and references'}</h2>
-      <p>
-        {es
-          ? 'Edito con Lightroom Classic y Photoshop. Inglés B1. Sin carné de conducir: me muevo en transporte público por toda la Comunidad de Madrid. Mi referente es Alex Webb, de Magnum; me quedo con sus fotos de niños jugando en un patio en México.'
-          : 'I edit in Lightroom Classic and Photoshop. English B1. No driving licence: I get around the whole Madrid region by public transport. My reference is Alex Webb, from Magnum; I keep going back to his photos of children playing in a courtyard in Mexico.'}
-      </p>
-      <p>
-        {/* TODO(opcional): cámara y objetivos */}
-        <span class="todo">TODO ({es ? 'opcional' : 'optional'}): {es ? 'cámara y objetivos' : 'camera and lenses'}</span>
-      </p>
-    </section>
   </div>
 </Base>
 <style>
@@ -111,7 +121,7 @@ const es = lang === 'es';
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: subgrid;
-    align-items: end;
+    align-items: start;
     padding-block: clamp(16px, 3vw, 40px) clamp(28px, 4vw, 48px);
   }
   .ab__portrait { grid-column: 1 / 3; }
@@ -135,7 +145,7 @@ const es = lang === 'es';
     background: rgba(143, 141, 136, 0.82);
     z-index: 1;
   }
-  .ab__lead { grid-column: 4 / 11; }
+  .ab__lead { grid-column: 4 / 12; }
   .ab__title {
     font-family: var(--f-cond);
     font-size: var(--t-14);
@@ -145,7 +155,9 @@ const es = lang === 'es';
     text-transform: uppercase;
     color: var(--muted);
   }
-  .ab__bio { margin-top: 10px; font-size: var(--t-20); line-height: 1.5; max-width: 52ch; }
+  .ab__bio { margin-top: 14px; font-size: var(--t-25); line-height: 1.45; max-width: 40ch; display: grid; gap: 0.8em; }
+  .ab__hello { font-family: var(--f-marker); font-size: var(--t-39); line-height: 1.1; text-transform: none; }
+  .ab__bio a { color: inherit; text-decoration: underline; text-decoration-color: var(--luz-trabajo); text-underline-offset: 0.18em; }
   .ab__block {
     grid-column: 1 / -1;
     display: grid;
@@ -154,7 +166,7 @@ const es = lang === 'es';
     border-top: 1px solid rgba(236, 235, 231, 0.18);
   }
   .ab__h2 { grid-column: 1 / 4; font-size: var(--t-14); font-weight: 600; color: var(--muted); text-transform: uppercase; }
-  .ab__block > :not(h2) { grid-column: 4 / 11; max-width: 62ch; }
+  .ab__block > :not(h2) { grid-column: 4 / 11; max-width: 62ch; font-size: var(--t-20); line-height: 1.5; }
   .ab__contact { display: grid; gap: 8px; }
   .ab__contact div { display: grid; grid-template-columns: 8rem 1fr; gap: 12px; align-items: baseline; }
   .ab__contact dt { color: var(--muted); }

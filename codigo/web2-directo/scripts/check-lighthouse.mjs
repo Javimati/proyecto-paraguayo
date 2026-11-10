@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const PORT = 4399;
-const PAGES = ['/', '/eventos/fiesta-naranja/', '/para-promotores', '/en/'];
+const PAGES = ['/', '/eventos/fiesta-naranja/', '/sobre/', '/en/'];
 const MIN = 0.9, LCP = 2500, CLS = 0.05, TBT = 200;
 
 // Servidor estático mínimo sobre dist/ (independiente de `astro preview`)

@@ -1,15 +1,17 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 10/11/2026 (chat 3: webs 2 y 4 publicadas en Cloudflare Pages desde GitHub)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
+_Última actualización: 10/11/2026 (chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 
 ## 1. Álvaro (datos confirmados)
-- 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha.
+- 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha. Antes: **Grado Medio de Técnico en Vídeo Disc-jockey y Sonido, Campus FP Arganda** (dato de Marlon, 10/11/2026; puesto en /sobre de la web 2).
 - Quiere fotoperiodismo, calle, reportaje y actualidad. También eventos, conciertos y bodas, en segundo plano. Vídeo no.
 - Objetivo: prácticas (FCT) en agencias (Europa Press, EFE, Servimedia, Contacto, Getty, AFP, Reuters, AP, El País…).
 - **Email:** alvadar2@gmail.com · **Teléfono:** 660 458 606
 - **Prácticas:** desde el 16/02/2027 hasta completar 440 h; horario el que asigne la empresa. Acepta empresas sin convenio previo (el centro lo tramita).
 - Edita con Lightroom Classic y Photoshop. Inglés B1. Sin carné de conducir; se mueve en transporte público por la Comunidad de Madrid.
 - Referente: Alex Webb (Magnum); le gustan sus fotos de niños jugando en un patio en México (sin título ni año exactos).
-- **No tiene:** Instagram ni web de fotos aparte, portfolio PDF, CV PDF, experiencia en manifestaciones, ruedas de prensa ni actos públicos, serie de reportaje de 6–8 fotos, fotos de temas sociales. Cámara y objetivos: sin respuesta. Bio: pendiente.
+- **No tiene:** Instagram ni web de fotos aparte, portfolio PDF, CV PDF, experiencia en manifestaciones, ruedas de prensa ni actos públicos, serie de reportaje de 6–8 fotos, fotos de temas sociales. Cámara y objetivos: sin respuesta.
+- **Bio (dada por Álvaro, 10/11/2026, reescrita más cercana en la web 2):** estudiante del Grado Superior de Técnico en Iluminación, Captación y Tratamiento de la Imagen; le apasiona la fotografía de eventos; le encanta capturar momentos que pasan en un segundo y se recuerdan siempre (energía de un directo, emoción en una celebración, detalles que casi nadie ve); su formación en iluminación y postproducción le permite trabajar con cualquier luz (salas oscuras, exteriores) y entregar imágenes cuidadas con acabado profesional; está construyendo su trayectoria y busca colaborar en conciertos, fiestas y eventos («Si quieres que tu evento quede bien contado, escríbeme»).
+- **Preferencias de Álvaro (no reabrir):** sus fotos **nunca recortadas** (siempre enteras, sin `object-fit: cover`), **todas las fotos de la carpeta** (sin descartes), **sin fechas visibles**, y **máxima calidad** de imagen.
 - Pies y metadatos de autor en sus fotos: «depende».
 - **Retrato real:** foto cuadrada, fondo gris (archivo `_OMB0014.jpg`), ya integrada en la web 2.
 
@@ -36,17 +38,18 @@ Datos reales metidos en las 4 webs (email, teléfono, prácticas, software, ingl
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.
-- Retrato en /sobre (polaroid con cinta), miniatura en /para-promotores, JSON-LD y og:image.
-- **Hecho (10/11/2026): fotos reales importadas** con `photos:import` (3000 px, EXIF conservado). Selección: Fiesta Naranja 10 de 22, Supernoventeros 8 de 16, Más trabajos 8 de 15. Descartadas a propósito: `07062025-DSC02979` (casi negra) y `KC PARED 2 (V2) (1)` (póster de desnudo al fondo).
-  - Fiesta Naranja (orden de galería = cronológico por nº DSC): 01=DSC02591, 02=DSC02658, 03=DSC02735, 07=DSC02931 (**portada**), 08=DSC03108, 04=DSC03171, 09=DSC03200, 10=DSC03499, 05=DSC03587, 06=DSC03747. Destacadas: 07, 10, 04, 05.
-  - Supernoventeros: 01=DSC02138, 02=DSC02202 (**portada**), 03=DSC02260, 04=DSC02282, 05=DSC02378, 06=DSC02684, 07=DSC02754, 08=DSC02780. Destacadas: 01, 02, 04, 06.
-  - Más trabajos: 01=DSC09914, 02=DSC00851 (**portada**), 03=DSC00963, 04=DSC00978, 05=DSC01014, 06=_R006961, 07=_R006980, 08=SAVE_20251001_220145. Destacadas: 01, 02, 06.
-  - Pies y alt: **descriptivos de lo que se ve** (sin nombres, artistas ni lugares). Sustituir cuando Álvaro diga quién sale y el momento. Resúmenes de sección siguen como TODO visible.
-  - Fecha de sección = primer día según EXIF (comentado en cada `index.md` como «confirmar»). Lugar: «pendiente».
-  - Rendimiento: la primera foto de evento y de /para-promotores sale con calidad 62 (y ancho 640 añadido); en /para-promotores solo la primera es `eager`. Lighthouse móvil: home P99, evento P98 (LCP 2,41 s), promotores P99 (LCP 1,05 s), /en/ P98. `photos:check` sin errores (avisos: sin autor/copyright en EXIF). `check:js` ok.
-  - Prototipo republicado en el mismo slug (versión `1794337265-4348`, 48 archivos).
-- **Siguiente paso web 2:** pies reales, lugares, resúmenes, bio, tarifas y plazo de entrega (datos de Álvaro).
-- Pendientes de la web 2: tarifas, plazo de entrega y bio (TODO).
+- Retrato en /sobre (polaroid con cinta), JSON-LD y og:image. Páginas: setlist (home), 3 eventos y /sobre.
+- **Hecho (10/11/2026), web 2:**
+  - **Las 53 fotos de la carpeta** importadas con `photos:import` (3000 px, EXIF conservado): Fiesta Naranja 22, Supernoventeros 16, Más trabajos 15. Orden: por nombre de archivo (Fiesta Naranja y Supernoventeros) y por fecha EXIF (Más trabajos).
+  - Portadas: Fiesta Naranja = DSC02931 (confeti), Supernoventeros = DSC02202 (salto chaqueta amarilla), Más trabajos = DSC00851 (dos DJs).
+  - Pies y alt: **descriptivos de lo que se ve** (sin nombres, artistas ni lugares). Sustituir cuando Álvaro diga quién sale. Resúmenes de sección siguen como TODO.
+  - **Sin recortes:** portada de la home (CSS `contain` y shader WebGL `fit` con bandas negras), miniatura «siguiente evento» y transición entre páginas.
+  - **Sin fechas visibles:** quitadas de pies, fichas del setlist y cabecera de evento (siguen en los datos y en el JSON-LD). Lugar sigue como «pendiente».
+  - **Calidad máxima:** `quality 92` y anchos hasta 2560 px (horizontal) / 2000 px (vertical); prototipo con una imagen por foto a ~2000 px. Puede bajar el Lighthouse/LCP: es decisión de Álvaro.
+  - **Página «Para promotores» eliminada** (ES y EN: `para-promotores.astro`, `en/for-promoters.astro`, `PromotersPage.astro`, enlaces del menú y del setlist). El campo `selected` de las fotos ya no se usa. Lighthouse revisa ahora `/sobre/` en su lugar.
+  - Home: «Bis» → «Info» (ES y EN).
+  - /sobre: bio nueva (cercana, a partir de su texto) con texto más grande; quitado el bloque «Herramientas y referencias» y el TODO de cámara.
+- **Siguiente paso web 2:** pies con nombres, lugares y resúmenes de sección (datos de Álvaro).
 
 ## 5. Publicar un prototipo en Claude (lo que funcionó)
 Restricciones del visor de artefactos: rutas relativas, fuentes como data: URI, sin descargas, máx. 256 archivos por publicación y **ningún nombre de archivo o carpeta que empiece por `_`**.
@@ -80,7 +83,6 @@ Herramientas en `herramientas/` del repo:
   - En móvil no se ha recapturado tras el último ajuste.
   - El título 3D «Desde Arganda» ya está arreglado (las paredes lo tapaban).
 - **Web 3:** al filtrar, 8 fotos quedan a unos 245 px (se quería 400).
-- **Web 2:** en móvil, en /para-promotores la primera foto queda bajo el primer pantallazo.
 - **Builds lentos** la primera vez por AVIF (web 1: 11 min). Los siguientes usan caché.
 
 ## 8. Decisiones tomadas (no reabrir)

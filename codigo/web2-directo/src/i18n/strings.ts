@@ -38,7 +38,7 @@ export const T = {
     setlistLabel: 'Setlist',
     setlistSub: 'Fotografía de conciertos, festivales, salas y fiestas. Madrid.',
     filmLabel: 'Fotos del show: desliza o usa las flechas',
-    encore: 'Bis',
+    encore: 'Info',
     photos: (n: number) => `${n} fotos`,
     placePending: 'Lugar: pendiente',
     datePending: 'Fecha: pendiente',
@@ -67,7 +67,7 @@ export const T = {
     setlistLabel: 'Setlist',
     setlistSub: 'Concert, festival, club and party photography. Madrid.',
     filmLabel: 'Photos of the show: swipe or use the arrow keys',
-    encore: 'Encore',
+    encore: 'Info',
     photos: (n: number) => `${n} photos`,
     placePending: 'Venue: pending',
     datePending: 'Date: pending',
@@ -114,13 +114,15 @@ export function chronicleCaption(
   text: string,
   lang: Lang,
 ): string {
-  const head = [venue?.toUpperCase(), city?.toUpperCase(), date ? numDate(date) : undefined].filter(Boolean).join(', ');
+  // Sin fechas visibles (decisión de Álvaro, 10/11/2026)
+  void date;
+  const head = [venue?.toUpperCase(), city?.toUpperCase()].filter(Boolean).join(', ');
   return head ? `${head} — ${text} (${T[lang].credit}: ${PERSON.credit})` : creditCaption(text, lang);
 }
 /** Ficha corta de un evento («Sala, Ciudad · 14.03.26») con «pendiente» donde falte el dato. */
 export function fichaParts(d: { venue?: string; city?: string; date?: Date; mixed?: boolean }, lang: Lang) {
   const t = T[lang];
   const place = d.mixed ? t.mixedPlace : [d.venue, d.city].filter(Boolean).join(', ') || t.placePending;
-  const date = d.mixed ? t.mixedDate : d.date ? ticketDate(d.date) : t.datePending;
+  const date = ''; // sin fechas visibles (decisión de Álvaro)
   return { place, date };
 }
