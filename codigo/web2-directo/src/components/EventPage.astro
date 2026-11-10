@@ -101,25 +101,12 @@ const ficha = fichaParts(d, lang);
                       alt={es ? p.alt : p.alt_en}
                       formats={['webp']}
                       widths={isPortrait(p) ? [400, 600, 1000, 1500, 2000] : [480, 640, 800, 1280, 1920, 2560]}
-                      sizes={isPortrait(p) ? '(min-width: 1024px) 57vh, min(calc(100vw - 32px), 32vh)' : '(min-width: 1024px) min(66vw, 1100px), calc(100vw - 32px)'}
+                      sizes={isPortrait(p) ? '(min-width: 1024px) 57vh, min(calc(100vw - 32px), 32vh)' : '(min-width: 1024px) min(100vw - 96px, 1200px), calc(100vw - 32px)'}
                       quality={92}
                       loading={i === 0 ? 'eager' : 'lazy'}
                       fetchpriority={i === 0 ? 'high' : undefined}
                       decoding="async"
                     />
-                  </div>
-                  <div class="shot__side">
-                    {own ? (
-                      <figcaption class="caption">{creditCaption(es ? p.caption : p.caption_en, lang)}</figcaption>
-                    ) : (
-                      <Caption
-                        venue={p.venue ?? d.venue}
-                        city={p.city ?? d.city}
-                        date={p.date ?? d.date}
-                        text={es ? p.caption : p.caption_en}
-                        lang={lang}
-                      />
-                    )}
                   </div>
                 </figure>
               </li>
@@ -128,8 +115,6 @@ const ficha = fichaParts(d, lang);
         }
       </ol>
     </div>
-
-    <p class="counter" aria-hidden="true"><span class="counter__tape">{t.track} <span data-counter>01</span>/{total}</span></p>
 
     <nav class="next wrap" aria-label={t.next}>
       <a href={ROUTES.event[lang](next.id)} data-astro-prefetch="viewport" class="next__link">
@@ -226,17 +211,15 @@ const ficha = fichaParts(d, lang);
     column-gap: var(--gap);
     align-items: end;
   }
-  .shot__window { grid-column: 1 / 10; width: 100%; }
+  /* Sin pies ni contador (decisión de Álvaro): todas las fotos centradas en el mismo eje */
+  .shot__window { grid-column: 1 / -1; width: 100%; display: flex; justify-content: center; }
   .shot__window :global(picture) { width: 100%; }
   .shot__window :global(img) {
-    width: min(100%, calc(86vh * var(--ar)));
+    width: min(100%, 1200px, calc(86vh * var(--ar)));
     height: auto;
     background: #000;
   }
-  /* verticales pegadas a su pie (a la derecha de su zona) */
-  .shot--portrait .shot__window :global(img) { margin-inline: auto 0; }
-  .shot__side { grid-column: 10 / -1; padding-bottom: 4px; }
-  .shot__side :global(.caption) { font-size: var(--t-14); line-height: 1.6; max-width: var(--measure); color: var(--fg); }
+  .shot__window :global(img) { margin-inline: auto; }
 
   /* Un solo contador, en marcador sobre una tira de cinta; el gel de la foto en pantalla tiñe su borde */
   .counter {
@@ -304,10 +287,10 @@ const ficha = fichaParts(d, lang);
     }
     .shot { flex: 0 0 calc(100vw - 2 * var(--margin)); scroll-snap-align: start; }
     .shot figure { display: block; }
-    .shot__window :global(img) { width: min(100%, calc(48vh * var(--ar))); }
-    .shot--portrait .shot__window :global(img) { margin-inline: 0; }
-    .shot__side { margin-top: 12px; }
-    .counter { bottom: 12px; }
+    /* cada foto en una caja de la misma altura, centrada: el carrusel queda alineado */
+    .shot__window { height: 48vh; align-items: center; }
+    .shot__window :global(picture) { display: flex; justify-content: center; }
+    .shot__window :global(img) { width: auto; max-width: 100%; max-height: 48vh; }
     .next { padding-block: 48px; }
     .next__link { grid-template-columns: 1fr; grid-template-areas: 'label' 'img' 'title'; }
     .next__title { font-size: var(--t-31); }
