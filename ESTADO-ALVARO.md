@@ -45,7 +45,8 @@ Datos reales metidos en las 4 webs (email, teléfono, prácticas, software, ingl
   - Pies y alt: **descriptivos de lo que se ve** (sin nombres, artistas ni lugares). Sustituir cuando Álvaro diga quién sale. Resúmenes de sección siguen como TODO.
   - **Sin recortes:** portada de la home (CSS `contain` y shader WebGL `fit` con bandas negras), miniatura «siguiente evento» y transición entre páginas.
   - **Sin fechas visibles:** quitadas de pies, fichas del setlist y cabecera de evento (siguen en los datos y en el JSON-LD). Lugar sigue como «pendiente».
-  - **Calidad máxima:** WebP `quality 92` y anchos hasta 2560 px (horizontal) / 2000 px (vertical). Sin AVIF: a este tamaño tardaba >1 h en compilar y Cloudflare Pages corta a los 20 min (con WebP, ~1 min); prototipo con una imagen por foto a ~2000 px. Puede bajar el Lighthouse/LCP: es decisión de Álvaro.
+  - **Calidad máxima:** WebP `quality 92` y anchos hasta 2560 px (horizontal) / 2000 px (vertical). Sin AVIF: a este tamaño tardaba >1 h en compilar y Cloudflare Pages corta a los 20 min (con WebP, ~1 min); prototipo con una imagen por foto a ~2000 px. Anchos pequeños (400–640 px) solo para móvil, misma calidad. Lighthouse móvil: home P96 (LCP 2,5–2,8 s, por encima del presupuesto de 2,5 s por la calidad máxima, decisión de Álvaro), evento P97 (2,42 s), /sobre P99, /en/ P97.
+  - Prototipo republicado en el mismo slug: versión `1794339139-2a9b` (73 archivos, una imagen por foto a ~2000 px).
   - **Página «Para promotores» eliminada** (ES y EN: `para-promotores.astro`, `en/for-promoters.astro`, `PromotersPage.astro`, enlaces del menú y del setlist). El campo `selected` de las fotos ya no se usa. Lighthouse revisa ahora `/sobre/` en su lugar.
   - Home: «Bis» → «Info» (ES y EN).
   - /sobre: bio nueva (cercana, a partir de su texto) con texto más grande; quitado el bloque «Herramientas y referencias» y el TODO de cámara.
