@@ -78,9 +78,10 @@ Ahora (mismo criterio que la web 2):
     - **BUG ARREGLADO (10/11/2026, 22:30):** la primera versión usaba `sharp.gamma(2.2)` para reducir «en luz lineal», pero sharp la hace a 8 bits → negros aplastados y con manchas en todas las versiones web (el original abierto suelto se veía bien). Quitada; ahora 16 bits. Comprobado: las 53 versiones tienen el mismo brillo medio que el original (máx. 0,25/255 de diferencia; antes hasta ~9). Quitado también el oscurecido de entrada (`filter: brightness(0.6)`) de las fotos en `global.css`: ningún efecto toca ya el color de una foto. **No volver a usar `.gamma()` en sharp.**
     - **Publicado y comprobado en Cloudflare** (commit `f3167b8`, build ~12 min, primero sin caché): https://alvarorodriguezeventos.pages.dev sirve `/fotos/` (versiones y originales, p. ej. `mas-trabajos/13-original.jpg` 4000×6000 bien orientado). Sin «N fotos», lugar, fechas ni TODO.
     - Prototipo de Claude: una versión por foto de 2400 px (JPEG 95 4:4:4), sin originales (límite de 64 MiB por publicación; publicado en 3 tandas).
-  - Prototipo republicado en el mismo slug: versión `1794346654-9a6f` (73 archivos, una imagen por foto a ~2000 px).
+  - Prototipo republicado en el mismo slug: versión `1794348554-5fe1` (73 archivos, una imagen por foto a ~2000 px).
   - **Página «Para promotores» eliminada** (ES y EN: `para-promotores.astro`, `en/for-promoters.astro`, `PromotersPage.astro`, enlaces del menú y del setlist). El campo `selected` de las fotos ya no se usa. Lighthouse revisa ahora `/sobre/` en su lugar.
   - Home: «Bis» → «Info» (ES y EN).
+  - /sobre, «Qué fotografío» (texto de Álvaro, 10/11/2026): «Conciertos en sala y teatro, festivales, fiestas, club y eventos. También me interesan las bodas, el fotoperiodismo, la fotografía de calle y el reportaje.» (interés, no experiencia).
   - /sobre: bio nueva (cercana, a partir de su texto) con texto más grande; quitado el bloque «Herramientas y referencias» y el TODO de cámara. Retrato más grande (polaroid hasta 360 px). En escritorio ≥ 1100 px la ficha (Qué fotografío, Formación, Contacto) va a la derecha de la bio; en tablet y móvil, debajo.
 - **Siguiente paso web 2:** si Álvaro quiere, pies con nombres, lugares y un resumen por sección (opcionales; ya no hay ningún TODO visible en la web).
 
