@@ -65,6 +65,7 @@ import {
 import { TextureLoader } from './textures';
 import { ExperienceUI } from './ui';
 import { ViajeSound } from './sound';
+import { NativeLayer, type Quad } from './native';
 import {
   DIM_FRAG,
   DUST_FRAG,
@@ -110,7 +111,11 @@ interface PhotoObj {
   base: { p: Vector3; q: Quaternion; s: Vector3 };
   mos: { p: Vector3; q: Quaternion; s: Vector3 };
   tex: Texture | null;
+  smallTex: Texture | null;
   hires: boolean;
+  /** versión grande cargada como textura (url y ancho), elegida por el tamaño real en pantalla */
+  hiresUrl: string | null;
+  hiresW: number;
   loading: boolean;
   revealT: number; // héroe: -1 sin empezar · 0..REVEAL_TIME
   fadeIn: number; // 0..1
@@ -182,7 +187,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   const high = tier === 'high';
   const touch = matchMedia('(hover: none)').matches;
   const mobile = touch || innerWidth / Math.max(innerHeight, 1) < 1;
-  const dprCap = high ? 1.75 : 1.25;
+  const dprCap = high ? 2 : 1.25;
   const sound = new ViajeSound();
 
   /* ───────── renderer ───────── */
@@ -196,6 +201,8 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   canvas.tabIndex = -1;
   Object.assign(canvas.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', display: 'block' });
   root.append(canvas);
+  /** foto real (<img srcset>) encima del lienzo cuando la cámara está quieta o en el lightbox */
+  const native = new NativeLayer(root);
 
   const scene = new Scene();
   const heroScene = new Scene();
@@ -463,7 +470,10 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       base: { p: slot.pos.clone(), q: slot.quat.clone(), s: new Vector3(W, H, 1) },
       mos: { p: new Vector3(), q: new Quaternion(), s: new Vector3(1, 1, 1) },
       tex: null,
+      smallTex: null,
       hires: false,
+      hiresUrl: null,
+      hiresW: 0,
       loading: false,
       revealT: -1,
       fadeIn: 0,
@@ -864,6 +874,9 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   let width = 1;
   let height = 1;
 
+  /** 0 = viajando · 1 = cámara quieta delante de una foto (sin balanceo ni parallax: la foto queda clavada) */
+  let restW = 0;
+  let restSince = 0;
   let lbOpen = false;
   let lbIndex = -1;
   let lbT = 0;
@@ -993,13 +1006,14 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     return at < z.firstStop ? z.firstStop - at : at > z.lastStop ? at - z.lastStop : 0;
   };
   const ensureTex = (p: PhotoObj) => {
-    if (p.tex || p.loading) return;
+    if (p.smallTex || p.loading) return;
     p.loading = true;
     loader
       .load(p.slot.photo.srcSmall, zoneDist(p, ts) * 10 + p.slot.index * 0.01)
       .then((t) => {
         if (disposed) return;
-        if (!p.hires) setTex(p, t);
+        p.smallTex = t;
+        if (!p.hiresUrl || !p.tex) setTex(p, t);
         if (p.slot.chapter === 0) {
           firstLoaded++;
           o.onProgress?.(firstLoaded / firstChapter.length);
@@ -1012,17 +1026,57 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         }
       });
   };
+  /** ancho en píxeles físicos del lienzo que ocupa la foto en su parada (para elegir la textura justa) */
+  const PN: Pose = { p: new Vector3(), l: new Vector3() };
+  const neededPx = (p: PhotoObj) => {
+    const bufW = width * renderer.getPixelRatio();
+    if (p.slot.stop < 0) return bufW * 0.3;
+    stopPose(p.slot.stop, PN);
+    const d = Math.max(PN.p.distanceTo(p.slot.pos), 0.5);
+    return (p.slot.width / (2 * d * tanHalf() * camera.aspect)) * bufW;
+  };
+  const maxTex = Math.min(renderer.capabilities.maxTextureSize || 4096, 4096);
   const ensureHires = (p: PhotoObj) => {
-    if (p.hires || p.slot.photo.src === p.slot.photo.srcSmall) return;
+    const vs = p.slot.photo.variants;
+    let url = p.slot.photo.src;
+    let w = 1600;
+    if (vs && vs.length) {
+      const need = neededPx(p);
+      const fit = vs.filter(([vw]) => vw <= maxTex && vw <= 3200);
+      const pickV = fit.find(([vw]) => vw >= need) ?? fit[fit.length - 1] ?? vs[0];
+      [w, url] = pickV;
+    }
+    if (url === p.slot.photo.srcSmall) return;
+    if (p.hires && (url === p.hiresUrl || w <= p.hiresW)) return;
+    const prevUrl = p.hiresUrl;
     p.hires = true;
+    p.hiresUrl = url;
+    p.hiresW = w;
     loader
-      .load(p.slot.photo.src, -1)
+      .load(url, -1)
       .then((t) => {
-        if (disposed) return;
+        if (disposed || p.hiresUrl !== url) return;
         setTex(p, t);
         if (lbOpen && lbIndex === p.slot.index) heroMat.uniforms.uTex.value = t;
+        if (prevUrl && prevUrl !== url) loader.release(prevUrl);
       })
-      .catch(() => (p.hires = false));
+      .catch(() => {
+        if (p.hiresUrl === url) {
+          p.hires = false;
+          p.hiresUrl = null;
+          p.hiresW = 0;
+        }
+      });
+  };
+  /** vuelve a la textura pequeña y libera la grande (fotos lejanas): la memoria de GPU no crece al viajar */
+  const dropHires = (p: PhotoObj) => {
+    if (!p.hiresUrl || !p.smallTex) return;
+    const url = p.hiresUrl;
+    p.hires = false;
+    p.hiresUrl = null;
+    p.hiresW = 0;
+    setTex(p, p.smallTex);
+    loader.release(url);
   };
   const setTex = (p: PhotoObj, t: Texture) => {
     p.tex = t;
@@ -1032,7 +1086,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   };
   photos.forEach((p) => ensureTex(p));
   // la héroe del capítulo 1 se ve ya (desenfocada) detrás de la intro: en alta en cuanto se pueda
-  ensureHires(photos[zones[0].hero]);
+  queueMicrotask(() => !disposed && ensureHires(photos[zones[0].hero]));
 
   /* ───────── navegación ───────── */
   const curStop = () => clamp(Math.round(cs), 0, nStops);
@@ -1438,6 +1492,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   let mosaic = 0;
   const qTilt = new Quaternion();
   const layoutPhotos = (dt: number) => {
+    const restSlot = restW > 0 && cs <= nStops - 1 ? stops[clamp(Math.round(cs), 0, nStops - 1)].slot : -1;
     const px = hasPointer ? pointerS.x - 0.5 : 0;
     const py = hasPointer ? pointerS.y - 0.5 : 0;
     photos.forEach((p, i) => {
@@ -1453,12 +1508,16 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         p.mesh.scale.copy(p.base.s);
         p.mesh.quaternion.copy(p.base.q);
         p.mesh.position.copy(p.base.p);
-        if (p.hover > 0.001) {
-          p.mesh.position.addScaledVector(p.slot.normal, p.hover * 0.35);
-          qTilt.setFromAxisAngle(UP, -px * 0.2 * p.hover);
+        const rk = i === restSlot ? smooth(restW) : 0;
+        const hv = p.hover * (1 - rk);
+        if (hv > 0.001) {
+          p.mesh.position.addScaledVector(p.slot.normal, hv * 0.35);
+          qTilt.setFromAxisAngle(UP, -px * 0.2 * hv);
           p.mesh.quaternion.multiply(qTilt);
           void py;
         }
+        // en reposo, paralela al plano de la cámara: en pantalla es un rectángulo exacto (capa nativa a píxel)
+        if (rk > 0) p.mesh.quaternion.slerp(camera.quaternion, rk);
       }
     });
   };
@@ -1500,16 +1559,27 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     const px = hasPointer ? pointerS.x - 0.5 : 0;
     const py = hasPointer ? pointerS.y - 0.5 : 0;
 
+    // reposo: la cámara se ha parado en una parada (no en la hoja final)
+    const settled =
+      started && !lbOpen && lbT === 0 && !lastInput && cs === ts && Math.abs(vel) < 0.02 && cs <= nStops - 1 && introK < 0.001 && focus > 0.999;
+    if (settled) {
+      if (!restSince) restSince = now;
+      restW = Math.min(1, restW + dt / 0.35);
+    } else {
+      restSince = 0;
+      restW = Math.max(0, restW - dt / 0.15);
+    }
+    const free = 1 - smooth(restW);
     // cámara
     poseAt(cs);
     if (introK > 0.0001) camPos.lerp(camLook, 0.22 * introK); // match-cut: la héroe llena la pantalla detrás de la intro
     camera.position.copy(camPos);
-    camera.position.y += Math.sin(uTime.value * 0.6) * 0.012;
+    camera.position.y += Math.sin(uTime.value * 0.6) * 0.012 * free;
     tmpV.copy(camLook);
     camera.lookAt(tmpV);
     // parallax suave con el ratón (respiración de cámara en mano)
-    camera.rotateY(-px * 0.05);
-    camera.rotateX(-py * 0.035);
+    camera.rotateY(-px * 0.05 * free);
+    camera.rotateX(-py * 0.035 * free);
     camera.updateMatrixWorld();
     camera.getWorldDirection(camFwd);
     shared.uCam.value.copy(camera.position);
@@ -1552,6 +1622,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       const inWindow = mosaic > 0.001 || (cs > z.firstStop - 1.6 && cs < z.lastStop + 1.6) || (!started && p.slot.chapter === 0);
       const u = p.mesh.material.uniforms;
       if (!inWindow) {
+        if (p.hiresUrl && !(lbIndex === p.slot.index && (lbOpen || lbT > 0))) dropHires(p);
         p.mesh.visible = false;
         if (p.refl) p.refl.visible = false;
         if (p.stamp) p.stamp.visible = false;
@@ -1566,6 +1637,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         activeIdx = p.slot.index;
       }
       if (p.slot.stop >= 0 && Math.abs(cs - p.slot.stop) < 1.3) ensureHires(p);
+      else if (p.hiresUrl && !(lbIndex === p.slot.index && (lbOpen || lbT > 0)) && (p.slot.stop < 0 ? mosaic < 0.01 : Math.abs(cs - p.slot.stop) > 3)) dropHires(p);
       const isHeroSrc = (lbOpen || lbT > 0) && lbIndex === p.slot.index;
       p.mesh.visible = !isHeroSrc;
 
@@ -1796,6 +1868,50 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     const dim = ease(lbT) * (lbDir < 0 && lbT < 0.15 ? lbT / 0.15 : 1);
     postMat.uniforms.uDim.value = dim;
 
+    // capa nativa: la foto real del navegador, encajada a píxel, en reposo y en el lightbox
+    {
+      let mesh: Mesh<PlaneGeometry, ShaderMaterial> | null = null;
+      let photo: PhotoObj | null = null;
+      let show = false;
+      if (hero.visible && lbIndex >= 0) {
+        photo = photos[lbIndex];
+        mesh = hero;
+        show = lbOpen && lbT >= 1 && lbDir === 0 && lbSwap == null && lbFade >= 1;
+      } else if (started && mosaic < 0.001 && cs <= nStops - 1) {
+        const k = clamp(Math.round(cs), 0, nStops - 1);
+        if (Math.abs(cs - k) < 0.5) {
+          photo = photos[stops[k].slot];
+          mesh = photo.mesh;
+          const u = mesh.material.uniforms;
+          show = restW >= 0.999 && mesh.visible && u.uReveal.value >= 1 && u.uFade.value >= 0.999 && photo.develop >= 1 && u.uSoft.value < 0.002;
+        }
+      }
+      let q: Quad | null = null;
+      if (mesh && photo) {
+        const mx = mesh.material.uniforms.uMargin.value as Vector2;
+        mesh.updateMatrixWorld();
+        const qx: Quad['x'] = [0, 0, 0, 0];
+        const qy: Quad['y'] = [0, 0, 0, 0];
+        const lc: [number, number][] = [
+          [-0.5 + mx.x, 0.5 - mx.y],
+          [0.5 - mx.x, 0.5 - mx.y],
+          [0.5 - mx.x, -0.5 + mx.y],
+          [-0.5 + mx.x, -0.5 + mx.y],
+        ];
+        let behind = false;
+        lc.forEach(([lx, ly], i) => {
+          tmpV.set(lx, ly, 0).applyMatrix4(mesh!.matrixWorld).project(camera);
+          if (tmpV.z > 1 || tmpV.z < -1) behind = true;
+          qx[i] = (tmpV.x * 0.5 + 0.5) * width;
+          qy[i] = (-tmpV.y * 0.5 + 0.5) * height;
+        });
+        if (!behind) q = { x: qx, y: qy };
+        // se prepara (descarga y decodifica) antes de llegar, con su ancho real en pantalla
+        if (q) native.set(photo.slot.photo, Math.max(...qx) - Math.min(...qx));
+      }
+      native.update(q, show, dt);
+    }
+
     if (dust) dust.material.uniforms.uCam.value.copy(camera.position);
 
     // post
@@ -1869,6 +1985,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         lastInput = 0;
       },
       stops: nStops,
+      open: (i: number) => openIndex(i),
       cam: () => [camera.position.x, camera.position.y, camera.position.z, camLook.x, camLook.y, camLook.z],
       street: () => street?.debug,
       zones: zones.map((z) => [z.firstStop, z.lastStop]),
@@ -1941,6 +2058,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();
+      native.destroy();
       ui.destroy();
     },
     goToChapter(n: number) {

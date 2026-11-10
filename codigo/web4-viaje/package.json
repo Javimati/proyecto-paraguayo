@@ -4,10 +4,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "node scripts/build-photos.mjs && astro dev",
+    "build": "node scripts/build-photos.mjs && astro build && node scripts/prune-dist.mjs",
     "preview": "astro preview",
     "photos:check": "node scripts/photos-check.mjs",
+    "photos:import": "node scripts/photos-import.mjs",
+    "photos:build": "node scripts/build-photos.mjs",
     "check:js": "node scripts/check-js-budget.mjs",
     "check:lh": "node scripts/check-lighthouse.mjs",
     "check:budgets": "npm run check:js && npm run check:lh"

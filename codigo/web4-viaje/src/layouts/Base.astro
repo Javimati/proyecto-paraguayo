@@ -31,7 +31,7 @@ const esUrl = lang === 'es' ? canonical : altUrl;
 const enUrl = lang === 'en' ? canonical : altUrl;
 let og: string | undefined;
 if (ogImage) {
-  const img = await getImage({ src: ogImage, width: 1200, format: 'jpg', quality: 78 });
+  const img = await getImage({ src: ogImage, width: 1200, format: 'jpg', quality: 90 });
   og = new URL(img.src, site).href;
 }
 const person = {

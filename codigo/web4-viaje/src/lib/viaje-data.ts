@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { getImage } from 'astro:assets';
+import { foto } from './fotos';
 import { T, wireCaption, type Lang } from '../i18n/strings';
 
 export type Chapter = CollectionEntry<'fotos'>;
@@ -19,6 +19,10 @@ export type ViajeData = {
       id: string;
       src: string;
       srcSmall: string;
+      /** todas las versiones nativas (ancho real → URL), la última es el original */
+      srcset: string;
+      variants: [number, string][];
+      original: string;
       w: number;
       h: number;
       alt: string;
@@ -30,7 +34,6 @@ export type ViajeData = {
 
 export type PhotoView = ViajeData['chapters'][number]['photos'][number] & {
   srcMid: string;
-  srcset: string;
   raw: RawPhoto;
   chapterId: string;
   index: number;
@@ -61,17 +64,15 @@ export async function getChapterViews(lang: Lang): Promise<ChapterView[]> {
       const id = chapterSlug(c);
       const photos = await Promise.all(
         c.data.photos.map(async (p, i): Promise<PhotoView> => {
-          const [small, mid, large] = await Promise.all(
-            [640, 1000, 1600].map((width) =>
-              getImage({ src: p.file, width: Math.min(width, p.file.width), format: 'webp', quality: 74 }),
-            ),
-          );
+          const f = foto(c.id, p.file);
           return {
             id: `${id}-${String(i + 1).padStart(2, '0')}`,
-            src: large.src,
-            srcMid: mid.src,
-            srcSmall: small.src,
-            srcset: `${small.src} 640w, ${mid.src} 1000w, ${large.src} 1600w`,
+            src: f.src,
+            srcMid: f.src,
+            srcSmall: f.small,
+            srcset: f.srcset,
+            variants: f.variants,
+            original: f.original,
             w: p.file.width,
             h: p.file.height,
             alt: lang === 'es' ? p.alt : p.alt_en,
@@ -111,10 +112,13 @@ export async function getViajeData(lang: Lang): Promise<ViajeData> {
       kicker: c.kicker,
       title: c.title,
       text: c.text,
-      photos: c.photos.map(({ id, src, srcSmall, w, h, alt, caption, dominant }) => ({
+      photos: c.photos.map(({ id, src, srcSmall, srcset, variants, original, w, h, alt, caption, dominant }) => ({
         id,
         src,
         srcSmall,
+        srcset,
+        variants,
+        original,
         w,
         h,
         alt,

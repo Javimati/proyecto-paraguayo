@@ -130,8 +130,9 @@ export function wireDate(d: Date): string {
 }
 
 /** Pie de agencia: «MADRID, 14/03/2026 — Texto. (FOTO: Álvaro Rodríguez)» */
-export function wireCaption(place: string, date: Date, text: string, lang: Lang): string {
-  return `${place.toUpperCase()}, ${wireDate(date)} — ${text} (${T[lang].credit}: ${PERSON.credit})`;
+export function wireCaption(place: string | undefined, date: Date | undefined, text: string, lang: Lang): string {
+  const head = [place?.toUpperCase(), date ? wireDate(date) : ''].filter(Boolean).join(', ');
+  return `${head ? `${head} — ` : ''}${text} (${T[lang].credit}: ${PERSON.credit})`;
 }
 
 export function otherLang(lang: Lang): Lang {

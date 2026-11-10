@@ -9,7 +9,7 @@ Eres el equipo web del portfolio de **Álvaro Rodríguez Valverde** (fotógrafo,
 2. El código de cada web está en `codigo/web1-fotoperiodismo`, `codigo/web2-directo`, `codigo/web3-portfolio` y `codigo/web4-viaje`. Trabaja solo en la carpeta de la web de la tarea.
 3. Al terminar, haz **commit y push a `main`** con los cambios de código y con `ESTADO-ALVARO.md` actualizado en el mismo commit: qué cambió, versión publicada, archivos entregados y pendientes nuevos o resueltos. Usa un mensaje de commit claro en español. Si el push falla, entrega el `ESTADO-ALVARO.md` actualizado como archivo y explica por qué.
 4. Los prototipos visibles en Claude se republican **en el mismo enlace** (slug en el ESTADO), nunca como artefacto nuevo. Los scripts para generarlos están en `herramientas/` (ver ESTADO §5).
-5. Las fotos reales están en el PC de Marlon (ruta en el ESTADO §2). Si hacen falta, pide a Marlon que añada esa carpeta con «Añadir carpeta» en la app de escritorio y cópialas con `device_stage_files`. Web 2: calidad nativa, los originales SÍ van al repo (los copia `npm run photos:import`; ver ESTADO). Resto de webs: solo versiones reducidas.
+5. Las fotos reales están en el PC de Marlon (ruta en el ESTADO §2). Si hacen falta, pide a Marlon que añada esa carpeta con «Añadir carpeta» en la app de escritorio y cópialas con `device_stage_files`. Webs 2 y 4: calidad nativa, los originales SÍ van al repo (los copia `npm run photos:import`; ver ESTADO). Webs 1 y 3: solo versiones reducidas.
 
 ## Cómo trabajar gastando pocos tokens
 - **Un chat = una tarea concreta en una sola web.**
@@ -24,4 +24,4 @@ Eres el equipo web del portfolio de **Álvaro Rodríguez Valverde** (fotógrafo,
 - La foto manda: ningún efecto altera el color de una foto en reposo.
 - Accesibilidad AA, respetar `prefers-reduced-motion`, sin destellos de más de 3 por segundo.
 - Antes de publicar o hacer push de una web: build sin errores, `npm run check:js`, `npm run photos:check` y Lighthouse móvil ≥ 90.
-- No subir al repo `node_modules`, `dist`, `public/fotos` ni zips. Fotos originales: solo en la web 2 (calidad nativa).
+- No subir al repo `node_modules`, `dist`, `public/fotos` ni zips. Fotos originales: solo en las webs 2 y 4 (calidad nativa).

@@ -12,7 +12,11 @@ const data = await getViajeData(lang);
 const views = await getChapterViews(lang);
 const chapters = await getChapters();
 const firstPhoto = chapters[0].data.photos[0];
-const heroSmall = data.chapters[0]?.photos[0]?.srcSmall;
+const first3d = data.chapters[0]?.photos[0];
+const heroSmall = first3d?.srcSmall;
+// misma elección que Historia.astro: la primera destacada (o la primera de todas)
+const allViews = views.flatMap((c) => c.photos);
+const hero2d = allViews.find((p) => p.featured) ?? allViews[0];
 const site = Astro.site!;
 const imageObjects = views
   .flatMap((c) => c.photos)
@@ -20,7 +24,9 @@ const imageObjects = views
   .map((p) => ({
     '@context': 'https://schema.org',
     '@type': 'ImageObject',
-    contentUrl: new URL(p.src, site).href,
+    contentUrl: new URL(p.original, site).href,
+    width: p.w,
+    height: p.h,
     caption: p.caption,
     creator: { '@type': 'Person', name: PERSON.name },
     creditText: PERSON.credit,
@@ -43,6 +49,7 @@ const description =
   jsonld={imageObjects}
 >
   <Fragment slot="head">
+    {hero2d && <link rel="preload" as="image" imagesrcset={hero2d.srcset} imagesizes="(min-width: 900px) min(1100px, 72vw), 92vw" fetchpriority="high" />}
     {/* Primer frame: decide antes de pintar si habrá intro (mismos checks baratos que src/scripts/caps.ts;
         el sondeo de WebGL2 lo hace home.ts y, si falla, retira la intro). Así el visor aparece desde el HTML
         y nunca se ve la escena 3D antes que él. */}
@@ -82,7 +89,7 @@ const description =
       heroSmall && (
         <div class="intro-pre" aria-hidden="true">
           <img class="intro-pre__b" src={heroSmall} alt="" decoding="async" loading="lazy" />
-          <img class="intro-pre__s" src={heroSmall} alt="" decoding="async" loading="lazy" />
+          <img class="intro-pre__s" src={first3d.src} srcset={first3d.srcset} sizes="100vw" alt="" decoding="async" loading="lazy" />
         </div>
       )
     }

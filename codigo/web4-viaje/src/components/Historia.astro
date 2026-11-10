@@ -77,6 +77,8 @@ function slot(p: PhotoView, i: number) {
               <span class="index__thumb">
                 <img
                   src={c.photos[0].srcSmall}
+                  srcset={c.photos[0].srcset}
+                  sizes="(min-width: 900px) 15vw, 45vw"
                   width={c.photos[0].w}
                   height={c.photos[0].h}
                   alt=""
@@ -296,7 +298,6 @@ function slot(p: PhotoView, i: number) {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: saturate(0.85) brightness(0.85);
     transition:
       filter 0.3s,
       scale 0.5s var(--ease-out);

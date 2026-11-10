@@ -44,6 +44,18 @@ El vacío oscuro entre estaciones es ahora una **calle de Madrid de noche** (`sr
 - Gancho de pruebas `window.__viaje.go(n)` (solo con `__VIAJE_NO_FPS_GUARD`) para capturas sin animar.
 - Comprobado: build ok, `check:js` 166 KB/350, `photos:check` ok, Lighthouse móvil 99/100/100/100 en `/`, `/editores/`, `/en/`. Capturas escritorio 1280×800 y móvil 390×844 (renderizado por software, ~1–2 fps: **fps reales en GPU sin medir**).
 
+## 3c. Web 4 — fotos a calidad nativa (10/11/2026, decisión de Marlon; prototipo publicado 1794347614-4ad4)
+Antes: WebP **calidad 74** hasta 1600 px; en el 3D la foto era una textura de ≤1600 px dentro de un lienzo limitado a 1,75× (blanda en retina/4K), con balanceo y parallax que nunca la dejaban clavada a píxel; el lightbox ampliaba esa textura.
+Ahora (mismo criterio que la web 2):
+- `npm run photos:import -- "<carpeta>" <capítulo> [--featured N]` copia los **originales byte a byte** al capítulo (`src/content/fotos/NN-…/NN.jpg`). `place` y `date` pasan a opcionales (no se inventan).
+- `scripts/build-photos.mjs` (en cada `build`/`dev`): JPEG 95, color 4:4:4, Lanczos, sRGB incrustado, EXIF conservado, 640–3200 px + original (`public/fotos/`, fuera del repo; caché en `node_modules/.astro/fotos`). `scripts/prune-dist.mjs` quita lo que Astro copiaba sin usar.
+- 2D, /editores, /sobre: srcset/sizes reales; precarga de la foto LCP; **/editores enlaza al original** de cada foto; JSON-LD apunta al original; fuera el oscurecido permanente de las miniaturas del índice.
+- **Viaje 3D:** al pararse ante una foto (y en el lightbox) se pone encima la **foto real del navegador** (`src/experience/native.ts`), encajada a píxel físico. En reposo la foto activa queda paralela al plano de cámara y se quitan balanceo y parallax para que sea un rectángulo exacto. Comprobado en navegador: 1× → posiciones enteras, 2× → medio píxel; la capa coincide con la foto 3D. Texturas 3D elegidas por su tamaño real en pantalla (hasta 3200 px) y liberadas al alejarse (memoria de GPU estable). Lienzo hasta 2× en gama alta.
+- Lighthouse móvil con fotos de muestra: rendimiento 91–97 (aprueba ≥ 90), pero **LCP 2,4–3,4 s** según la pasada (antes 1,8 s): la foto LCP es ahora JPEG 95 (800 px, 82 KB) y compite con las miniaturas del índice a calidad completa. Por encima del presupuesto de 2,5 s: precio de la calidad máxima, igual que la web 2. Con los originales reales pesará más. Si algún día se quiere bajar: miniaturas del índice con menos calidad o diferidas.
+- `build-photos` (webs 2 y 4) ya borra de la caché las versiones que no tocan: si se cambiaba una foto por otra más pequeña, se seguían sirviendo las versiones grandes de la foto anterior.
+- Prototipo en Claude: 2 versiones por foto (640 y la mayor ≤ 2400 px) con `herramientas/preview-fotos.py` (el visor admite 256 archivos); la calidad nativa completa está en Cloudflare.
+- **Negros en bandas:** la web 4 hereda el arreglo de la web 2 (sin `.gamma()`, reducción a 16 bits, `VERSION v2-q95-444-rgb16`). Comprobado en `fiesta-naranja/12`: mismo brillo que una reducción de referencia (diferencia media 1,5/255; con la gamma de 8 bits era 7/255 y los negros salían aplastados).
+
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.
@@ -79,6 +91,7 @@ Herramientas en `herramientas/` del repo:
 2. `python3 tools/fix-underscore.py entregables/<nombre>` → renombra `_astro` a `x_astro`.
 3. Webs 2 y 3: `unify-loupe.py`, luego `one-per-photo.py <dir> 1200` y `reduce-preview.py <dir> 1200` → una imagen por foto (si no, más de 256 archivos).
 4. `font-display:optional` → `swap` en el preview (si no, en el visor no carga la Permanent Marker).
+4b. Webs con fotos nativas en `/fotos/` (2 y 4): `python3 herramientas/preview-fotos.py <preview> <dist> 2400` → 2 versiones por foto y todas las rutas relativas (también las del JSON del viaje).
 5. Web 4: reescribir las rutas del JSON `"/x_astro/` → `"./x_astro/` (o `../` en `/en/`).
 6. Probar en local (http.server + Playwright) y publicar con `publish_files` (mismo slug, `base_version` de `get_artifact`, mode replace o patch).
 
@@ -111,5 +124,5 @@ Herramientas en `herramientas/` del repo:
 ## 8. Decisiones tomadas (no reabrir)
 - Presupuestos: LCP < 2,5 s, CLS < 0,05, INP < 200 ms, JS inicial < 90 KB gzip (web 4: escena 3D diferida < 350 KB), Lighthouse ≥ 90.
 - Un único sistema de animación por web. Lenis solo en escritorio. Sin ScrollTrigger si no se usa.
-- Sin marca de agua. Crédito en pies y JSON-LD; Astro quita el EXIF de las imágenes optimizadas.
+- Sin marca de agua. Crédito en pies y JSON-LD. Webs 2 y 4: las versiones conservan el EXIF (build-photos).
 - Las fotos en WebGL se pintan sin iluminación, sin tone mapping ni grano.

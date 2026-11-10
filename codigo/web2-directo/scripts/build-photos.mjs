@@ -54,6 +54,10 @@ async function one(slug, file) {
   const rotated = (meta.orientation ?? 1) >= 5;
   const w = rotated ? meta.height : meta.width;
   const jobs = [];
+  // fuera las versiones que ya no tocan (p. ej. se cambió la foto por otra más pequeña): si no, se servirían
+  // versiones grandes de la foto ANTERIOR
+  const expected = new Set([...WIDTHS.filter((x) => x < w).map((x) => `${base}-${x}.jpg`), `${base}-original.jpg`]);
+  for (const f of await readdir(dir)) if (f.startsWith(`${base}-`) && !expected.has(f)) await rm(path.join(dir, f));
 
   for (const width of WIDTHS.filter((x) => x < w)) {
     const out = path.join(dir, `${base}-${width}.jpg`);

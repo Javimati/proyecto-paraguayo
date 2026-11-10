@@ -19,7 +19,9 @@ const site = Astro.site!;
 const jsonld = picks.map((p) => ({
   '@context': 'https://schema.org',
   '@type': 'ImageObject',
-  contentUrl: new URL(p.src, site).href,
+  contentUrl: new URL(p.original, site).href,
+  width: p.w,
+  height: p.h,
   caption: p.caption,
   creator: { '@type': 'Person', name: PERSON.name },
   creditText: PERSON.credit,
@@ -37,6 +39,7 @@ const jsonld = picks.map((p) => ({
   page="editors"
   jsonld={jsonld}
 >
+  {picks[0] && <link slot="head" rel="preload" as="image" imagesrcset={picks[0].srcset} imagesizes="(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw" fetchpriority="high" />}
   <main id="main" tabindex="-1" class="ed wrap">
     <header class="ed__head">
       <div class="ed__who">
@@ -71,13 +74,16 @@ const jsonld = picks.map((p) => ({
                     width={p.w}
                     height={p.h}
                     alt={p.alt}
-                    loading={i < 3 ? 'eager' : 'lazy'}
+                    loading={i === 0 ? 'eager' : 'lazy'}
                     fetchpriority={i === 0 ? 'high' : undefined}
                     decoding="async"
                   />
                 </div>
                 <figcaption class="mono">{p.caption}</figcaption>
               </figure>
+              <a class="ed__orig mono" href={p.original} target="_blank" rel="noopener">
+                {es ? 'Original' : 'Original'} · {p.w}×{p.h}
+              </a>
               <button
                 type="button"
                 class="ed__copy mono"
@@ -143,6 +149,18 @@ const jsonld = picks.map((p) => ({
     width: auto;
     max-width: 100%;
     object-fit: contain;
+  }
+  .ed__orig {
+    display: inline-block;
+    margin: 6px 12px 0 0;
+    font-size: 0.8125rem;
+    color: var(--tenue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .ed__orig:hover,
+  .ed__orig:focus-visible {
+    color: var(--peaking);
   }
   figcaption {
     margin-top: 10px;

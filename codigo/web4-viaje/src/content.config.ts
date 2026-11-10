@@ -24,8 +24,9 @@ const fotos = defineCollection({
             alt_en: z.string().min(10, 'Falta el alt (EN)'),
             caption: z.string().min(10, 'Falta el pie de foto (ES)'),
             caption_en: z.string().min(10, 'Falta el pie de foto (EN)'),
-            place: z.string().min(1),
-            date: z.coerce.date(),
+            /** lugar y fecha: opcionales (no se inventan); si faltan, el pie no los muestra */
+            place: z.string().min(1).optional(),
+            date: z.coerce.date().optional(),
             /** Entra en la selección de /editores (~15 en total) */
             featured: z.boolean().default(false),
             /** Color dominante (#rrggbb), lo rellena `npm run photos:check` */

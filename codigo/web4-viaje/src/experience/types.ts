@@ -5,6 +5,11 @@ export interface ViajePhoto {
   id: string;
   src: string;
   srcSmall: string;
+  /** versiones nativas para <img srcset> (JPEG 95 4:4:4, hasta 3200 px + original) */
+  srcset?: string;
+  /** [ancho, url] de menor a mayor; la última es el original */
+  variants?: [number, string][];
+  original?: string;
   w: number;
   h: number;
   alt: string;

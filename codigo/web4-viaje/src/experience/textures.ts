@@ -93,6 +93,26 @@ export class TextureLoader {
     if (t) this.renderer.initTexture(t);
   }
 
+  /** libera una textura grande que ya no hace falta (vuelve a la pequeña) para no acumular memoria de GPU */
+  release(url: string) {
+    const p = this.cache.get(url);
+    if (!p) return;
+    this.cache.delete(url);
+    const i = this.queue.findIndex((j) => j.url === url);
+    if (i >= 0) {
+      this.queue.splice(i, 1)[0].reject(new Error('released'));
+      return;
+    }
+    p.then((t) => {
+      this.textures.delete(t);
+      const k = this.uploads.indexOf(t);
+      if (k >= 0) this.uploads.splice(k, 1);
+      const img = t.image as { close?: () => void } | undefined;
+      t.dispose();
+      img?.close?.();
+    }).catch(() => {});
+  }
+
   dispose() {
     this.disposed = true;
     this.abort.abort();

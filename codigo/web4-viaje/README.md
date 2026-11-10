@@ -28,7 +28,15 @@ photos:
     date: 2026-03-14
     featured: true          # sale en «Para editores» (unas 15 en total)
 ```
-- **Añadir una foto:** cópiala a la carpeta del capítulo y añade su bloque en `index.md`.
+- **Importar fotos reales (calidad nativa):** `npm run photos:import -- "<carpeta>" <capítulo> [--featured N] [--append]`
+  (capítulo = `2`, `02-la-calle` o `la-calle`). Copia los JPEG **originales byte a byte**, sin reducir ni recomprimir,
+  ordenados por fecha EXIF, y deja pies/alt como TODO. `place` y `date` son opcionales: no se inventan.
+- **Versiones web:** `scripts/build-photos.mjs` (se ejecuta solo con `npm run build`/`dev`) genera JPEG calidad 95 con
+  color 4:4:4 a 640–3200 px + el original (`public/fotos/`, fuera del repo). Cada pantalla recibe su densidad real
+  (srcset/sizes). En el viaje 3D, cuando la cámara se para ante una foto o se abre el lightbox, encima del lienzo se
+  pone la foto real del navegador encajada a píxel físico (`src/experience/native.ts`); las texturas 3D se eligen por
+  su tamaño real en pantalla y las lejanas se liberan.
+- **Añadir una foto a mano:** cópiala (original) a la carpeta del capítulo y añade su bloque en `index.md`.
 - **Nuevo capítulo:** copia una carpeta, cambia `n`, títulos y fotos.
 - Después: `npm run photos:check` (revisa pies, alt, tamaño y autor en EXIF, y calcula el color dominante).
 - Si falta un pie o un alt, la web **no se publica**: es a propósito.
@@ -52,6 +60,6 @@ photos:
 Alternativa sin GitHub: `npm run build` y arrastra la carpeta `dist` en Cloudflare Pages → Upload assets.
 
 ## Pendiente (TODO visible en la web)
-Fotos reales y sus pies · textos de los capítulos · bio de 60–90 palabras · cámara y objetivos (opcional) · PDF de
+Fotos reales (originales, con `photos:import`) y sus pies · textos de los capítulos · bio de 60–90 palabras · cámara y objetivos (opcional) · PDF de
 portfolio y CV · dominio. Las 49 fotos actuales son de muestra generadas y están marcadas como PROVISIONAL.
-Nota: al optimizar, Astro elimina EXIF/IPTC de las copias web; el crédito va en los pies y en los datos estructurados.
+Nota: las versiones web conservan el EXIF (autor, copyright) y llevan perfil sRGB incrustado; el original se sirve tal cual.
