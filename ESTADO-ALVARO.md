@@ -1,5 +1,5 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 10/11/2026 (chat 2: fotos reales en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
+_Última actualización: 10/11/2026 (chat 3: webs 2 y 4 publicadas en Cloudflare Pages desde GitHub)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 
 ## 1. Álvaro (datos confirmados)
 - 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha.
@@ -59,9 +59,17 @@ Herramientas en `herramientas/` del repo:
 6. Probar en local (http.server + Playwright) y publicar con `publish_files` (mismo slug, `base_version` de `get_artifact`, mode replace o patch).
 
 ## 6. Despliegue en Cloudflare
-- **Opción A, subida directa:** arrastrar `webN-*-cloudflare-subida-directa.zip` en Workers & Pages → Pages → Upload assets. Un proyecto creado así no se puede pasar luego a GitHub.
-- **Opción B (recomendada):** este repo conectado a Pages (un proyecto de Pages por web, con directorio raíz `codigo/webN-…`), build `npm run build`, salida `dist`, `NODE_VERSION=22`, `SITE_URL=<dominio>`.
-- Dominio: pendiente. Cuando lo haya, cambiar `SITE_URL` y `robots.txt`. Guía completa: `LEEME-DESPLIEGUE.md`.
+- **Formato definitivo (10/11/2026): este repo conectado a Cloudflare Pages, plan gratuito.** Cada push a `main` publica solo. Cuenta de Cloudflare de Marlon (marlonjavimati2). **Solo se publican 2 webs:**
+  | Proyecto de Pages | Web | Directorio raíz | Watch path | URL |
+  |---|---|---|---|---|
+  | `alvarorodriguezeventos` | 2 (directo) | `codigo/web2-directo` | `codigo/web2-directo/*` | https://alvarorodriguezeventos.pages.dev |
+  | `alvarorodriguezportfolio` | 4 (viaje) | `codigo/web4-viaje` | `codigo/web4-viaje/*` | https://alvarorodriguezportfolio.pages.dev |
+- Los dos: build `npm run build`, salida `dist`, variables `NODE_VERSION=22` y `SITE_URL=<su URL .pages.dev>`. Rama de producción `main`; las demás ramas generan previsualizaciones.
+- Comprobado el 10/11/2026: las dos URLs cargan; eventos ya muestra el commit `40eb592` (fotos reales).
+- Límites del plan gratuito: 500 builds/mes y 1 build a la vez (por cuenta); tráfico ilimitado. Con los watch paths, un push solo reconstruye la web cuya carpeta cambió.
+- **Pendiente de Marlon:** borrar el Worker suelto `alvarorodriguezeventos` (Compute → Workers & Pages, el de tipo *Worker*, no el de Pages): fue un primer intento fallido, no publica nada.
+- **Por confirmar:** Marlon dijo «portfolio = web 4», pero la carpeta `web3-portfolio` es la 3. Si era la 3, cambiar en el proyecto `alvarorodriguezportfolio` el directorio raíz y el watch path.
+- Dominio propio: pendiente. Cuando lo haya: Custom domains en el proyecto, cambiar `SITE_URL` y la línea `Sitemap:` de `public/robots.txt`. Guía: `LEEME-DESPLIEGUE.md`.
 
 ## 7. Problemas conocidos
 - **WebGL solo probado con renderizado por software:** fps reales sin medir en una GPU.
