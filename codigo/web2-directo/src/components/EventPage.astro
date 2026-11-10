@@ -105,7 +105,7 @@ const ficha = fichaParts(d, lang);
                     <Picture
                       src={p.file}
                       alt={es ? p.alt : p.alt_en}
-                      formats={['avif', 'webp']}
+                      formats={['webp']}
                       widths={isPortrait(p) ? [600, 1000, 1500, 2000] : [800, 1280, 1920, 2560]}
                       sizes={isPortrait(p) ? '(min-width: 1024px) 57vh, min(calc(100vw - 32px), 32vh)' : '(min-width: 1024px) min(66vw, 1100px), calc(100vw - 32px)'}
                       quality={92}
