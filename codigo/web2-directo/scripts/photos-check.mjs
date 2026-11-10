@@ -73,7 +73,7 @@ for (const slug of slugs) {
   let fm;
   try { fm = frontmatter(await readFile(mdPath, 'utf8'), rel); } catch (e) { errors.push(e.message); continue; }
 
-  for (const k of ['title', 'title_en', 'summary', 'summary_en', 'cover', 'order']) {
+  for (const k of ['title', 'title_en', 'cover', 'order'] /* summary opcional: sin texto no se muestra */) {
     if (fm[k] === undefined || fm[k] === '') errors.push(`${rel}: falta «${k}»`);
   }
   // Sala, ciudad y fecha son opcionales (se muestran como «pendiente»); en secciones mixed van por foto.

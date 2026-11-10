@@ -15,7 +15,7 @@ const idx = all.findIndex((e) => e.id === entry.id);
 const next = all[(idx + 1) % all.length];
 const d = entry.data;
 const title = cleanTitle(es ? d.title : d.title_en);
-const summary = es ? d.summary : d.summary_en;
+const summary = (es ? d.summary : d.summary_en) || '';
 const other: Lang = es ? 'en' : 'es';
 const total = String(d.photos.length).padStart(2, '0');
 const nextName = showName(next, lang);
@@ -47,7 +47,7 @@ const ficha = fichaParts(d, lang);
 
 <Base
   title={title.text}
-  description={summary}
+  description={summary || (es ? `${name}: fotografía de Álvaro Rodríguez.` : `${name}: photography by Álvaro Rodríguez.`)}
   lang={lang}
   altHref={ROUTES.event[other](entry.id)}
   theme="escenario"
@@ -72,7 +72,7 @@ const ficha = fichaParts(d, lang);
           <span>{t.photos(d.photos.length)}</span>
         </p>
       </div>
-      <p class="ev__summary">{summary}</p>
+      {summary && <p class="ev__summary">{summary}</p>}
       {(title.provisional || d.provisional) && <p class="ev__provisional">{t.provisional}</p>}
     </header>
 

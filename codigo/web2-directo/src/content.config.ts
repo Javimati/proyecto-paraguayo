@@ -22,8 +22,8 @@ const eventos = defineCollection({
       mixed: z.boolean().default(false),
       /** hora del set, opcional: «22:30». Solo si es el dato real. */
       time: z.string().optional(),
-      summary: z.string().min(1),
-      summary_en: z.string().min(1),
+      summary: z.string().optional(),
+      summary_en: z.string().optional(),
       cover: image(),
       order: z.number().int(),
       provisional: z.boolean().default(false),

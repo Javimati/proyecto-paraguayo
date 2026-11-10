@@ -7,8 +7,6 @@ title_en: Supernoventeros
 artist: Supernoventeros
 artist_en: Supernoventeros
 kind: fiesta
-summary: '[PROVISIONAL] TODO: dos o tres frases secas sobre Supernoventeros: qué es, dónde y cuándo fue, qué cubriste. Sustituir por el texto de Álvaro.'
-summary_en: '[PROVISIONAL] TODO: two or three plain sentences about Supernoventeros: what it is, where and when it took place, what you covered. Replace with Álvaro’s text.'
 cover: ./05.jpg
 order: 2
 provisional: false

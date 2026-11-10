@@ -128,8 +128,6 @@ const out = {
   artist: fm.artist ?? title,
   artist_en: fm.artist_en ?? fm.title_en ?? title,
   ...fm,
-  summary: fm.summary ?? 'TODO: dos o tres frases sobre el evento.',
-  summary_en: fm.summary_en ?? 'TODO: two or three sentences about the event.',
   cover: append && fm.cover ? fm.cover : './01.jpg',
   order: fm.order ?? 99,
   provisional: false,
