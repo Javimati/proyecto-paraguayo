@@ -63,6 +63,7 @@ El vacío oscuro entre estaciones es ahora una **calle de Madrid de noche** (`sr
     5. `scripts/prune-dist.mjs` borra de `dist/_astro` los originales que Astro copia sin usarlos (~585 MB).
     - `npm run build` = `build-photos` + `astro build` + `prune-dist`. Generar todo de cero: ~8 min aquí (luego, solo lo nuevo). `dist` ≈ 1,2 GB, 511 archivos (máx. 22 MB).
     - Coste: fotos ~2× más pesadas. Lighthouse móvil oscila: home P85–91, evento P83–93, /sobre P99. Presupuesto de imagen LCP subido de 250 a 600 KB en `check-js-budget.mjs`. Precarga (`<link rel=preload imagesrcset>`) de la foto LCP en home y eventos.
+    - **Publicado y comprobado en Cloudflare** (commit `f3167b8`, build ~12 min, primero sin caché): https://alvarorodriguezeventos.pages.dev sirve `/fotos/` (versiones y originales, p. ej. `mas-trabajos/13-original.jpg` 4000×6000 bien orientado). Sin «N fotos», lugar, fechas ni TODO.
     - Prototipo de Claude: una versión por foto de 2400 px (JPEG 95 4:4:4), sin originales (límite de 64 MiB por publicación; publicado en 3 tandas).
   - Prototipo republicado en el mismo slug: versión `1794344399-caa8` (73 archivos, una imagen por foto a ~2000 px).
   - **Página «Para promotores» eliminada** (ES y EN: `para-promotores.astro`, `en/for-promoters.astro`, `PromotersPage.astro`, enlaces del menú y del setlist). El campo `selected` de las fotos ya no se usa. Lighthouse revisa ahora `/sobre/` en su lugar.
