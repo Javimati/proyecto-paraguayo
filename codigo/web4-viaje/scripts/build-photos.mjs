@@ -55,15 +55,31 @@ async function fresh(out) {
 }
 const thumb = async (input) =>
   sharp(input, { limitInputPixels: false }).rotate().resize(48, 48, { fit: 'fill' }).greyscale().raw().toBuffer();
-/** ¿es la misma foto? (miniatura 48 px en grises: misma foto ≈ 1–5 por color/ICC; otra foto ≫ 40) */
-async function sameThumb(srcThumb, cached) {
+/** ¿es la misma foto? Mismas proporciones (±0,5 %) y miniatura 48 px en grises normalizada casi igual (misma foto ≤ 0,13
+ *  ; fotos distintas ≥ 0,5; umbral 0,25). Las proporciones pillan un recorte nuevo de la misma escena (MT14, 11/11/2026). */
+// miniatura normalizada (media 0, desviación 1): así el perfil de color / ICC no cuenta, solo la imagen
+const norm = (buf) => {
+  let m = 0;
+  for (const v of buf) m += v;
+  m /= buf.length;
+  let sd = 0;
+  for (const v of buf) sd += (v - m) ** 2;
+  sd = Math.sqrt(sd / buf.length) || 1;
+  return Float32Array.from(buf, (v) => (v - m) / sd);
+};
+const LIMIT = Number(process.env.FOTOS_LIMIT ?? 0.25);
+async function sameThumb(srcThumb, srcAspect, cached) {
   try {
-    const b = await thumb(cached);
+    const m = await sharp(cached).metadata();
+    const rot = (m.orientation ?? 1) >= 5;
+    const asp = rot ? m.height / m.width : m.width / m.height;
+    if (Math.abs(asp / srcAspect - 1) > 0.005) return false;
+    const b = norm(await thumb(cached));
     if (srcThumb.length !== b.length) return false;
     let d = 0;
     for (let i = 0; i < b.length; i++) d += Math.abs(srcThumb[i] - b[i]);
-    if (process.env.FOTOS_DEBUG) console.log('  huella', cached, (d / b.length).toFixed(2));
-    return d / b.length < 12;
+    if (process.env.FOTOS_DEBUG) console.log('  huella', cached, (d / b.length).toFixed(3));
+    return d / b.length < LIMIT;
   } catch {
     return false;
   }
@@ -89,8 +105,10 @@ async function one(slug, file) {
   if (old !== hash) {
     const files = (await readdir(dir)).filter((f) => f.startsWith(`${base}-`) && f.endsWith('.jpg'));
     if (files.length) {
-      const t = await thumb(src);
-      for (const f of files) if (!(await sameThumb(t, path.join(dir, f)))) await rm(path.join(dir, f));
+      const t = norm(await thumb(src));
+      const sm = await sharp(src).metadata();
+      const asp = (sm.orientation ?? 1) >= 5 ? sm.height / sm.width : sm.width / sm.height;
+      for (const f of files) if (!(await sameThumb(t, asp, path.join(dir, f)))) await rm(path.join(dir, f));
     }
     await writeFile(print, hash);
   }
