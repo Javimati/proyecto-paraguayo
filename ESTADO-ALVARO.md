@@ -117,6 +117,9 @@ Ahora (mismo criterio que la web 2):
 - **Carrusel / fotos que no son la parada actual borrosas:** se quedaban con la textura de 480 px (solo la parada activa subía de calidad) y en móvil el lienzo 3D iba a 1,25×. Ahora cada foto visible mide cada pocos fotogramas cuántos píxeles ocupa de verdad en pantalla y carga la versión justa (hasta 3200 px; la suelta al alejarse). En móvil el lienzo va hasta 2×; si va lento baja a 1,25× y, si no basta, pasa a la versión sin animación. Comprobado a 1920×1080 2×: satélites y fotos vecinas suben solas a 1080–2400 px.
 - Más trabajos 14 («Raúl entre el humo», recorte de Álvaro, 2406×1499) copiada de la web 2 a `03-la-noche/06.jpg`.
 
+## 3i. Web 4 — sin pies de foto visibles (11/11/2026)
+- Decisión de Marlon: **fuera los títulos/pies de las fotos** en la historia 2D (`figcaption`) y en el visor ampliado del 3D. Los textos siguen en `index.md` (caption/alt): el `alt` se mantiene para accesibilidad y SEO, y el pie va en el JSON-LD invisible.
+
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.

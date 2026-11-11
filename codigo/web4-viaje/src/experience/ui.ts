@@ -595,7 +595,8 @@ export class ExperienceUI {
   }
   updateDialog(slot: Slot) {
     this.dialogAlt.textContent = slot.photo.alt;
-    this.dialogCap.textContent = slot.photo.caption;
+    // sin pie visible (decisión de Marlon, 11/11/2026): la foto habla sola; el alt sigue para lectores de pantalla
+    this.dialogCap.textContent = '';
     this.dialogCount.textContent = `${String(slot.index + 1).padStart(3, '0')} / ${String(this.slots.length).padStart(3, '0')} — ${this.data.chapters[slot.chapter]?.title ?? ''}`;
   }
   closeDialog(focusIndex?: number) {

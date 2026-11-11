@@ -129,7 +129,6 @@ function slot(p: PhotoView, i: number) {
                   />
                   <span class="frame-marks shot__marks" aria-hidden="true" />
                 </div>
-                <figcaption class="mono">{p.caption}</figcaption>
               </figure>
             );
           })}
@@ -428,11 +427,6 @@ function slot(p: PhotoView, i: number) {
   .shot:hover .shot__marks {
     color: var(--peaking);
     inset: -5px;
-  }
-  .shot figcaption {
-    max-width: 70ch;
-    color: var(--tenue);
-    line-height: 1.6;
   }
 
   /* Apertura de diafragma acoplada al scroll (CSS puro; sin soporte = foto visible) */
