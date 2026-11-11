@@ -34,12 +34,12 @@ const imageObjects = views
   }));
 const description =
   lang === 'es'
-    ? 'Álvaro Rodríguez Valverde, fotógrafo de reportaje y eventos en Madrid. Un viaje por sus fotos, capítulo a capítulo. Busca prácticas desde febrero de 2027.'
-    : 'Álvaro Rodríguez Valverde, reportage and events photographer in Madrid. A journey through his photos, chapter by chapter. Looking for an internship from February 2027.';
+    ? 'Álvaro Rodríguez Valverde, fotógrafo en Madrid: fotografía de calle, fotorreportaje, conciertos y eventos. Un viaje por sus fotos, capítulo a capítulo. Busca prácticas en agencia o medio desde febrero de 2027.'
+    : 'Álvaro Rodríguez Valverde, photographer in Madrid: street photography, reportage, gigs and events. A journey through his photos, chapter by chapter. Looking for an agency or newsroom internship from February 2027.';
 ---
 
 <Base
-  title={`${PERSON.name} — ${lang === 'es' ? 'Fotorreportaje y eventos' : 'Reportage and events'}`}
+  title={`${PERSON.name} — ${lang === 'es' ? 'Fotografía' : 'Photography'}`}
   description={description}
   lang={lang}
   altHref={ROUTES.home[otherLang(lang)]}

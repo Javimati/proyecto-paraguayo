@@ -35,7 +35,7 @@ const SOUND_KEY = 'viaje:sonido';
 const TXT = {
   es: {
     name: 'Álvaro Rodríguez Valverde',
-    role: 'Fotorreportaje y eventos',
+    role: 'Fotografía',
     place: 'Madrid',
     hold: 'Mantén para enfocar',
     hint: 'o haz clic para entrar',
@@ -52,7 +52,7 @@ const TXT = {
   },
   en: {
     name: 'Álvaro Rodríguez Valverde',
-    role: 'Photojournalism & events',
+    role: 'Photography',
     place: 'Madrid',
     hold: 'Hold to focus',
     hint: 'or click to enter',

@@ -4,8 +4,8 @@ kicker: Capítulo 02 — La calle
 kicker_en: Chapter 02 — The street
 title: La calle
 title_en: The street
-text: "Mi referente es Alex Webb: capas, luz dura y varias escenas dentro de un mismo encuadre. Fotoperiodismo, calle y reportaje: es lo que más quiero hacer."
-text_en: "My reference is Alex Webb: layers, hard light and several scenes inside one frame. Photojournalism, street and reportage: it is what I want to do most."
+text: "La fotografía de calle es lo que más me gusta: salir con la cámara y estar atento a lo que pasa. De ahí quiero llegar al fotorreportaje y la actualidad."
+text_en: "Street photography is what I love most: going out with the camera and paying attention to what happens. From there I want to move into reportage and news."
 provisional: false
 photos:
   - file: ./01.jpg

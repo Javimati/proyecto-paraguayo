@@ -1784,11 +1784,11 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       let rect: { x: number; y: number; w: number; h: number } | null = null;
       if (lockIndex >= 0 && photos[lockIndex].mesh.visible) {
         const p = photos[lockIndex];
-        const mx = p.mesh.material.uniforms.uMargin.value;
-        corners[0].set(-0.5 + mx.x, -0.5 + mx.y, 0);
-        corners[1].set(0.5 - mx.x, -0.5 + mx.y, 0);
-        corners[2].set(-0.5 + mx.x, 0.5 - mx.y, 0);
-        corners[3].set(0.5 - mx.x, 0.5 - mx.y, 0);
+        // el recuadro AF va justo sobre el borde EXTERIOR del marco (esquinas del plano), a cualquier tamaño
+        corners[0].set(-0.5, -0.5, 0);
+        corners[1].set(0.5, -0.5, 0);
+        corners[2].set(-0.5, 0.5, 0);
+        corners[3].set(0.5, 0.5, 0);
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
         let behind = false;
         p.mesh.updateMatrixWorld();

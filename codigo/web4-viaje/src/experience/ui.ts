@@ -24,9 +24,9 @@ const DEFAULTS = {
     endLead: 'Busco prácticas desde el 16/02/2027 (440 h). Me adapto al horario que me asignéis.',
     copy: 'Copiar',
     copied: 'Copiado',
-    editors: 'Para editores',
-    editorsHref: '/editores/',
-    index: 'Ver índice',
+    about: 'Sobre mí',
+    aboutHref: '/sobre/',
+    index: 'Ver sin animación',
     phoneLabel: 'Teléfono',
     emailLabel: 'Email',
     endRegion: 'Contacto',
@@ -51,9 +51,9 @@ const DEFAULTS = {
     endLead: 'Looking for an internship from 16/02/2027 (440 h). Any schedule you assign works for me.',
     copy: 'Copy',
     copied: 'Copied',
-    editors: 'For editors',
-    editorsHref: '/en/editors/',
-    index: 'View index',
+    about: 'About',
+    aboutHref: '/en/about/',
+    index: 'View without animation',
     phoneLabel: 'Phone',
     emailLabel: 'Email',
     endRegion: 'Contact',
@@ -367,8 +367,8 @@ export class ExperienceUI {
     const tel = this.h('a', '', ddP, PHONE) as HTMLAnchorElement;
     tel.href = PHONE_HREF;
     const ctas = this.h('div', 'vx-end-ctas', this.end);
-    const ed = this.h('a', 'vx-btn vx-btn--main', ctas, l.editors) as HTMLAnchorElement;
-    ed.href = l.editorsHref;
+    const ab = this.h('a', 'vx-btn vx-btn--main', ctas, l.about) as HTMLAnchorElement;
+    ab.href = l.aboutHref;
     const idx = this.h('button', 'vx-btn', ctas, l.index) as HTMLButtonElement;
     idx.type = 'button';
     idx.addEventListener('click', () => {
@@ -536,7 +536,8 @@ export class ExperienceUI {
   /** devuelve true si es un enganche nuevo (para el clic de AF) */
   private lockId = -1;
   afLock(rect: { x: number; y: number; w: number; h: number }, label: string, id = -1) {
-    const pad = 10;
+    // el rect ya es el borde exterior del marco: las esquinas AF se apoyan en él, sin holgura
+    const pad = 0;
     const vw = innerWidth, vh = innerHeight, m = 6;
     const x0 = Math.max(rect.x - pad, m), y0 = Math.max(rect.y - pad, m + 26);
     const x1 = Math.min(rect.x + rect.w + pad, vw - m), y1 = Math.min(rect.y + rect.h + pad, vh - m);
@@ -558,7 +559,8 @@ export class ExperienceUI {
     return fresh;
   }
   tickAF(dt: number) {
-    const k = 1 - Math.exp(-dt * (this.locked ? 16 : 22));
+    // enganchado: sigue a la foto sin retraso (con suavizado quedaba desplazado mientras la cámara se asentaba)
+    const k = this.locked ? 1 : 1 - Math.exp(-dt * 22);
     const p = this.afPos;
     const t = this.afTarget;
     p.x += (t.x - p.x) * k;

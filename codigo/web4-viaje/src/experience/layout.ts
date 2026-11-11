@@ -169,7 +169,7 @@ export function buildLayout(data: ViajeData, opts: { perChapter: number; thumbs:
       });
       anchorZ -= 34;
     } else if (preset === 'layers') {
-      // la calle: capas en profundidad que se solapan; la cámara las atraviesa (Alex Webb)
+      // la calle: capas en profundidad que se solapan; la cámara las atraviesa 
       main.forEach((p, j) => {
         const { width, height } = size(p, 2.3 + r() * 0.4, 3.8);
         const side = j % 2 === 0 ? -1 : 1;

@@ -5,7 +5,7 @@
  *
  * Por qué existe: el servicio de imágenes de Astro solo deja elegir la calidad, y WebP/AVIF a calidad
  * normal reducen el color a la mitad de resolución (4:2:0), que se nota en luces rojas y naranjas de
- * concierto. Las mismas versiones alimentan la historia 2D, /editores, la capa <img> nativa del viaje 3D
+ * concierto. Las mismas versiones alimentan la historia 2D, /sobre, la capa <img> nativa del viaje 3D
  * (foto en reposo y lightbox) y las texturas WebGL (elegidas según el tamaño real en pantalla). Aquí cada foto se genera con control total:
  *
  *  · Fuente: el ORIGINAL tal cual sale de Lightroom (src/content/fotos/<NN-capitulo>/NN.jpg, sin reducir).
@@ -21,7 +21,8 @@
  * Caché: node_modules/.astro/fotos (Cloudflare Pages conserva node_modules/.astro entre builds): solo se
  * regenera lo que cambia.
  */
-import { readdir, mkdir, stat, copyFile, rm, cp } from 'node:fs/promises';
+import { readdir, mkdir, stat, copyFile, rm, cp, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -44,11 +45,30 @@ sharp.concurrency(Math.max(1, Math.min(4, os.cpus().length)));
 
 const jpegOpts = (q) => ({ quality: q, chromaSubsampling: '4:4:4', mozjpeg: true, progressive: true });
 
-async function fresh(out, srcStat) {
+// Una versión vale si existe y no está vacía. Que corresponda a la foto ACTUAL lo garantiza la huella
+// (sha1 del original, en «NN.src»): NO se usa la fecha de los archivos, porque en Cloudflare la caché
+// restaurada es más nueva que el clon del repo y se servían versiones de la foto anterior
+// (bug visto el 11/11/2026: la foto de muestra de 02-la-calle/01 seguía publicada).
+async function fresh(out) {
   if (!existsSync(out)) return false;
-  const s = await stat(out);
-  return s.mtimeMs >= srcStat.mtimeMs && s.size > 0;
+  return (await stat(out)).size > 0;
 }
+const thumb = async (input) =>
+  sharp(input, { limitInputPixels: false }).rotate().resize(48, 48, { fit: 'fill' }).greyscale().raw().toBuffer();
+async function sameAsCached(src, cached) {
+  if (!existsSync(cached)) return false;
+  try {
+    const [a, b] = await Promise.all([thumb(src), thumb(cached)]);
+    if (a.length !== b.length) return false;
+    let d = 0;
+    for (let i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]);
+    if (process.env.FOTOS_DEBUG) console.log('  huella', cached, (d / a.length).toFixed(2));
+    return d / a.length < 12; // misma foto ≈ 1–5 (color/ICC); otra foto ≫ 40
+  } catch {
+    return false;
+  }
+}
+const sha1 = async (f) => createHash('sha1').update(await readFile(f)).digest('hex');
 
 const srcDir = (slug) => EXTRA[slug] ?? path.join(SRC, slug);
 
@@ -58,6 +78,20 @@ async function one(slug, file) {
   const dir = path.join(CACHE, VERSION, slug);
   await mkdir(dir, { recursive: true });
   const st = await stat(src);
+  // huella: si la foto cambió, fuera todas sus versiones antiguas
+  const print = path.join(dir, `${base}.src`);
+  const hash = await sha1(src);
+  let old = existsSync(print) ? (await readFile(print, 'utf8')).trim() : '';
+  // Caché de antes de la huella (sin «.src»): se confía en ella solo si su versión pequeña es la MISMA foto
+  // (comparación en miniatura 48 px). Así el primer build en Cloudflare no regenera las 64 fotos (~12 min).
+  if (!old && (await sameAsCached(src, path.join(dir, `${base}-${WIDTHS[0]}.jpg`)))) {
+    old = hash;
+    await writeFile(print, hash);
+  }
+  if (old !== hash) {
+    for (const f of await readdir(dir)) if (f.startsWith(`${base}-`)) await rm(path.join(dir, f));
+    await writeFile(print, hash);
+  }
   const meta = await sharp(src).metadata();
   const rotated = (meta.orientation ?? 1) >= 5;
   const w = rotated ? meta.height : meta.width;
@@ -69,7 +103,7 @@ async function one(slug, file) {
 
   for (const width of WIDTHS.filter((x) => x < w)) {
     const out = path.join(dir, `${base}-${width}.jpg`);
-    if (await fresh(out, st)) continue;
+    if (await fresh(out)) continue;
     jobs.push(
       sharp(src, { limitInputPixels: false })
         .rotate()
@@ -86,7 +120,7 @@ async function one(slug, file) {
   }
 
   const orig = path.join(dir, `${base}-original.jpg`);
-  if (!(await fresh(orig, st))) {
+  if (!(await fresh(orig))) {
     if (st.size <= MAX_ORIGINAL) jobs.push(copyFile(src, orig));
     else jobs.push(sharp(src, { limitInputPixels: false }).rotate().withIccProfile('srgb').keepExif().jpeg(jpegOpts(97)).toFile(orig));
   }
@@ -110,7 +144,7 @@ await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT, { recursive: true });
 for (const slug of slugs) {
   const from = path.join(CACHE, VERSION, slug);
-  if (existsSync(from)) await cp(from, path.join(OUT, slug), { recursive: true });
+  if (existsSync(from)) await cp(from, path.join(OUT, slug), { recursive: true, filter: (f) => !f.endsWith('.src') });
 }
 // quita de public/fotos las versiones de fotos que ya no están en el contenido
 for (const slug of slugs) {

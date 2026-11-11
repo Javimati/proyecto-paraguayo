@@ -10,7 +10,6 @@ const t = T[lang];
 const ol = otherLang(lang);
 const items = [
   ['home', ROUTES.home[lang], t.nav.home],
-  ['editors', ROUTES.editors[lang], t.nav.editors],
   ['about', ROUTES.about[lang], t.nav.about],
   ['contact', ROUTES.contact[lang], t.nav.contact],
 ] as const;
@@ -26,7 +25,7 @@ const items = [
     <ul role="list">
       {
         items.map(([key, href, label]) => (
-          <li class:list={[{ 'is-secondary': key === 'home' || key === 'contact', 'is-about': key === 'about' }]}>
+          <li class:list={[{ 'is-secondary': key === 'home' || key === 'contact' }]}>
             <a href={href} aria-current={page === key ? 'page' : undefined}>
               {label}
             </a>
@@ -106,7 +105,7 @@ const items = [
     height: calc(clamp(12px, 2.2vw, 28px) * 2 + 26px);
     padding-inline: calc(clamp(12px, 2.2vw, 28px) + 16px);
   }
-  @media (max-width: 420px) {
+  @media (max-width: 520px) {
     :global(html.exp-on) .site-header {
       padding-inline: calc(clamp(12px, 2.2vw, 28px) + 10px);
       gap: 10px;
@@ -211,6 +210,8 @@ const items = [
       transition: none;
     }
   }
+  /* Móvil y tablet estrecha: Historia y Contacto pasan al pie; el interruptor queda solo (sin texto ni caja).
+     El nombre accesible del botón («Animación») sigue ahí aunque no se vea. */
   @media (max-width: 760px) {
     .is-secondary {
       display: none;
@@ -218,13 +219,6 @@ const items = [
     .brand__name {
       font-size: var(--t-15);
     }
-  }
-  @media (max-width: 420px) {
-    nav ul {
-      gap: 10px;
-    }
-    /* el nombre completo sigue siendo el texto accesible del enlace; se ve «Álvaro R.» */
-    .brand__name,
     .index-btn__label {
       position: absolute;
       width: 1px;
@@ -233,22 +227,32 @@ const items = [
       clip: rect(0 0 0 0);
       white-space: nowrap;
     }
-    /* en pantallas muy estrechas «Sobre mí» queda en el pie; «Para editores» es la acción principal */
-    .is-about {
-      display: none;
-    }
-    .brand__short {
-      display: inline;
-      font-size: var(--t-15);
-    }
-    /* el botón queda en icono (nombre accesible intacto): sin caja, para no parecer una ventana ni chocar con la esquina del visor */
     .index-btn {
+      flex: none;
       min-width: 44px;
       min-height: 44px;
       justify-content: center;
       padding: 0;
       border: 0;
       background: none;
+    }
+  }
+  /* Móvil: se ve «Álvaro R.» (el nombre completo sigue siendo el texto accesible del enlace) */
+  @media (max-width: 520px) {
+    nav ul {
+      gap: 14px;
+    }
+    .brand__name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    .brand__short {
+      display: inline;
+      font-size: var(--t-15);
     }
   }
 </style>

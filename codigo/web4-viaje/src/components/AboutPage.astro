@@ -18,8 +18,8 @@ const retratoAlt = es ? 'Retrato de Álvaro Rodríguez Valverde' : 'Portrait of 
 <Base
   title={t.nav.about}
   description={es
-    ? 'Sobre Álvaro Rodríguez Valverde: fotógrafo de reportaje y eventos, estudiante en Campus FP Atocha, Arganda del Rey (Madrid).'
-    : 'About Álvaro Rodríguez Valverde: reportage and events photographer, student at Campus FP Atocha, Arganda del Rey (Madrid).'}
+    ? 'Sobre Álvaro Rodríguez Valverde: fotografía de calle, fotorreportaje y eventos. Estudiante en Campus FP Atocha, Arganda del Rey (Madrid).'
+    : 'About Álvaro Rodríguez Valverde: street photography, reportage and events. Student at Campus FP Atocha, Arganda del Rey (Madrid).'}
   lang={lang}
   altHref={ROUTES.about[otherLang(lang)]}
   page="about"
@@ -42,31 +42,29 @@ const retratoAlt = es ? 'Retrato de Álvaro Rodríguez Valverde' : 'Portrait of 
         {es ? (
           <>
             <p class="about__hello">
-              Soy Álvaro Rodríguez, tengo 20 años, vivo en Arganda del Rey (Madrid) y estudio 2.º del Grado Superior de Técnico en
-              Iluminación, Captación y Tratamiento de la Imagen en Campus FP Atocha. Me interesan el fotorreportaje, la calle y la
-              actualidad; también fotografío conciertos, fiestas y bodas.
+              Soy Álvaro Rodríguez, tengo 20 años y vivo en Arganda del Rey (Madrid). Estudio 2.º del Grado Superior de Técnico en
+              Iluminación, Captación y Tratamiento de la Imagen en Campus FP Atocha.
             </p>
-            <p>Me encanta la fotografía, y donde más la disfruto es en un evento: con la música a tope, la gente a lo suyo y la cámara en la mano.</p>
-            <p>Me quedo con lo que pasa en un segundo y se recuerda para siempre: la energía de un directo, un abrazo en mitad de la pista, los detalles que casi nadie ve.</p>
-            <p>Gracias a lo que estudio me muevo bien con cualquier luz, desde una sala a oscuras hasta un exterior, y entrego fotos cuidadas, con acabado profesional.</p>
+            <p>Lo que más me gusta es la fotografía de calle: salir con la cámara y estar atento a lo que pasa delante de mí. Quiero dedicarme al fotorreportaje y a la actualidad.</p>
+            <p>Me quedo con lo que pasa en un segundo y no se repite: un gesto, una luz que dura un instante, los detalles que casi nadie ve.</p>
+            <p>También me gustan mucho los conciertos y los eventos: la energía de un directo, la gente en la pista. Gracias a lo que estudio me muevo bien con cualquier luz, desde una sala a oscuras hasta un exterior, y edito en Lightroom Classic y Photoshop para entregar fotos cuidadas.</p>
             <p>
-              Estoy empezando y tengo muchas ganas. Busco prácticas y colaborar en conciertos, fiestas y eventos. Si quieres que lo que
-              pasa quede bien contado, <a href={ROUTES.contact[lang]}>escríbeme</a>.
+              Estoy construyendo mi trayectoria y busco prácticas en una agencia o un medio desde el 16 de febrero de 2027. Si crees que
+              puedo encajar, <a href={ROUTES.contact[lang]}>escríbeme</a>.
             </p>
           </>
         ) : (
           <>
             <p class="about__hello">
-              I’m Álvaro Rodríguez, I’m 20, I live in Arganda del Rey (Madrid) and I’m in my second year of the Higher Vocational
-              Diploma in Lighting, Image Capture and Processing at Campus FP Atocha. I’m drawn to reportage, street and news
-              photography; I also shoot gigs, parties and weddings.
+              I’m Álvaro Rodríguez, I’m 20 and I live in Arganda del Rey (Madrid). I’m in my second year of the Higher Vocational
+              Diploma in Lighting, Image Capture and Processing at Campus FP Atocha.
             </p>
-            <p>I love photography, and where I enjoy it most is at an event: music up loud, people lost in the moment and a camera in my hand.</p>
-            <p>I go after what happens in a second and stays with you forever: the energy of a live show, a hug in the middle of the dance floor, the details almost nobody notices.</p>
-            <p>What I study means I’m comfortable in any light, from a pitch-dark venue to outdoors, and I deliver carefully finished, professional images.</p>
+            <p>What I love most is street photography: going out with the camera and paying attention to what happens in front of me. I want to work in reportage and news.</p>
+            <p>I go after what happens in a second and never repeats: a gesture, a light that lasts an instant, the details almost nobody notices.</p>
+            <p>I also really enjoy gigs and events: the energy of a live show, people on the dance floor. What I study means I’m comfortable in any light, from a pitch-dark venue to outdoors, and I edit in Lightroom Classic and Photoshop to deliver carefully finished pictures.</p>
             <p>
-              I’m just starting out and I’m hungry for it. I’m looking for an internship and to work on gigs, parties and events. If you
-              want what happens to be told well, <a href={ROUTES.contact[lang]}>get in touch</a>.
+              I’m building my path and looking for an internship at an agency or newsroom from 16 February 2027. If you think I could
+              fit in, <a href={ROUTES.contact[lang]}>get in touch</a>.
             </p>
           </>
         )}
@@ -75,16 +73,8 @@ const retratoAlt = es ? 'Retrato de Álvaro Rodríguez Valverde' : 'Portrait of 
         <h2 id="what-t" class="mono">{es ? 'Qué fotografío' : 'What I shoot'}</h2>
         <p>
           {es
-            ? 'Fotoperiodismo, fotografía de calle y reportaje. También conciertos en sala y teatro, festivales, fiestas, club, eventos y bodas.'
-            : 'Photojournalism, street photography and reportage. Also club and theatre gigs, festivals, parties, club nights, events and weddings.'}
-        </p>
-      </section>
-      <section class="about__ref" aria-labelledby="ref-t">
-        <h2 id="ref-t" class="mono">{es ? 'Referente' : 'Influence'}</h2>
-        <p>
-          {es
-            ? 'Alex Webb (Magnum). Me gusta su foto de unos niños jugando en un patio en México: varias escenas que conviven dentro del mismo encuadre.'
-            : 'Alex Webb (Magnum). I like his picture of children playing in a courtyard in Mexico: several scenes living inside one frame.'}
+            ? 'Fotografía de calle, fotorreportaje y actualidad. También conciertos en sala y teatro, festivales, fiestas, club, eventos y bodas.'
+            : 'Street photography, reportage and news. Also club and theatre gigs, festivals, parties, club nights, events and weddings.'}
         </p>
       </section>
       <Facts lang={lang} />
@@ -92,7 +82,7 @@ const retratoAlt = es ? 'Retrato de Álvaro Rodríguez Valverde' : 'Portrait of 
         <h2 id="contact-t" class="mono">{t.nav.contact}</h2>
         <ContactActions lang={lang} />
       </section>
-      <p class="about__cta"><a class="btn btn--solid" href={ROUTES.contact[lang]}>{t.nav.contact}</a> <a class="btn" href={ROUTES.editors[lang]}>{t.forEditors}</a></p>
+      <p class="about__cta"><a class="btn btn--solid" href={ROUTES.contact[lang]}>{t.nav.contact}</a></p>
     </div>
   </main>
 </Base>

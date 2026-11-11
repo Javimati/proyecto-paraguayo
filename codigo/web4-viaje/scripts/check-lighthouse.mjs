@@ -30,7 +30,7 @@ const server = createServer(async (req, res) => {
   }
 }).listen(4499);
 
-const urls = ['/', '/editores/', '/en/'];
+const urls = ['/', '/sobre/', '/en/'];
 let failed = false;
 for (const u of urls) {
   const { stdout: out } = await run('npx', ['-y', 'lighthouse@12', `http://localhost:4499${u}`, '--quiet', '--output=json', '--chrome-flags=--headless=new --no-sandbox --disable-background-networking --disable-sync --no-first-run', '--only-categories=performance,accessibility,best-practices,seo'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }); // async: el servidor de este mismo proceso debe seguir respondiendo

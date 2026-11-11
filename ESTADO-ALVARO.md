@@ -95,6 +95,23 @@ Ahora (mismo criterio que la web 2):
 - **Móvil:** /editores se ensanchaba a 536 px en un móvil de 390 (rejilla `1fr` con imágenes de 6000 px de ancho intrínseco) → `minmax(0, 1fr)` (también en Facts). Comprobado a 360 y 390 px: ninguna página se sale de la pantalla.
 - Comprobado: build ok, `check:js` 169 KB/350, `astro check` sin errores; recorrido 3D en móvil (paradas 6, 12, 20, 26) y versión sin animación con fotos reales.
 
+## 3g. Web 4 — portfolio general para agencias y medios (11/11/2026)
+- **Enfoque (decisión de Marlon):** la web 4 es el portfolio general que Álvaro manda a agencias y medios (Europa Press, 20minutos…). Lo primero es la **foto de calle y el fotorreportaje**; los eventos y conciertos van después y también se nombran. La web de eventos es la 2.
+- **Orden de capítulos:** 01 Desde Madrid y 02 La calle (callejeras) → 03 La Fiesta Naranja → 04 Supernoventeros → 05 La noche → 06 Lo que viene. **Fotos de eventos en el orden del PDF de Álvaro** (`Portfolio_Álvaro_Rodríguez.pdf`, Canva, de arriba-izquierda a abajo-derecha):
+  - Fiesta Naranja: 18, 16, 20, 02, 13, 06, 10, 14, 17, 04, 11, 15, 05, 12, 22, 03, 08, 01, 09, 07, 19 · la **21 no está en el PDF** (va al final).
+  - Supernoventeros: 13, 10, 06, 08, 04, 07, 11, 14, 16, 02, 05, 12, 09, 15, 01, 03 (la 16 vuelve aquí desde «Lo que viene»).
+  - Más trabajos («La noche»): 01, 08, 06, 11, 15, 04, 05, 07, 14, 09, 02, 10, 03 · **12 y 13 no están en el PDF** (siguen en «Lo que viene»).
+  - (números = nombre de archivo en la carpeta del PC, campo `source`). Las primeras fotos de cada capítulo son las paradas del 3D.
+  - **En el PDF hay una foto que no tenemos:** una barra con luz naranja y un camarero sirviendo (pág. 15, abajo, 2.ª). No está en ninguna carpeta. Pedírsela a Álvaro.
+  - Las carpetas conservan su nombre antiguo (`03-la-noche` es el capítulo 5, `05-fiesta-naranja` el 3) a propósito: renombrarlas obligaría a Cloudflare a regenerar todas las versiones (~12 min). El orden lo da `n` en cada `index.md`.
+- **Fuera «Para editores»** (páginas `/editores/` y `/en/editors/`, enlaces de cabecera, pie, cierre y final del 3D). `public/_redirects` manda las URLs antiguas a Contacto. El botón del final del 3D es ahora «Sobre mí».
+- **Fuera Alex Webb / «Referente»** (Sobre mí y texto del capítulo 2).
+- **Bio nueva** (Sobre mí, ES/EN), solo con datos de §1: calle y fotorreportaje primero, luego conciertos y eventos, prácticas en agencia o medio. Héroe e intro: «Fotografía.» (antes «Fotorreportaje y eventos.»). Descripciones y JSON-LD alineados.
+- **Cabecera móvil:** se cortaba entre 421 y 760 px (nombre completo + 4 enlaces + botón). Ahora: ≤ 760 px solo «Sobre mí», EN y el interruptor (sin texto); ≤ 520 px «Álvaro R.». Comprobado de 360 a 1024 px: nada se sale.
+- **3D en móvil:** antes solo entraban móviles con ≥ 6 núcleos y ≥ 6 GB declarados; Safari (iPhone) no da esos datos y siempre caía en la versión sin animación (por eso no se veía el interruptor). Ahora cualquier móvil con WebGL2 entra en 3D reducida; si va a < 40 fps baja calidad y, si no basta, pasa solo a la versión sin animación.
+- **Recuadro AF:** se apoya en el borde exterior del marco (esquinas del plano) y sigue a la foto sin retraso; antes iba 10 px fuera de la foto, con suavizado, y en pantallas grandes quedaba descolocado respecto al marco.
+- **Bug de caché de fotos (importante):** `build-photos` daba por buenas las versiones de la caché por fecha; en Cloudflare la caché restaurada es más nueva que el clon y se seguía sirviendo la **foto de muestra de `02-la-calle/01`** (era la portada de la web real). Ahora cada foto lleva huella sha1 (`NN.src` en la caché) y, para la caché antigua sin huella, se compara la miniatura con el original (misma foto ≈ 1–5; otra ≫ 40; umbral 12). Así el primer build no regenera todo. **La web 2 tiene el mismo `build-photos` con el mismo fallo latente** (pendiente para un chat de la web 2).
+
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.

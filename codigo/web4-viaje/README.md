@@ -11,7 +11,7 @@ misma historia en 2D para móviles modestos, lectores de pantalla y quien prefie
    - Para ver la versión 2D: `?tier=none`.
 
 ## Cambiar fotos y textos
-Cada capítulo es una carpeta en `src/content/fotos/` (`01-desde-madrid`, `02-la-calle`, `03-la-noche`, `04-supernoventeros`, `05-fiesta-naranja`, `06-lo-que-viene`) con sus fotos y un
+Cada capítulo es una carpeta en `src/content/fotos/` (`01-desde-madrid`, `02-la-calle`, `05-fiesta-naranja` [cap. 3], `04-supernoventeros`, `03-la-noche` [cap. 5], `06-lo-que-viene`; el orden lo da `n`, no el nombre de la carpeta) con sus fotos y un
 `index.md`:
 ```yaml
 n: 2                        # orden del capítulo
@@ -26,7 +26,7 @@ photos:
     caption_en: ...
     place: Madrid
     date: 2026-03-14
-    featured: true          # sale en «Para editores» (unas 15 en total)
+    featured: true          # destacada (héroe e índice)
 ```
 - **Importar fotos reales (calidad nativa):** `npm run photos:import -- "<carpeta>" <capítulo> [--featured N] [--append]`
   (capítulo = `2`, `02-la-calle` o `la-calle`). Copia los JPEG **originales byte a byte**, sin reducir ni recomprimir,

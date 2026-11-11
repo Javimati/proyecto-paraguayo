@@ -5,7 +5,7 @@
  *   npm run photos:import -- "<carpeta-origen>" <capitulo> [--featured N] [--append]
  *
  *   capitulo: número («2»), carpeta («02-la-calle») o nombre («la-calle») de src/content/fotos/
- *   --featured N  marca las N primeras como destacadas (salen en /editores)
+ *   --featured N  marca las N primeras como destacadas (van al héroe y al índice)
  *   --append      las añade al final en vez de sustituir las del capítulo
  *
  * Qué hace:

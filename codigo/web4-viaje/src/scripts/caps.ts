@@ -59,12 +59,14 @@ export function detectTier(): Tier {
   const width = window.innerWidth;
 
   // Checks baratos antes de crear ningún contexto WebGL
-  if (cores < 4 || (mem !== undefined && mem < 4)) return 'low';
+  // En móvil Safari puede capar los núcleos que informa: ahí solo se descartan los claramente flojos
+  if (cores < (coarse ? 2 : 4) || (mem !== undefined && mem < 4)) return 'low';
   if (!hasWebGL2()) return 'none';
 
   if (coarse || width < 1024) {
-    // Móvil o tablet: 3D reducida solo si es potente
-    return cores >= 6 && (mem === undefined || mem >= 6) ? 'mid' : 'low';
+    // Móvil o tablet con WebGL2: 3D reducida. Safari (iPhone) informa de pocos núcleos y no da la memoria,
+    // así que antes nunca entraba; si va lento, el vigilante de fps lo pasa a la versión sin animación.
+    return 'mid';
   }
   if (cores >= 8 && (mem === undefined || mem >= 8)) return 'high';
   return 'mid';
