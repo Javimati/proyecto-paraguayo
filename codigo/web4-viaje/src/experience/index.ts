@@ -180,7 +180,9 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   const high = tier === 'high';
   const touch = matchMedia('(hover: none)').matches;
   const mobile = touch || innerWidth / Math.max(innerHeight, 1) < 1;
-  const dprCap = high ? 2 : 1.25;
+  // móvil (mid) también hasta 2×: a 1,25× las fotos del carrusel se veían blandas en pantallas retina.
+  // Si va lento, degrade() baja a 1,25× y, si aún no basta, se pasa a la versión sin animación.
+  const dprCap = 2;
   const sound = new ViajeSound();
 
   /* ───────── renderer ───────── */
@@ -1027,12 +1029,28 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     return (p.slot.width / (2 * d * tanHalf() * camera.aspect)) * bufW;
   };
   const maxTex = Math.min(renderer.capabilities.maxTextureSize || 4096, 4096);
-  const ensureHires = (p: PhotoObj) => {
+  /** ancho en píxeles físicos que ocupa AHORA la foto en pantalla (satélites, carrusel, fotos de paso) */
+  const SP = new Vector3();
+  const screenPx = (p: PhotoObj) => {
+    p.mesh.updateMatrixWorld();
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (const [lx, ly] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]] as const) {
+      SP.set(lx, ly, 0).applyMatrix4(p.mesh.matrixWorld).project(camera);
+      if (SP.z > 1 || SP.z < -1) return 0;
+      x0 = Math.min(x0, SP.x); x1 = Math.max(x1, SP.x); y0 = Math.min(y0, SP.y); y1 = Math.max(y1, SP.y);
+    }
+    // fuera de pantalla: no hace falta más detalle
+    if (x1 < -1 || x0 > 1 || y1 < -1 || y0 > 1) return 0;
+    const s = renderer.getDrawingBufferSize(SV2);
+    return Math.max(((x1 - x0) / 2) * s.x, ((y1 - y0) / 2) * s.y * (p.slot.photo.w / p.slot.photo.h));
+  };
+  const SV2 = new Vector2();
+  const ensureHires = (p: PhotoObj, needAtLeast = 0) => {
     const vs = p.slot.photo.variants;
     let url = p.slot.photo.src;
     let w = 1600;
     if (vs && vs.length) {
-      const need = neededPx(p);
+      const need = Math.max(p.slot.stop >= 0 ? neededPx(p) : 0, needAtLeast);
       const fit = vs.filter(([vw]) => vw <= maxTex && vw <= 3200);
       const pickV = fit.find(([vw]) => vw >= need) ?? fit[fit.length - 1] ?? vs[0];
       [w, url] = pickV;
@@ -1453,7 +1471,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   const mirrorM = new Matrix4().makeTranslation(0, FLOOR_Y, 0).multiply(new Matrix4().makeScale(1, -1, 1)).multiply(new Matrix4().makeTranslation(0, -FLOOR_Y, 0));
 
   /* ───────── calidad y vigilancia de fps ───────── */
-  let quality = high ? 2 : 1;
+  let quality = 2;
   let fpsFrames = 0;
   let fpsTime = 0;
   let guardFrom = 0;
@@ -1467,7 +1485,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       p.refl.visible = false;
       p.refl = null;
     }
-    renderer.setPixelRatio(1);
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.25));
     onResize();
   };
   const fallback = (reason: string) => {
@@ -1523,11 +1541,13 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   const camFwd = new Vector3();
   let lastLock = -1;
 
+  let frameNo = 0;
   function frame(now: number) {
     raf = 0;
     if (disposed) return;
     if (!visible) return;
     raf = requestAnimationFrame(frame);
+    frameNo++;
     const dt = Math.min((now - last) / 1000, 1 / 20);
     last = now;
     uTime.value += dt;
@@ -1644,7 +1664,15 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
         activeIdx = p.slot.index;
       }
       if (p.slot.stop >= 0 && Math.abs(cs - p.slot.stop) < 1.3) ensureHires(p);
-      else if (p.hiresUrl && !(lbIndex === p.slot.index && (lbOpen || lbT > 0)) && (p.slot.stop < 0 ? mosaic < 0.01 : Math.abs(cs - p.slot.stop) > 3)) dropHires(p);
+      else if (p.hiresUrl && !(lbIndex === p.slot.index && (lbOpen || lbT > 0)) && p.slot.stop >= 0 && Math.abs(cs - p.slot.stop) > 3) dropHires(p);
+      // calidad por tamaño real en pantalla (carrusel, satélites, fotos que no son la parada actual): si la foto
+      // ocupa más píxeles que su textura, se carga la versión justa; antes se quedaban en la de 480 px
+      if (p.mesh.visible && (frameNo + p.slot.index) % 12 === 0) {
+        const px = screenPx(p);
+        const have = p.hiresW || 480;
+        if (px > have * 1.1) ensureHires(p, px * 1.15);
+        else if (p.hiresUrl && p.slot.stop < 0 && px < have * 0.35 && !(lbIndex === p.slot.index && (lbOpen || lbT > 0))) dropHires(p);
+      }
       const isHeroSrc = (lbOpen || lbT > 0) && lbIndex === p.slot.index;
       p.mesh.visible = !isHeroSrc;
 
@@ -2013,7 +2041,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       photo: (i: number) => {
         const p = photos[i];
         const u = p.mesh.material.uniforms;
-        return { vis: p.mesh.visible, reveal: u.uReveal.value, fade: u.uFade.value, lum: u.uLum.value, soft: u.uSoft.value, hasTex: u.uHasTex.value, revealT: p.revealT, fadeIn: p.fadeIn, role: p.slot.role, stop: p.slot.stop, transparent: p.mesh.material.transparent, ro: p.mesh.renderOrder };
+        return { vis: p.mesh.visible, reveal: u.uReveal.value, fade: u.uFade.value, lum: u.uLum.value, soft: u.uSoft.value, hasTex: u.uHasTex.value, revealT: p.revealT, fadeIn: p.fadeIn, role: p.slot.role, stop: p.slot.stop, transparent: p.mesh.material.transparent, ro: p.mesh.renderOrder, texW: p.hiresW || (p.smallTex ? 480 : 0) };
       },
       cam: () => [camera.position.x, camera.position.y, camera.position.z, camLook.x, camLook.y, camLook.z],
       street: () => street?.debug,

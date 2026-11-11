@@ -55,15 +55,15 @@ async function fresh(out) {
 }
 const thumb = async (input) =>
   sharp(input, { limitInputPixels: false }).rotate().resize(48, 48, { fit: 'fill' }).greyscale().raw().toBuffer();
-async function sameAsCached(src, cached) {
-  if (!existsSync(cached)) return false;
+/** ¿es la misma foto? (miniatura 48 px en grises: misma foto ≈ 1–5 por color/ICC; otra foto ≫ 40) */
+async function sameThumb(srcThumb, cached) {
   try {
-    const [a, b] = await Promise.all([thumb(src), thumb(cached)]);
-    if (a.length !== b.length) return false;
+    const b = await thumb(cached);
+    if (srcThumb.length !== b.length) return false;
     let d = 0;
-    for (let i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]);
-    if (process.env.FOTOS_DEBUG) console.log('  huella', cached, (d / a.length).toFixed(2));
-    return d / a.length < 12; // misma foto ≈ 1–5 (color/ICC); otra foto ≫ 40
+    for (let i = 0; i < b.length; i++) d += Math.abs(srcThumb[i] - b[i]);
+    if (process.env.FOTOS_DEBUG) console.log('  huella', cached, (d / b.length).toFixed(2));
+    return d / b.length < 12;
   } catch {
     return false;
   }
@@ -78,18 +78,20 @@ async function one(slug, file) {
   const dir = path.join(CACHE, VERSION, slug);
   await mkdir(dir, { recursive: true });
   const st = await stat(src);
-  // huella: si la foto cambió, fuera todas sus versiones antiguas
-  const print = path.join(dir, `${base}.src`);
+  // Huella (sha1 del original) en «NN.huella». Si falta o no coincide, se revisa CADA versión de la caché
+  // contra el original (miniatura) y se borran las que no son esta foto. Antes (11/11/2026) solo se miraba
+  // la de 320 px: en Cloudflare esa era nueva pero las de 640–3200 y el original seguían siendo la foto de
+  // muestra anterior, y al abrir la foto salía la PROVISIONAL. Las «.src» de esa versión no valen.
+  const print = path.join(dir, `${base}.huella`);
   const hash = await sha1(src);
-  let old = existsSync(print) ? (await readFile(print, 'utf8')).trim() : '';
-  // Caché de antes de la huella (sin «.src»): se confía en ella solo si su versión pequeña es la MISMA foto
-  // (comparación en miniatura 48 px). Así el primer build en Cloudflare no regenera las 64 fotos (~12 min).
-  if (!old && (await sameAsCached(src, path.join(dir, `${base}-${WIDTHS[0]}.jpg`)))) {
-    old = hash;
-    await writeFile(print, hash);
-  }
+  const old = existsSync(print) ? (await readFile(print, 'utf8')).trim() : '';
+  if (existsSync(path.join(dir, `${base}.src`))) await rm(path.join(dir, `${base}.src`));
   if (old !== hash) {
-    for (const f of await readdir(dir)) if (f.startsWith(`${base}-`)) await rm(path.join(dir, f));
+    const files = (await readdir(dir)).filter((f) => f.startsWith(`${base}-`) && f.endsWith('.jpg'));
+    if (files.length) {
+      const t = await thumb(src);
+      for (const f of files) if (!(await sameThumb(t, path.join(dir, f)))) await rm(path.join(dir, f));
+    }
     await writeFile(print, hash);
   }
   const meta = await sharp(src).metadata();
@@ -144,7 +146,7 @@ await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT, { recursive: true });
 for (const slug of slugs) {
   const from = path.join(CACHE, VERSION, slug);
-  if (existsSync(from)) await cp(from, path.join(OUT, slug), { recursive: true, filter: (f) => !f.endsWith('.src') });
+  if (existsSync(from)) await cp(from, path.join(OUT, slug), { recursive: true, filter: (f) => !f.endsWith('.src') && !f.endsWith('.huella') });
 }
 // quita de public/fotos las versiones de fotos que ya no están en el contenido
 for (const slug of slugs) {
