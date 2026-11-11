@@ -17,9 +17,12 @@
  *
  * Salida: public/fotos/<slug>/NN-<ancho>.jpg y NN-original.jpg (public/fotos está en .gitignore).
  * Caché: node_modules/.astro/fotos (Cloudflare Pages conserva node_modules/.astro entre builds): solo se
- * regenera lo que cambia.
+ * regenera lo que cambia. Se decide por el CONTENIDO del original (SHA-256 guardado en <slug>/.hashes.json),
+ * nunca por fechas: en Cloudflare las fechas de la caché restaurada y del checkout no son fiables
+ * (11/11/2026: una foto sustituida siguió sirviéndose antigua por comparar mtimes).
  */
-import { readdir, mkdir, stat, copyFile, rm, cp } from 'node:fs/promises';
+import { readdir, mkdir, stat, copyFile, rm, cp, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -38,18 +41,24 @@ sharp.concurrency(Math.max(1, Math.min(4, os.cpus().length)));
 
 const jpegOpts = (q) => ({ quality: q, chromaSubsampling: '4:4:4', mozjpeg: true, progressive: true });
 
-async function fresh(out, srcStat) {
+async function fresh(out) {
   if (!existsSync(out)) return false;
-  const s = await stat(out);
-  return s.mtimeMs >= srcStat.mtimeMs && s.size > 0;
+  return (await stat(out)).size > 0;
 }
+const sha = async (f) => createHash('sha256').update(await readFile(f)).digest('hex');
 
-async function one(slug, file) {
+async function one(slug, file, hashes) {
   const src = path.join(SRC, slug, file);
   const base = file.replace(/\.jpe?g$/i, '');
   const dir = path.join(CACHE, VERSION, slug);
   await mkdir(dir, { recursive: true });
   const st = await stat(src);
+  const h = await sha(src);
+  if (hashes[base] !== h) {
+    // original nuevo o cambiado: fuera todas sus versiones anteriores
+    for (const f of await readdir(dir)) if (f.startsWith(`${base}-`)) await rm(path.join(dir, f));
+    hashes[base] = h;
+  }
   const meta = await sharp(src).metadata();
   const rotated = (meta.orientation ?? 1) >= 5;
   const w = rotated ? meta.height : meta.width;
@@ -61,7 +70,7 @@ async function one(slug, file) {
 
   for (const width of WIDTHS.filter((x) => x < w)) {
     const out = path.join(dir, `${base}-${width}.jpg`);
-    if (await fresh(out, st)) continue;
+    if (await fresh(out)) continue;
     jobs.push(
       sharp(src, { limitInputPixels: false })
         .rotate()
@@ -78,7 +87,7 @@ async function one(slug, file) {
   }
 
   const orig = path.join(dir, `${base}-original.jpg`);
-  if (!(await fresh(orig, st))) {
+  if (!(await fresh(orig))) {
     if (st.size <= MAX_ORIGINAL) jobs.push(copyFile(src, orig));
     else jobs.push(sharp(src, { limitInputPixels: false }).rotate().withIccProfile('srgb').keepExif().jpeg(jpegOpts(97)).toFile(orig));
   }
@@ -91,17 +100,21 @@ let made = 0, total = 0;
 const slugs = (await readdir(SRC, { withFileTypes: true })).filter((d) => d.isDirectory()).map((d) => d.name);
 for (const slug of slugs) {
   const files = (await readdir(path.join(SRC, slug))).filter((f) => /^\d+\.jpe?g$/i.test(f)).sort();
+  const hf = path.join(CACHE, VERSION, slug, '.hashes.json');
+  let hashes = {};
+  try { hashes = JSON.parse(await readFile(hf, 'utf8')); } catch {}
   for (const f of files) {
-    made += await one(slug, f);
+    made += await one(slug, f, hashes);
     total++;
   }
+  await writeFile(hf, JSON.stringify(hashes, null, 1));
 }
 // public/fotos = copia exacta de la caché (borra lo que ya no existe)
 await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT, { recursive: true });
 for (const slug of slugs) {
   const from = path.join(CACHE, VERSION, slug);
-  if (existsSync(from)) await cp(from, path.join(OUT, slug), { recursive: true });
+  if (existsSync(from)) await cp(from, path.join(OUT, slug), { recursive: true, filter: (s) => !s.endsWith('.hashes.json') });
 }
 // quita de public/fotos las versiones de fotos que ya no están en el contenido
 for (const slug of slugs) {
