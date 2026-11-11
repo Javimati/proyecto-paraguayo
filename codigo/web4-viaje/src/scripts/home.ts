@@ -79,15 +79,14 @@ function createProgress() {
   };
 }
 
-/** El botón dice lo que hace: «Sin animación» (pasa a la vista plana) o «Con animación» (vuelve al 3D) */
+/** Interruptor «Animación»: encendido = recorrido 3D; apagado = versión sin animación (2D). La etiqueta no cambia; el estado lo dicen el interruptor y aria-checked. */
 function setPressed(is2d: boolean) {
   if (!btn) return;
-  // la etiqueta ya dice el estado al que se pasa: sin aria-pressed (un conmutador no debe cambiar de nombre)
   btn.removeAttribute('aria-pressed');
+  btn.setAttribute('role', 'switch');
+  btn.setAttribute('aria-checked', is2d ? 'false' : 'true');
   btn.dataset.view = is2d ? '2d' : '3d';
-  const label = btn.querySelector('.index-btn__label');
   const d = btn.dataset;
-  if (label) label.textContent = (is2d ? d.animated : d.plain) ?? label.textContent;
   btn.title = (is2d ? d.animatedHint : d.plainHint) ?? btn.title;
 }
 
@@ -230,9 +229,8 @@ if (!capable) {
   // Sin 3D: si el script del <head> había preparado la intro, se retira limpia
   html.classList.remove('intro-on', 'intro-pre');
   introRoot.replaceChildren();
-  // Sin botón de alternar: «Índice» lleva al índice de capítulos
-  btn?.removeAttribute('aria-pressed');
-  if (btn) btn.title = btn.dataset.index ?? btn.title;
+  // Sin 3D no hay animación que encender: fuera el interruptor (la página 2D ya tiene su índice)
+  if (btn) btn.style.display = 'none';
 } else if (store.get('vista-2d') === '1') {
   html.classList.remove('intro-on', 'intro-pre');
   setPressed(true);

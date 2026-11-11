@@ -198,7 +198,7 @@ const jsonld = picks.map((p) => ({
   }
   @media (max-width: 860px) {
     .ed__head {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .ed__facts {
       order: 2;
@@ -206,7 +206,7 @@ const jsonld = picks.map((p) => ({
   }
   @media (max-width: 639px) {
     .ed__grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

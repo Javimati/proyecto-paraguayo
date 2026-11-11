@@ -86,6 +86,15 @@ Ahora (mismo criterio que la web 2):
 - Comprobado: build ok, `check:js` 169 KB/350, `photos:check` sin errores, enlaces del prototipo sin rotos. La capa nativa del 3D aparece cuando la foto termina de revelarse (en el renderizado por software tarda ~15 s; en GPU real, inmediato). **fps reales en GPU sin medir.**
 - Pendiente (Marlon/Álvaro): lugar y fecha de cada capítulo, qué es cada foto de Más trabajos, textos de capítulo definitivos.
 
+## 3f. Web 4 — revisión de Marlon (11/11/2026, prototipo 1794387428-6829)
+- **Fotos completas:** comprobado por hash que están las 63 (Fiesta Naranja 22, Supernoventeros 16, Más trabajos 15, Callejera 10). Marlon confirma que **son todas las fotos que tiene Álvaro**. Los originales servidos en `dist` son idénticos byte a byte salvo `fiesta-naranja/02` (26 MB > 25 MiB de Cloudflare → JPEG 97 4:4:4 a resolución completa, como estaba previsto).
+- **Fuera todo lo provisional** (decisión de Marlon): los textos de capítulo ya no llevan `[PROVISIONAL] … TODO`. Se han reescrito solo con datos confirmados (§1: Arganda, Alex Webb, fotoperiodismo/calle/reportaje, frases de su bio sobre la luz y los momentos de un segundo). Si Álvaro manda textos propios, se cambian en `src/content/fotos/*/index.md`.
+- **Fuera el crédito «(FOTO: Álvaro Rodríguez)»** de los pies (es su web). Se mantiene solo en los metadatos invisibles (JSON-LD `creditText`/`copyrightNotice`).
+- **Fuera las fechas de los pies** (se habían colado desde el EXIF; preferencia de Álvaro: sin fechas visibles).
+- **Botón de cabecera → interruptor «Animación»** (EN «Animation»): bola amarilla a la derecha = viaje 3D; gris a la izquierda = versión sin animación. `role="switch"` + `aria-checked`. Sin caja sobre el visor (el icono 2×2 parecía el logo de Windows y chocaba con la esquina de la cámara en móvil). Si el navegador no puede con el 3D, el interruptor no aparece. En las otras páginas, el enlace «Índice» lleva icono de lista.
+- **Móvil:** /editores se ensanchaba a 536 px en un móvil de 390 (rejilla `1fr` con imágenes de 6000 px de ancho intrínseco) → `minmax(0, 1fr)` (también en Facts). Comprobado a 360 y 390 px: ninguna página se sale de la pantalla.
+- Comprobado: build ok, `check:js` 169 KB/350, `astro check` sin errores; recorrido 3D en móvil (paradas 6, 12, 20, 26) y versión sin animación con fotos reales.
+
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.

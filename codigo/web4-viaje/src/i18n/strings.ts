@@ -32,6 +32,7 @@ export const T = {
     otherShort: 'EN',
     index: 'Índice',
     indexHint: 'Cambiar a la vista 2D',
+    animation: 'Animación',
     viewPlain: 'Sin animación',
     viewPlainHint: 'Ver la web sin el recorrido 3D: todas las fotos en una página',
     viewAnimated: 'Con animación',
@@ -85,6 +86,7 @@ export const T = {
     otherShort: 'ES',
     index: 'Index',
     indexHint: 'Switch to the 2D view',
+    animation: 'Animation',
     viewPlain: 'No animation',
     viewPlainHint: 'See the site without the 3D journey: every photo on one page',
     viewAnimated: 'Animated',
@@ -137,10 +139,11 @@ export function wireDate(d: Date): string {
   return `${dd}/${mm}/${d.getUTCFullYear()}`;
 }
 
-/** Pie de agencia: «MADRID, 14/03/2026 — Texto. (FOTO: Álvaro Rodríguez)» */
+/** Pie: «MADRID — Texto.». Sin fecha (preferencia de Álvaro: sin fechas visibles) ni crédito (la web entera es suya). */
 export function wireCaption(place: string | undefined, date: Date | undefined, text: string, lang: Lang): string {
-  const head = [place?.toUpperCase(), date ? wireDate(date) : ''].filter(Boolean).join(', ');
-  return `${head ? `${head} — ` : ''}${text} (${T[lang].credit}: ${PERSON.credit})`;
+  void date;
+  const head = place ? place.toUpperCase() : '';
+  return `${head ? `${head} — ` : ''}${text}`;
 }
 
 export function otherLang(lang: Lang): Lang {

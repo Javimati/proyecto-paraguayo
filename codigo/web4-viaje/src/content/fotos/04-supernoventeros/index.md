@@ -4,10 +4,8 @@ kicker: Capítulo 04 — Supernoventeros
 kicker_en: Chapter 04 — Supernoventeros
 title: Supernoventeros
 title_en: Supernoventeros
-text: Un concierto de Supernoventeros, desde el foso y la pasarela.
-  [PROVISIONAL] Cuenta dónde fue y cómo lo trabajaste. TODO.
-text_en: A Supernoventeros concert, shot from the pit and the catwalk.
-  [PROVISIONAL] Say where it was and how you worked it. TODO.
+text: "Un concierto de Supernoventeros, desde el foso y la pasarela: la energía de un directo, foto a foto."
+text_en: "A Supernoventeros concert, shot from the pit and the catwalk: the energy of a live show, frame by frame."
 provisional: false
 photos:
   - file: ./01.jpg

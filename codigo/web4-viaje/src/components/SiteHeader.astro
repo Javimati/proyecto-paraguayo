@@ -46,19 +46,18 @@ const items = [
         type="button"
         class="index-btn"
         id="btn-indice"
+        role="switch"
+        aria-checked="true"
         title={t.viewPlainHint}
-        data-plain={t.viewPlain}
         data-plain-hint={t.viewPlainHint}
-        data-animated={t.viewAnimated}
         data-animated-hint={t.viewAnimatedHint}
-        data-index={t.index}
       >
-        <span class="index-btn__icon" aria-hidden="true" />
-        <span class="index-btn__label">{t.index}</span>
+        <span class="index-btn__label">{t.animation}</span>
+        <span class="index-btn__switch" aria-hidden="true" />
       </button>
     ) : (
       <a class="index-btn" href={`${ROUTES.home[lang]}#capitulos`}>
-        <span class="index-btn__icon" aria-hidden="true" />
+        <span class="index-btn__icon index-btn__icon--list" aria-hidden="true" />
         <span class="index-btn__label">{t.index}</span>
       </a>
     )
@@ -107,6 +106,12 @@ const items = [
     height: calc(clamp(12px, 2.2vw, 28px) * 2 + 26px);
     padding-inline: calc(clamp(12px, 2.2vw, 28px) + 16px);
   }
+  @media (max-width: 420px) {
+    :global(html.exp-on) .site-header {
+      padding-inline: calc(clamp(12px, 2.2vw, 28px) + 10px);
+      gap: 10px;
+    }
+  }
   .brand__short {
     display: none;
   }
@@ -151,23 +156,60 @@ const items = [
     text-decoration: none;
     cursor: pointer;
   }
+  /* sobre el visor 3D, sin caja: no tapa la esquina de la cámara */
+  :global(html.exp-on) .index-btn {
+    border-color: transparent;
+    background: none;
+  }
   .index-btn:hover {
     border-color: var(--peaking);
     color: var(--peaking);
   }
-  .index-btn[data-view='2d'] {
-    border-color: var(--peaking);
-  }
-  /* icono: rejilla 2×2 de miniaturas */
-  .index-btn__icon {
-    width: 12px;
-    height: 12px;
+  /* icono del enlace «Índice» (otras páginas): tres líneas de lista */
+  .index-btn__icon--list {
+    width: 14px;
+    height: 10px;
     background:
-      linear-gradient(currentColor, currentColor) 0 0 / 5px 5px,
-      linear-gradient(currentColor, currentColor) 100% 0 / 5px 5px,
-      linear-gradient(currentColor, currentColor) 0 100% / 5px 5px,
-      linear-gradient(currentColor, currentColor) 100% 100% / 5px 5px;
+      linear-gradient(currentColor, currentColor) 0 0 / 100% 1.5px,
+      linear-gradient(currentColor, currentColor) 0 50% / 100% 1.5px,
+      linear-gradient(currentColor, currentColor) 0 100% / 100% 1.5px;
     background-repeat: no-repeat;
+  }
+  /* interruptor de animación: encendido (bola a la derecha, amarillo) = viaje animado; apagado = versión sin animación */
+  .index-btn__switch {
+    position: relative;
+    flex: none;
+    width: 28px;
+    height: 16px;
+    border: 1.5px solid var(--peaking);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--peaking) 22%, transparent);
+    transition: background-color 0.25s, border-color 0.25s;
+  }
+  .index-btn__switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 14px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--peaking);
+    transition: left 0.25s ease, background-color 0.25s;
+  }
+  .index-btn[data-view='2d'] .index-btn__switch {
+    border-color: var(--tenue);
+    background: transparent;
+  }
+  .index-btn[data-view='2d'] .index-btn__switch::after {
+    left: 2px;
+    background: var(--tenue);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .index-btn__switch,
+    .index-btn__switch::after {
+      transition: none;
+    }
   }
   @media (max-width: 760px) {
     .is-secondary {
@@ -199,12 +241,14 @@ const items = [
       display: inline;
       font-size: var(--t-15);
     }
-    /* el botón Índice queda en icono (nombre accesible intacto) y no tapa el visor del hero */
+    /* el botón queda en icono (nombre accesible intacto): sin caja, para no parecer una ventana ni chocar con la esquina del visor */
     .index-btn {
-      min-width: 40px;
-      min-height: 40px;
+      min-width: 44px;
+      min-height: 44px;
       justify-content: center;
-      padding: 6px;
+      padding: 0;
+      border: 0;
+      background: none;
     }
   }
 </style>

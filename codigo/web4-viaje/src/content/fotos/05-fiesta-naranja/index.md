@@ -4,10 +4,8 @@ kicker: Capítulo 05 — La Fiesta Naranja
 kicker_en: Chapter 05 — La Fiesta Naranja
 title: La Fiesta Naranja
 title_en: La Fiesta Naranja
-text: "Un festival entero vestido de naranja: público, cabina y escenario.
-  [PROVISIONAL] Cuenta dónde fue y qué te tocó cubrir. TODO."
-text_en: "A whole festival dressed in orange: crowd, DJ booth and stage.
-  [PROVISIONAL] Say where it was and what you covered. TODO."
+text: "Un festival entero vestido de naranja: público, cabina y escenario. La emoción de una celebración y los detalles que casi nadie ve."
+text_en: "A whole festival dressed in orange: crowd, DJ booth and stage. The emotion of a celebration and the details almost nobody sees."
 provisional: false
 photos:
   - file: ./01.jpg

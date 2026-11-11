@@ -4,11 +4,8 @@ kicker: Capítulo 01 — Desde Madrid
 kicker_en: Chapter 01 — From Madrid
 title: Desde Madrid
 title_en: From Madrid
-text: "Vivo en Arganda del Rey, al sureste de Madrid. [PROVISIONAL] Aquí van dos
-  o tres frases tuyas: cuándo empezaste a hacer fotos, con qué y por qué. TODO."
-text_en: "I live in Arganda del Rey, south-east of Madrid. [PROVISIONAL] Two or
-  three sentences of yours go here: when you started taking photos, with what
-  and why. TODO."
+text: "Vivo en Arganda del Rey, al sureste de Madrid. Salgo con la cámara a buscar lo que pasa en un segundo y se recuerda siempre."
+text_en: "I live in Arganda del Rey, south-east of Madrid. I go out with the camera looking for what happens in a second and stays with you for good."
 provisional: false
 photos:
   - file: ./01.jpg

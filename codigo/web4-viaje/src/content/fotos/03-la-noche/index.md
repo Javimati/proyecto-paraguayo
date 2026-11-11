@@ -4,10 +4,8 @@ kicker: Capítulo 03 — La noche
 kicker_en: Chapter 03 — The night
 title: La noche
 title_en: The night
-text: Salas, cabinas, barra y pista. [PROVISIONAL] Cuenta qué buscas cuando
-  fotografías una noche de club. TODO.
-text_en: Venues, DJ booths, the bar and the dance floor. [PROVISIONAL] Say what
-  you look for when you shoot a club night. TODO.
+text: "Salas, cabinas, barra y pista. Mi formación en iluminación me deja trabajar con cualquier luz, también en una sala a oscuras."
+text_en: "Venues, DJ booths, the bar and the dance floor. My lighting training lets me work with any light, even in a dark room."
 provisional: false
 photos:
   - file: ./01.jpg

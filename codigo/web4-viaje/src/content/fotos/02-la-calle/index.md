@@ -4,12 +4,8 @@ kicker: Capítulo 02 — La calle
 kicker_en: Chapter 02 — The street
 title: La calle
 title_en: The street
-text: "Mi referente es Alex Webb: capas, luz dura y varias escenas dentro de un
-  mismo encuadre. [PROVISIONAL] Cuenta con tus palabras qué buscas cuando sales
-  a la calle. TODO."
-text_en: "My reference is Alex Webb: layers, hard light and several scenes
-  inside one frame. [PROVISIONAL] Say in your own words what you look for out on
-  the street. TODO."
+text: "Mi referente es Alex Webb: capas, luz dura y varias escenas dentro de un mismo encuadre. Fotoperiodismo, calle y reportaje: es lo que más quiero hacer."
+text_en: "My reference is Alex Webb: layers, hard light and several scenes inside one frame. Photojournalism, street and reportage: it is what I want to do most."
 provisional: false
 photos:
   - file: ./01.jpg
