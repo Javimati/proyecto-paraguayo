@@ -44,33 +44,20 @@ export const PHOTO_FRAG = /* glsl */ `
     bool inImage = all(greaterThanEqual(inner, vec2(0.0))) && all(lessThanEqual(inner, vec2(1.0)));
     vec3 col;
     if (inImage) {
+      // interior de la foto: SIEMPRE sus píxeles tal cual, desde que aparece (decisión de Marlon, 16/11/2026).
+      // Antes se desenfocaba («recuerdo»), se atenuaba (uLum), se revelaba desde papel claro y se le aplicaba
+      // niebla hasta llegar: se veía distinta (más brillante y lavada) y cambiaba al pararse delante.
       col = uHasTex > 0.5 ? texture2D(uTex, inner).rgb : vec3(0.02);
-      if (uSoft > 0.01 && uHasTex > 0.5) {
-        // enfoque de recuerdo: anillo de 8 muestras, solo mientras la foto no es la activa
-        vec3 acc = col;
-        float rad = uSoft * 0.014;
-        for (int i = 0; i < 8; i++) {
-          float a = float(i) * 0.785398 + 0.39;
-          acc += texture2D(uTex, inner + vec2(cos(a), sin(a) * uAspect.x) * rad).rgb;
-        }
-        col = acc / 9.0;
-      }
-      if (uDevelop < 0.999) {
-        // revelado: las sombras aparecen antes que las luces sobre papel claro
-        float l = dot(col, vec3(0.299, 0.587, 0.114));
-        float k = smoothstep(0.0, 1.0, uDevelop * 1.55 - l * 0.55);
-        col = mix(vec3(0.80, 0.79, 0.75), col, k);
-      }
-      col *= uLum;
     } else {
       // marco: papel muy oscuro con un filo de luz en el borde exterior
       vec2 e = min(vUv, 1.0 - vUv) / uMargin;       // 0 en el borde exterior, 1 en el interior
       float edge = 1.0 - smoothstep(0.0, 0.35, min(e.x, e.y));
       col = vec3(0.055, 0.055, 0.06) + vec3(0.9, 0.86, 0.78) * edge * (0.10 + 0.55 * uGlow);
+      col *= uLum;
+      // niebla por distancia, solo en el marco
+      float fog = (1.0 - uHero) * smoothstep(uFogRange.x, uFogRange.y, vDist);
+      col = mix(col, uFog, fog);
     }
-    // niebla por distancia: lejos se funde con el espacio; cerca (y en el lightbox) la foto queda intacta
-    float fog = (1.0 - uHero) * smoothstep(uFogRange.x, uFogRange.y, vDist);
-    col = mix(col, uFog, fog);
     float alpha = uReveal;
     if (uFade < 0.999) {
       // se deshace en ascuas desde los bordes, con el filo encendido
@@ -82,6 +69,7 @@ export const PHOTO_FRAG = /* glsl */ `
       col = mix(col, vec3(1.0, 0.52, 0.18) * 1.6, ember);
       alpha *= keep;
     }
+    if (alpha < 0.004) discard;
     gl_FragColor = vec4(col, alpha);
   }
 `;

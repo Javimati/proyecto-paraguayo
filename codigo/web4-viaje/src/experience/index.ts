@@ -92,8 +92,8 @@ import type { Experience, MountOptions } from './types';
 export type { Experience, MountOptions, ViajeData, Tier } from './types';
 
 const FRAME = 0.045; // ancho del marco en unidades de mundo
+const PHOTO_POINTS = false; // nube de puntos al aparecer la héroe (desactivada: la foto se ve tal cual desde el principio)
 const REVEAL_TIME = 0.6; // s, nube de puntos de la héroe
-const FADE_TIME = 0.45; // s, aparición del resto
 const BASE_FOG = new Color(0.016, 0.017, 0.024);
 const UP = new Vector3(0, 1, 0);
 const TEXT_COLOR = new Color(0.92, 0.91, 0.88);
@@ -399,7 +399,9 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     mat.blendSrc = SrcAlphaFactor;
     mat.blendDst = OneMinusSrcAlphaFactor;
     mat.blendSrcAlpha = ZeroFactor;
-    mat.blendDstAlpha = OneMinusSrcAlphaFactor;
+    // máscara de foto ENTERA en cuanto se dibuja (aunque aún esté apareciendo): así la linterna, el barrido y el
+    // quemado de película del post nunca iluminan una foto a medio aparecer (16/11/2026)
+    mat.blendDstAlpha = ZeroFactor;
     const mesh = new Mesh(planeGeo, mat);
     mesh.scale.set(W, H, 1);
     mesh.position.copy(slot.pos);
@@ -1671,9 +1673,10 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       const isHeroSrc = (lbOpen || lbT > 0) && lbIndex === p.slot.index;
       p.mesh.visible = !isHeroSrc;
 
-      // aparición: la héroe de cada estación se condensa desde una nube de puntos; el resto aparece suave
+      // aparición: todas igual, la foto tal cual y opaca desde que se ve. Fuera la nube de puntos de la héroe
+      // (16/11/2026): los puntos agrandaban las luces y la foto se veía más brillante hasta condensarse.
       if (p.tex) {
-        if (p.slot.role === 'hero') {
+        if (PHOTO_POINTS && p.slot.role === 'hero') {
           if (p.revealT < 0) {
             const instant = !started || Math.abs(vel) > 6 || mosaic > 0.01;
             if (instant) p.revealT = REVEAL_TIME;
@@ -1694,8 +1697,10 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
             }
           } else if (p.revealT >= REVEAL_TIME) u.uReveal.value = 1;
         } else {
-          p.fadeIn = Math.min(p.fadeIn + dt / FADE_TIME, 1);
-          u.uReveal.value = smooth(p.fadeIn);
+          // opaca desde el primer fotograma: con fundido, la calle (ventanas, farolas) se veía A TRAVÉS de la foto
+          // mientras aparecía y la foto parecía más clara hasta terminar (16/11/2026)
+          p.fadeIn = 1;
+          u.uReveal.value = 1;
         }
       }
       // revelado químico del plano «sin revelar» al llegar

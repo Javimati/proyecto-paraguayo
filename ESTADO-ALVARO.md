@@ -128,6 +128,14 @@ Ahora (mismo criterio que la web 2):
 - **Portadas del índice de capítulos (escritorio): fotos enteras** (`object-fit: contain` en caja 3:2 con bandas; antes `cover` las recortaba, sobre todo las verticales). Un título largo ya no agranda su portada («Supernoven-teros» parte con guion). También enteras la foto de fondo de la intro (sin zoom de 1,05) y las fotos de la historia 2D (`contain`). Ya no queda ningún `object-fit: cover` en la web 4.
 - Comprobado: build ok, `check:js` ok, `photos:check` sin errores, `astro check` 0 errores; captura del índice a 1280 px. Lighthouse no repetido (cambios solo de CSS/texto y menos geometría en el 3D). **3D sin probar en GPU real.**
 
+## 3k. Web 4 — la foto se ve original desde que aparece (16/11/2026, 2.º chat del día)
+- Queja de Marlon: en el 3D la foto se veía más brillante/distinta al llegar y luego cambiaba a la original. Medido (Playwright + SwiftShader): en reposo la textura WebGL y la capa nativa coinciden (brillo medio 80,0 frente a 79,5); el cambio venía del camino de llegada:
+  1. **Fundido de aparición:** la foto era semitransparente unos 0,45 s y se veía la calle (ventanas, farolas) A TRAVÉS de ella. Ahora es opaca desde el primer fotograma (`uReveal = 1`).
+  2. **Nube de puntos** de la héroe: los puntos agrandaban las luces. Desactivada (`PHOTO_POINTS = false`).
+  3. En el shader de la foto, el interior era: desenfoque de «recuerdo» (`uSoft`), atenuado de las no activas (`uLum`, 33 %), niebla por distancia y papel sin revelar en «Lo que viene». **Fuera todo:** el interior son siempre los píxeles de la textura; atenuado y niebla solo en el marco. **Consecuencia:** las fotos vecinas y las del fondo ya no se ven oscurecidas ni borrosas, y en «Lo que viene» no hay revelado.
+  4. **Máscara de foto del post** (`blendDstAlpha = Zero` + `discard` si alfa < 0,004): linterna, barrido y quemado de película entre capítulos ya no pueden iluminar una foto. Se mantiene el deshacer en ascuas al atravesarla (solo al irte).
+- Comprobado: build ok, `check:js` ok, `photos:check` sin errores; captura durante la llegada a la parada 4: la foto ya está entera y opaca. **Sin probar en GPU real.**
+
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.
