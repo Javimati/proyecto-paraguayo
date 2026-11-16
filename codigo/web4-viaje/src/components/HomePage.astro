@@ -74,10 +74,9 @@ const description =
       html.intro-pre #intro-root { display: block; }
       html.intro-on .site-header { opacity: 0; pointer-events: none; }
       .intro-pre { position: fixed; inset: 0; background: #0a0b10; transition: opacity 0.45s ease; }
-      .intro-pre img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.05); transition: transform 0.3s cubic-bezier(0.2, 0.6, 0.3, 1); }
+      .intro-pre img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
       .intro-pre__b { filter: blur(18px) brightness(0.62); }
       .intro-pre__s { opacity: var(--focus, 0); }
-      #intro-root.is-shooting .intro-pre img { transform: scale(1); }
       .intro-pre.is-gone { opacity: 0; }
     </style>
   </Fragment>

@@ -99,8 +99,20 @@ async function one(slug, file) {
   // la de 320 px: en Cloudflare esa era nueva pero las de 640–3200 y el original seguían siendo la foto de
   // muestra anterior, y al abrir la foto salía la PROVISIONAL. Las «.src» de esa versión no valen.
   const print = path.join(dir, `${base}.huella`);
-  const hash = await sha1(src);
-  const old = existsSync(print) ? (await readFile(print, 'utf8')).trim() : '';
+  // «h2:» (16/11/2026): las huellas escritas antes de comparar proporciones (commit 34c8750) dieron por buena
+  // la versión ANTIGUA de MT14 (Raúl, 6000×4000) tras cambiarla por el recorte 2406×1499, y la web siguió
+  // sirviendo la antigua. Con el prefijo nuevo, todas las fotos se revisan una vez con la comprobación completa.
+  const hash = 'h2:' + (await sha1(src));
+  let old = existsSync(print) ? (await readFile(print, 'utf8')).trim() : '';
+  // red de seguridad barata en cada build (solo cabeceras): la versión «original» de la caché debe medir
+  // lo mismo que el original del repo; si no, la caché es de otra foto
+  const cachedOrig = path.join(dir, `${base}-original.jpg`);
+  if (old === hash && existsSync(cachedOrig)) {
+    const [a, b] = await Promise.all([sharp(src).metadata(), sharp(cachedOrig).metadata()]);
+    const dims = (m) => ((m.orientation ?? 1) >= 5 ? [m.height, m.width] : [m.width, m.height]);
+    const [aw, ah] = dims(a), [bw, bh] = dims(b);
+    if (aw !== bw || ah !== bh) old = '';
+  }
   if (existsSync(path.join(dir, `${base}.src`))) await rm(path.join(dir, `${base}.src`));
   if (old !== hash) {
     const files = (await readdir(dir)).filter((f) => f.startsWith(`${base}-`) && f.endsWith('.jpg'));

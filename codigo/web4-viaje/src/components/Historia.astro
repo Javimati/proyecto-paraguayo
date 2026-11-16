@@ -45,7 +45,6 @@ function slot(p: PhotoView, i: number) {
   <section class="hero" aria-labelledby="hero-title">
     <span class="frame-marks hero__marks" aria-hidden="true"></span>
     <p class="hero__readout mono" aria-hidden="true">
-      <span>{t.viewer.iso} 400</span><span>1/250</span><span>f/2.8</span>
       <span class="hero__shots">[{String(total).padStart(3, '0')}] {t.viewer.shots}</span>
     </p>
     <div class="hero__viewfinder">
@@ -286,9 +285,13 @@ function slot(p: PhotoView, i: number) {
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: var(--gap);
   }
+  .index__list > li {
+    min-width: 0;
+  }
   .index__item {
     display: grid;
-    grid-template-columns: auto 1fr;
+    /* minmax(0, 1fr): un título largo («Supernoventeros») no ensancha su columna ni agranda la portada */
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 2px 10px;
     text-decoration: none;
   }
@@ -300,10 +303,14 @@ function slot(p: PhotoView, i: number) {
     margin-bottom: 10px;
     color: transparent;
   }
+  /* foto ENTERA (preferencia de Álvaro: nunca recortadas): cabe en la caja 3:2 con bandas si es vertical */
   .index__thumb img {
+    position: absolute;
+    inset: 0;
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition:
       filter 0.3s,
       scale 0.5s var(--ease-out);
@@ -326,6 +333,8 @@ function slot(p: PhotoView, i: number) {
     padding-top: 0.35em;
   }
   .index__name {
+    overflow-wrap: break-word;
+    hyphens: auto;
     font-size: var(--t-21);
     font-weight: 640;
     line-height: 1.1;
@@ -414,9 +423,10 @@ function slot(p: PhotoView, i: number) {
     color: transparent;
   }
   .shot__frame img {
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
   .shot__marks {
     inset: -10px;

@@ -297,6 +297,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     return g;
   };
 
+  const PHOTO_LIGHTS = false;
   const coneMat = (color: { value: Color }, k: number) => {
     const m = new ShaderMaterial({ vertexShader: SPOT_VERT, fragmentShader: SPOT_FRAG, uniforms: { uTint: color, uI: { value: 0 }, uK: { value: k } }, transparent: true, depthWrite: false, side: DoubleSide });
     keepAlpha(m, true);
@@ -329,7 +330,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     decor.push(m);
     return m;
   };
-  const windowLights: { win: ShaderMaterial; shaft: ShaderMaterial; chapter: number }[] = [];
+  const windowLights: { win: ShaderMaterial; chapter: number }[] = [];
   for (const z of zones) {
     const A = z.anchor;
     if (z.preset === 'room') {
@@ -345,14 +346,8 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       decorMats.push(win);
       const wpos = A.clone().add(new Vector3(-4.97, 1.55, -5.3));
       addPlane(win, wpos, Math.PI / 2, 0, 1.1, 1.5, z.index);
-      const shaftC = coneMat({ value: new Color(1, 0.92, 0.78) }, 0.05);
-      const shaft = new Mesh(spotGeo, shaftC);
-      placeCone(shaft, wpos.clone().add(new Vector3(0.05, 0.1, 0)), light.clone().add(new Vector3(0.5, -0.4, 0.2)), 1.8);
-      shaft.renderOrder = 6;
-      shaft.userData.chapter = z.index;
-      scene.add(shaft);
-      decor.push(shaft);
-      windowLights.push({ win, shaft: shaftC, chapter: z.index });
+      // sin haz de luz sobre la foto (decisión de Marlon, 16/11/2026): cada foto se ve uniforme, tal cual
+      windowLights.push({ win, chapter: z.index });
     } else if (z.preset === 'wall') {
       // muro: fondo oscuro detrás de la rejilla
       const s0 = slots.filter((s) => s.chapter === z.index);
@@ -413,10 +408,10 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     mesh.visible = false;
     scene.add(mesh);
 
-    // foco cenital (no en el cuarto: allí manda la ventana)
+    // SIN foco cenital ni contraluces sobre las fotos (decisión de Marlon, 16/11/2026): los conos se sumaban
+    // encima de la foto y cambiaban su iluminación. Cada foto se ve uniforme, tal cual la entregó Álvaro.
     let spot: PhotoObj['spot'] = null;
-    const preset = zones[slot.chapter].preset;
-    if (slot.role !== 'thumb' && preset !== 'room' && preset !== 'stage') {
+    if (PHOTO_LIGHTS && slot.role !== 'thumb' && zones[slot.chapter].preset !== 'room' && zones[slot.chapter].preset !== 'stage') {
       spot = new Mesh(spotGeo, coneMat(shared.uTint, 0.07));
       const src = slot.pos.clone().addScaledVector(slot.normal, 1.1).add(new Vector3(0, slot.height * 0.5 + 3.2, 0));
       const dst = slot.pos.clone().addScaledVector(slot.normal, 0.6).add(new Vector3(0, -slot.height * 0.5 - 0.8, 0));
@@ -427,7 +422,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     }
     // contraluces del escenario: dos haces cruzados del color de la foto, por detrás
     const backs: PhotoObj['backs'] = [];
-    if (slot.back) {
+    if (PHOTO_LIGHTS && slot.back) {
       const col = { value: new Color(slot.back[0], slot.back[1], slot.back[2]) };
       for (const side of [-1, 1]) {
         const b = new Mesh(spotGeo, coneMat(col, 0.16));
@@ -1781,7 +1776,6 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       const z = zones[w.chapter];
       const near1 = 1 - clamp(Math.abs(cs - z.firstStop) - 0.2, 0, 1);
       w.win.uniforms.uI.value = 0.32 + 0.22 * near1;
-      w.shaft.uniforms.uI.value = 0.6 + 0.5 * near1;
     }
     // títulos 3D: una sola línea de tiempo por título, derivada de la posición (sin reinicios)
     for (const t of titles) {

@@ -1,5 +1,5 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 10/11/2026 (chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
+_Última actualización: 16/11/2026 (chat web 4: sin ISO/velocidad/diafragma, foto de Raúl, sin foco, portadas enteras; chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 ## 1. Álvaro (datos confirmados)
 - 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha. Antes: **Grado Medio de Técnico en Vídeo Disc-jockey y Sonido, Campus FP Arganda** (dato de Marlon, 10/11/2026; puesto en /sobre de la web 2).
 - Quiere fotoperiodismo, calle, reportaje y actualidad. También eventos, conciertos y bodas, en segundo plano. Vídeo no.
@@ -119,6 +119,14 @@ Ahora (mismo criterio que la web 2):
 
 ## 3i. Web 4 — sin pies de foto visibles (11/11/2026)
 - Decisión de Marlon: **fuera los títulos/pies de las fotos** en la historia 2D (`figcaption`) y en el visor ampliado del 3D. Los textos siguen en `index.md` (caption/alt): el `alt` se mantiene para accesibilidad y SEO, y el pie va en el JSON-LD invisible.
+
+## 3j. Web 4 — ajustes de Marlon (16/11/2026)
+- **Fuera ISO, velocidad y diafragma** en todas partes: lectura del visor del héroe 2D (queda solo «[063] disparos»), barra EVF de la intro (quedan M, AWB, fotómetro, batería y disparos) y la 404.
+- **Raúl entre el humo (MT14, `03-la-noche/06.jpg`)**: el repo ya tenía el recorte 2406×1499, pero Cloudflare seguía sirviendo la versión antigua 6000×4000 (comprobado: `06-1080.jpg` era 1080×720). Causa: en el build de 34c8750 la huella se escribió con la comparación vieja (sin proporciones) y dio por buenas las versiones antiguas; el arreglo de 5b00e37 ya no volvía a mirar porque la huella coincidía. Ahora: huella con prefijo `h2:` (todas las fotos se revisan una vez con la comprobación completa; el próximo build en Cloudflare tarda unos minutos más) y, en cada build, comprobación barata de que `NN-original.jpg` de la caché mide lo mismo que el original. Probado simulando el fallo: regenera solo las versiones malas.
+- **Fuera el foco cenital** (cono de luz desde arriba sobre cada foto), los contraluces cruzados del escenario y el haz de la ventana sobre la foto del cuarto: se sumaban encima de la foto y cambiaban su iluminación. `PHOTO_LIGHTS = false` en `src/experience/index.ts`. La ventana del cuarto sigue (sin haz). **Sigue igual:** las fotos que no son la parada actual se ven atenuadas y desenfocadas hasta llegar (la activa, tal cual).
+- **Supernoventeros, texto nuevo** (Marlon): «Un festival que te transporta a los años noventa, desde el foso y el escenario, la energía de un directo, foto a foto.» (EN: «A festival that takes you back to the nineties, from the pit and the stage, the energy of a live show, frame by frame.»).
+- **Portadas del índice de capítulos (escritorio): fotos enteras** (`object-fit: contain` en caja 3:2 con bandas; antes `cover` las recortaba, sobre todo las verticales). Un título largo ya no agranda su portada («Supernoven-teros» parte con guion). También enteras la foto de fondo de la intro (sin zoom de 1,05) y las fotos de la historia 2D (`contain`). Ya no queda ningún `object-fit: cover` en la web 4.
+- Comprobado: build ok, `check:js` ok, `photos:check` sin errores, `astro check` 0 errores; captura del índice a 1280 px. Lighthouse no repetido (cambios solo de CSS/texto y menos geometría en el 3D). **3D sin probar en GPU real.**
 
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.

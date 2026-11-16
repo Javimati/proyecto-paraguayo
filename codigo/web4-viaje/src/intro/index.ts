@@ -260,9 +260,6 @@ export function mountIntro(o: IntroOptions): Promise<void> {
     evf.setAttribute('aria-hidden', 'true');
     evf.innerHTML = `
       <span class="vf__mode">M</span>
-      <span>1/250</span>
-      <span>F2.8</span>
-      <span>ISO 1600</span>
       <span>AWB</span>
       <span class="vf__meter" title="Exposición"><span class="vf__meter-scale">−2 · · · 0 · · · +2</span><i></i></span>
       <span class="vf__bat" title="Batería"><i></i><i></i><i></i><i></i></span>
