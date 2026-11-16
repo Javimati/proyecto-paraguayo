@@ -1052,7 +1052,8 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
       const pickV = fit.find(([vw]) => vw >= need) ?? fit[fit.length - 1] ?? vs[0];
       [w, url] = pickV;
     }
-    if (url === p.slot.photo.srcSmall) return;
+    // la pequeña ya es de 480 px: nunca se cambia por una versión más pequeña (antes podía bajar a 320 px y verse blanda)
+    if (url === p.slot.photo.srcSmall || (vs && vs.length && w <= 480)) return;
     if (p.hires && (url === p.hiresUrl || w <= p.hiresW)) return;
     const prevUrl = p.hiresUrl;
     p.hires = true;
@@ -1531,6 +1532,18 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     });
   };
 
+  /* ───────── máscara de foto en el alfa ─────────
+   * Las fotos escriben alfa 0 para que el post (linterna, barrido, quemado) no las toque. Eso solo vale en el
+   * render a textura: pintando directo en el lienzo (móvil/tablet, gama media), ese alfa 0 llegaba a la pantalla y
+   * el navegador mezclaba la foto con el fondo de la página → sombras lavadas y azuladas mientras te movías, hasta
+   * que encima aparecía la foto real (16/11/2026; medido: negros a 12/255 en vez de 0). Sin post, alfa intacto. */
+  let photoMask = true;
+  const setPhotoMask = (on: boolean) => {
+    if (on === photoMask) return;
+    photoMask = on;
+    for (const p of photos) p.mesh.material.blendDstAlpha = on ? ZeroFactor : OneFactor;
+  };
+
   /* ───────── bucle ───────── */
   const tmpV = new Vector3();
   const tmpS = new Vector3();
@@ -1975,6 +1988,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
     // render
     loader.tick();
     const needRT = usePost || blur > 0.002 || segSweep > 0.01;
+    setPhotoMask(needRT && !!rt);
     if (needRT && rt) {
       renderer.setRenderTarget(rt);
       renderer.setClearColor(fog, 1);

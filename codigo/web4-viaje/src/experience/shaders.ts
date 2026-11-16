@@ -298,7 +298,8 @@ export const POST_FRAG = /* glsl */ `
         float k = float(i) / 7.0;
         acc += texture2D(tScene, vUv - dir * k * v * 0.09).rgb;
       }
-      col = mix(col, acc / 8.0, smoothstep(0.0, 0.25, v));
+      // solo fuera de las fotos: la estela arrastraba las luces sobre las sombras de la foto (16/11/2026)
+      col = mix(col, acc / 8.0, smoothstep(0.0, 0.25, v) * (1.0 - photo));
     }
 
     // luz de linterna en la bruma alrededor del cursor (fuera de las fotos)

@@ -5,6 +5,14 @@ import { LinearFilter, LinearMipmapLinearFilter, NoColorSpace, Texture, type Web
  * con concurrencia limitada, y subida a GPU de una en una por frame para no dar tirones.
  * Las texturas van SIN conversión de espacio de color: los píxeles llegan a pantalla tal cual.
  */
+/** motor WebKit: Safari en Mac y cualquier navegador en iOS/iPadOS (Chrome, Brave… usan WebKit allí) */
+const IS_WEBKIT = (() => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const ios = /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  return ios || (/AppleWebKit/.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Android/.test(ua));
+})();
+
 type Job = { url: string; priority: number; resolve: (t: Texture) => void; reject: (e: unknown) => void };
 
 export class TextureLoader {
@@ -64,7 +72,11 @@ export class TextureLoader {
 
   private async fetchOne(url: string): Promise<Texture> {
     let tex: Texture;
-    if (typeof createImageBitmap === 'function') {
+    // WebKit (Safari y todos los navegadores de iPhone/iPad): NO se usa createImageBitmap. Con ImageBitmap la foto
+    // podía llegar a la GPU al revés (no respeta siempre `imageOrientation: 'flipY'`) y con el color convertido al
+    // de la pantalla, con las sombras lavadas hasta que encima aparecía la foto real (16/11/2026). Con <img> el
+    // volteo lo hace WebGL (UNPACK_FLIP_Y, fiable en todos) y los píxeles llegan tal cual (sin conversión de color).
+    if (typeof createImageBitmap === 'function' && !IS_WEBKIT) {
       const res = await fetch(url, { signal: this.abort.signal });
       if (!res.ok) throw new Error(`${res.status} ${url}`);
       const blob = await res.blob();
