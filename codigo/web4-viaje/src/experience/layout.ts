@@ -124,9 +124,11 @@ export function buildLayout(data: ViajeData, opts: { perChapter: number; thumbs:
   data.chapters.forEach((ch, ci) => {
     const preset: Preset = mobile ? 'axis' : PRESETS[ci % PRESETS.length];
     const all = ch.photos;
-    const main = all.slice(0, Math.max(1, opts.perChapter));
+    // móvil: TODAS las fotos son paradas (una por pantalla). Antes solo las 5 primeras de cada capítulo → 26 de 63
+    // en el móvil frente a 63 en el PC (16/11/2026). En PC, las que no son parada van de satélites (todas).
+    const main = mobile ? all : all.slice(0, Math.max(1, opts.perChapter));
     // el resto de fotos del capítulo: satélites sin parada (se abren en el lightbox). Cada decorado los coloca a su manera
-    const extra = opts.thumbs ? all.slice(main.length, main.length + (preset === 'carousel' ? 24 : 16)) : [];
+    const extra = opts.thumbs ? all.slice(main.length) : [];
     const r = rand(ci * 31 + 7);
     const anchor = new Vector3(mobile ? 0 : Math.sin(ci * 1.7) * 10, 0, anchorZ);
     const firstStop = stops.length;

@@ -1,5 +1,5 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 16/11/2026 (chat web 4, 5.º: fotos boca abajo al azar en Chrome Android → texturas con <img>; chat web 4, 4.º: fotos boca abajo al volver; chat web 4, 3.º: fotos lavadas/al revés al deslizar en móvil; chat web 4: sin ISO/velocidad/diafragma, foto de Raúl, sin foco, portadas enteras; chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
+_Última actualización: 16/11/2026 (chat web 4, 6.º: las 63 fotos también en móvil; chat web 4, 5.º: fotos boca abajo al azar en Chrome Android → texturas con <img>; chat web 4, 4.º: fotos boca abajo al volver; chat web 4, 3.º: fotos lavadas/al revés al deslizar en móvil; chat web 4: sin ISO/velocidad/diafragma, foto de Raúl, sin foco, portadas enteras; chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 ## 1. Álvaro (datos confirmados)
 - 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha. Antes: **Grado Medio de Técnico en Vídeo Disc-jockey y Sonido, Campus FP Arganda** (dato de Marlon, 10/11/2026; puesto en /sobre de la web 2).
 - Quiere fotoperiodismo, calle, reportaje y actualidad. También eventos, conciertos y bodas, en segundo plano. Vídeo no.
@@ -154,6 +154,11 @@ Ahora (mismo criterio que la web 2):
 - Causa: `createImageBitmap` en Chrome Android (la imagen puede quedar en GPU y la subida cambia de origen). **Eliminado del todo:** todas las texturas de foto se cargan con `<img>` + `decode()` (ruta estándar de WebGL), derechas y sin volteo en la subida; el shader voltea (`photoUv`). `textures.ts` ya no usa ImageBitmap.
 - Comprobado aquí (Chromium): WebGL = foto nativa (1,0/255; volteada 41), avanzar y volver sin cambios. No reproducible sin su móvil: **que Marlon lo confirme** (recargar la página antes).
 - Pendiente aparte: en su captura, con la foto parada, la capa nativa (foto real encima) no tapaba la textura; revisar si en móvil tarda o no llega a mostrarse.
+
+## 3o. Web 4 — las 63 fotos también en móvil (16/11/2026, 6.º chat del día)
+- Marlon: en el PC salen 63 fotos y en el móvil 26. Causa: en móvil solo se ponían las 5 primeras de cada capítulo y sin miniaturas; en PC de gama media pasaba lo mismo (5 por capítulo, sin satélites → 30 paradas y faltaban fotos).
+- Ahora (`layout.ts` + `index.ts`): **en móvil todas las fotos son paradas** (una por pantalla, 63 paradas); **en PC, en todas las gamas**, 6 paradas por capítulo y el resto como satélites (todas, sin tope de 16/24).
+- Comprobado (Chromium): móvil 390×844 → 63 paradas, contador 041/063 y 061/063 con la foto bien; PC gama media → contador /063; sin errores. Ojo: los decorados `room` (cap. 1) y `layers` (cap. 2) no colocan satélites: si algún día esos capítulos pasan de 6 fotos, en PC faltarían las de más.
 
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.

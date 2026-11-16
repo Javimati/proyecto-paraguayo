@@ -204,7 +204,7 @@ export async function mountExperience(o: MountOptions): Promise<Experience> {
   const camera = new PerspectiveCamera(mobile ? 58 : 46, 1, 0.05, 420);
 
   /* ───────── layout ───────── */
-  const layout = buildLayout(data, { perChapter: high ? 6 : 5, thumbs: high && !mobile, mobile });
+  const layout = buildLayout(data, { perChapter: 6, thumbs: !mobile, mobile }); // todas las fotos en todas las gamas (63)
   const { slots, stops, zones, finalAnchor } = layout;
   const nStops = stops.length; // la parada nStops es la hoja de contactos final
   const loader = new TextureLoader(renderer, 3, high ? 8 : 2);
