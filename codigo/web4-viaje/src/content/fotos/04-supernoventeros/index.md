@@ -1,13 +1,23 @@
 ---
-n: 4
-kicker: Capítulo 04 — Supernoventeros
-kicker_en: Chapter 04 — Supernoventeros
+n: 3
+kicker: Capítulo 03 — Supernoventeros
+kicker_en: Chapter 03 — Supernoventeros
 title: Supernoventeros
 title_en: Supernoventeros
 text: 'Un festival que te transporta a los años noventa, desde el foso y el escenario, la energía de un directo, foto a foto.'
 text_en: 'A festival that takes you back to the nineties, from the pit and the stage, the energy of a live show, frame by frame.'
 provisional: false
 photos:
+- file: ./03.jpg
+  alt: Artista con chaqueta amarilla y pantalón blanco saltando con una pierna estirada bajo focos azules
+  alt_en: Performer in a yellow jacket and white trousers leaping with one leg stretched out under blue
+    lights
+  caption: Salto en el aire con chaqueta amarilla.
+  caption_en: A mid-air leap in a yellow jacket.
+  date: 2025-03-29
+  featured: true
+  source: SUPERNOVENTEROS/05.jpg
+  dominant: '#081838'
 - file: ./05.jpg
   alt: Cantante con tocado brillante y traje de lentejuelas plateadas cantando bajo luz morada
   alt_en: Singer with a glittering headpiece and silver sequinned suit singing under purple light
@@ -103,16 +113,6 @@ photos:
   featured: true
   source: SUPERNOVENTEROS/02.jpg
   dominant: '#081828'
-- file: ./03.jpg
-  alt: Artista con chaqueta amarilla y pantalón blanco saltando con una pierna estirada bajo focos azules
-  alt_en: Performer in a yellow jacket and white trousers leaping with one leg stretched out under blue
-    lights
-  caption: Salto en el aire con chaqueta amarilla.
-  caption_en: A mid-air leap in a yellow jacket.
-  date: 2025-03-29
-  featured: true
-  source: SUPERNOVENTEROS/05.jpg
-  dominant: '#081838'
 - file: ./13.jpg
   alt: Escenario iluminado en azul visto desde el fondo del recinto, con el público en primer término
   alt_en: Stage lit in blue seen from the back of the arena, with the crowd in the foreground

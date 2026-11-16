@@ -1,7 +1,7 @@
 ---
-n: 3
-kicker: Capítulo 03 — La Fiesta Naranja
-kicker_en: Chapter 03 — La Fiesta Naranja
+n: 2
+kicker: Capítulo 02 — La Fiesta Naranja
+kicker_en: Chapter 02 — La Fiesta Naranja
 title: La Fiesta Naranja
 title_en: La Fiesta Naranja
 text: 'Un festival entero vestido de naranja: público, cabina y escenario. La emoción de una celebración
@@ -10,6 +10,15 @@ text_en: 'A whole festival dressed in orange: crowd, DJ booth and stage. The emo
   and the details almost nobody sees.'
 provisional: false
 photos:
+- file: ./19.jpg
+  alt: Plano general del recinto con pantallas y focos morados sobre el público
+  alt_en: Wide shot of the venue with screens and purple lights over the crowd
+  caption: El recinto entero en luz morada.
+  caption_en: The whole venue in purple light.
+  date: 2025-06-08
+  featured: false
+  source: LA FIESTA NARANJA/15.jpg
+  dominant: '#080818'
 - file: ./05.jpg
   alt: Performer con gorra de plato dorada y body de cadenas posando en el escenario frente al público
   alt_en: Performer in a gold peaked cap and chain bodysuit posing on stage in front of the crowd
@@ -109,15 +118,6 @@ photos:
   featured: false
   source: LA FIESTA NARANJA/11.jpg
   dominant: '#080808'
-- file: ./19.jpg
-  alt: Plano general del recinto con pantallas y focos morados sobre el público
-  alt_en: Wide shot of the venue with screens and purple lights over the crowd
-  caption: El recinto entero en luz morada.
-  caption_en: The whole venue in purple light.
-  date: 2025-06-08
-  featured: false
-  source: LA FIESTA NARANJA/15.jpg
-  dominant: '#080818'
 - file: ./08.jpg
   alt: Hombre con cresta de colores y chaleco naranja levantando el puño entre el público, también vestido
     de naranja

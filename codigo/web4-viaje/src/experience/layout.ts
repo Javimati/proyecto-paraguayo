@@ -84,7 +84,9 @@ function vivid(hex: string): [number, number, number] {
   return [0.35 + 0.65 * c[0], 0.35 + 0.65 * c[1], 0.35 + 0.65 * c[2]];
 }
 
-const PRESETS: Preset[] = ['room', 'layers', 'wall', 'stage', 'carousel', 'develop'];
+// 16/11/2026: Álvaro quita el capítulo «Desde Madrid» (era el cuarto, 'room'); cada capítulo conserva su decorado.
+// 'room' sigue en el código por si vuelve a usarse.
+const PRESETS: Preset[] = ['layers', 'wall', 'stage', 'carousel', 'develop'];
 
 function size(p: ViajePhoto, h: number, maxW = Infinity) {
   let height = h;
@@ -126,7 +128,9 @@ export function buildLayout(data: ViajeData, opts: { perChapter: number; thumbs:
     const all = ch.photos;
     // móvil: TODAS las fotos son paradas (una por pantalla). Antes solo las 5 primeras de cada capítulo → 26 de 63
     // en el móvil frente a 63 en el PC (16/11/2026). En PC, las que no son parada van de satélites (todas).
-    const main = mobile ? all : all.slice(0, Math.max(1, opts.perChapter));
+    // los decorados sin satélites (cuarto, capas, revelado) llevan todas sus fotos como paradas, para que no falte ninguna
+    const noExtras = preset === 'room' || preset === 'layers' || preset === 'develop';
+    const main = mobile || noExtras ? all : all.slice(0, Math.max(1, opts.perChapter));
     // el resto de fotos del capítulo: satélites sin parada (se abren en el lightbox). Cada decorado los coloca a su manera
     const extra = opts.thumbs ? all.slice(main.length) : [];
     const r = rand(ci * 31 + 7);

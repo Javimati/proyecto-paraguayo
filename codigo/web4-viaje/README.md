@@ -11,7 +11,7 @@ misma historia en 2D para móviles modestos, lectores de pantalla y quien prefie
    - Para ver la versión 2D: `?tier=none`.
 
 ## Cambiar fotos y textos
-Cada capítulo es una carpeta en `src/content/fotos/` (`01-desde-madrid`, `02-la-calle`, `05-fiesta-naranja` [cap. 3], `04-supernoventeros`, `03-la-noche` [cap. 5], `06-lo-que-viene`; el orden lo da `n`, no el nombre de la carpeta) con sus fotos y un
+Cada capítulo es una carpeta en `src/content/fotos/` (`02-la-calle` [cap. 1], `05-fiesta-naranja` [cap. 2], `04-supernoventeros` [cap. 3], `03-la-noche` [cap. 4], `06-lo-que-viene` [cap. 5]; «Desde Madrid» se quitó el 16/11/2026; el orden lo da `n`, no el nombre de la carpeta) con sus fotos y un
 `index.md`:
 ```yaml
 n: 2                        # orden del capítulo

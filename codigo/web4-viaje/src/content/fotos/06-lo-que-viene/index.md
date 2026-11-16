@@ -1,7 +1,7 @@
 ---
-n: 6
-kicker: Capítulo 06 — Lo que viene
-kicker_en: Chapter 06 — What comes next
+n: 5
+kicker: Capítulo 05 — Lo que viene
+kicker_en: Chapter 05 — What comes next
 title: Lo que viene
 title_en: What comes next
 text: Estudio 2.º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen en Campus FP Atocha.

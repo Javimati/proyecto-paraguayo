@@ -1,13 +1,24 @@
 ---
-n: 2
-kicker: Capítulo 02 — La calle
-kicker_en: Chapter 02 — The street
+n: 1
+kicker: Capítulo 01 — La calle
+kicker_en: Chapter 01 — The street
 title: La calle
 title_en: The street
 text: "La fotografía de calle es lo que más me gusta: salir con la cámara y estar atento a lo que pasa. De ahí quiero llegar al fotorreportaje y la actualidad."
 text_en: "Street photography is what I love most: going out with the camera and paying attention to what happens. From there I want to move into reportage and news."
 provisional: false
 photos:
+  - file: ./05.jpg
+    alt: Tres personas esperan en un andén delante de un tren en marcha; una mujer
+      lleva un velo blanco
+    alt_en: Three people wait on a platform in front of a moving train; one woman
+      wears a white veil
+    caption: "Espera en el andén: tres viajeros delante de un tren que pasa."
+    caption_en: "Waiting on the platform: three travellers in front of a passing train."
+    date: 2026-10-28
+    featured: true
+    source: CALLEJERA/_R007244.2.jpg
+    dominant: "#080808"
   - file: ./01.jpg
     alt: Gente subiendo unas escaleras hacia la calle a contraluz, bajo un cielo con
       estelas de avión
@@ -54,17 +65,6 @@ photos:
     featured: true
     source: CALLEJERA/_R006078.JPG
     dominant: "#888888"
-  - file: ./05.jpg
-    alt: Tres personas esperan en un andén delante de un tren en marcha; una mujer
-      lleva un velo blanco
-    alt_en: Three people wait on a platform in front of a moving train; one woman
-      wears a white veil
-    caption: "Espera en el andén: tres viajeros delante de un tren que pasa."
-    caption_en: "Waiting on the platform: three travellers in front of a passing train."
-    date: 2026-10-28
-    featured: true
-    source: CALLEJERA/_R007244.2.jpg
-    dominant: "#080808"
   - file: ./06.jpg
     alt: "Calle de noche: dos mujeres y un hombre junto a un autobús iluminado"
     alt_en: "Street at night: two women and a man beside a lit bus"
@@ -74,4 +74,50 @@ photos:
     featured: false
     source: CALLEJERA/_R007191.JPG
     dominant: "#080808"
+  - file: ./07.jpg
+    alt: Cabeza gigante de mujer, blanca, sobre una plaza; abajo, un hombre con
+      barba camina junto a un muro en sombra
+    alt_en: Giant white head of a woman above a square; below, a bearded man walks
+      past a shadowed wall
+    caption: Una cabeza blanca enorme vigila la plaza mientras un hombre pasa por la
+      sombra.
+    caption_en: A huge white head watches over the square as a man walks through the
+      shadow.
+    date: 2026-01-09
+    featured: true
+    source: CALLEJERA/_R005313.JPG
+    dominant: "#080808"
+  - file: ./08.jpg
+    alt: Una persona con capucha se tapa la cara en el asiento de un autobús; una
+      franja de sol entra por la ventanilla
+    alt_en: A hooded person covers their face in a bus seat; a strip of sunlight
+      comes through the window
+    caption: Una franja de sol entra por la ventanilla mientras alguien se tapa la
+      cara en el asiento.
+    caption_en: A strip of sun comes through the window as someone covers their face
+      in the seat.
+    date: 2026-01-19
+    featured: false
+    source: CALLEJERA/_R005473.2.jpg
+    dominant: "#080808"
+  - file: ./09.jpg
+    alt: Mujer con velo blanco sentada de espaldas en un suelo de adoquines
+    alt_en: Woman in a white veil sitting with her back to the camera on cobblestones
+    caption: Una mujer con velo blanco, sentada de espaldas sobre el empedrado.
+    caption_en: A woman in a white veil, sitting with her back to us on the cobbles.
+    date: 2026-07-25
+    featured: false
+    source: CALLEJERA/_R006694.2.jpg
+    dominant: "#383838"
+  - file: ./10.jpg
+    alt: Ventanal iluminado de un edificio con una figura detrás del cristal y luces
+      desenfocadas debajo
+    alt_en: Lit window of a building with a figure behind the glass and blurred
+      lights below
+    caption: Una silueta tras un ventanal iluminado, sobre un reflejo de luces.
+    caption_en: A silhouette behind a lit window, above a blur of lights.
+    date: 2026-01-30
+    featured: false
+    source: CALLEJERA/_R005573.JPG
+    dominant: "#383838"
 ---

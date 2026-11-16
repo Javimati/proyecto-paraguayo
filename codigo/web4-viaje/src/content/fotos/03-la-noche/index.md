@@ -1,7 +1,7 @@
 ---
-n: 5
-kicker: Capítulo 05 — La noche
-kicker_en: Chapter 05 — The night
+n: 4
+kicker: Capítulo 04 — La noche
+kicker_en: Chapter 04 — The night
 title: La noche
 title_en: The night
 text: Salas, cabinas, barra y pista. Mi formación en iluminación me deja trabajar con cualquier luz, también
@@ -10,6 +10,15 @@ text_en: Venues, DJ booths, the bar and the dance floor. My lighting training le
   even in a dark room.
 provisional: false
 photos:
+- file: ./06.jpg
+  alt: Escenario oscuro con chorros de humo iluminados en rojo y un artista en el centro
+  alt_en: Dark stage with red-lit smoke jets and a performer in the centre
+  caption: Columnas de humo rojo a los lados del escenario.
+  caption_en: Columns of red smoke on both sides of the stage.
+  date: 2026-08-23
+  featured: false
+  source: MÁS TRABAJOS/14.jpg
+  dominant: '#080808'
 - file: ./01.jpg
   alt: Hombre con barba canosa riendo a carcajadas hacia la cámara bajo luz azul
   alt_en: Grey-bearded man laughing loudly toward the camera under blue light
@@ -84,15 +93,6 @@ photos:
   date: 2025-09-06
   featured: false
   source: MÁS TRABAJOS/07.jpg
-  dominant: '#080808'
-- file: ./06.jpg
-  alt: Escenario oscuro con chorros de humo iluminados en rojo y un artista en el centro
-  alt_en: Dark stage with red-lit smoke jets and a performer in the centre
-  caption: Columnas de humo rojo a los lados del escenario.
-  caption_en: Columns of red smoke on both sides of the stage.
-  date: 2026-08-23
-  featured: false
-  source: MÁS TRABAJOS/14.jpg
   dominant: '#080808'
 - file: ./08.jpg
   alt: Foto en blanco y negro muy oscura de un joven entre sombras y humo

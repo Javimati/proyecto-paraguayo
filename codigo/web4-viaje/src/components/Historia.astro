@@ -89,7 +89,6 @@ function slot(p: PhotoView, i: number) {
               </span>
               <span class="index__n mono">{pad(c.n)}</span>
               <span class="index__name">{c.title}</span>
-              <span class="index__count mono meta">{t.photosN(c.photos.length)}</span>
             </a>
           </li>
         ))
@@ -339,9 +338,6 @@ function slot(p: PhotoView, i: number) {
     font-weight: 640;
     line-height: 1.1;
     letter-spacing: -0.015em;
-  }
-  .index__count {
-    grid-column: 2;
   }
   .provisional {
     margin-top: 28px;
