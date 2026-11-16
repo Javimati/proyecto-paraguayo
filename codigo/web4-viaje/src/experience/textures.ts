@@ -1,7 +1,7 @@
 import { LinearFilter, LinearMipmapLinearFilter, NoColorSpace, Texture, type WebGLRenderer } from 'three';
 
 /**
- * Carga de texturas: fetch → createImageBitmap (decodifica fuera del hilo principal y voltea en origen)
+ * Carga de texturas: fetch → createImageBitmap (decodifica fuera del hilo principal), foto DERECHA (fila 0 = arriba)
  * con concurrencia limitada, y subida a GPU de una en una por frame para no dar tirones.
  * Las texturas van SIN conversión de espacio de color: los píxeles llegan a pantalla tal cual.
  */
@@ -80,9 +80,11 @@ export class TextureLoader {
       const res = await fetch(url, { signal: this.abort.signal });
       if (!res.ok) throw new Error(`${res.status} ${url}`);
       const blob = await res.blob();
-      const bmp = await createImageBitmap(blob, { imageOrientation: 'flipY', premultiplyAlpha: 'none' });
+      // sin `imageOrientation: 'flipY'`: según navegador y caché, algunas fotos llegaban SIN voltear y se veían
+      // boca abajo al volver atrás (16/11/2026). Ahora se decodifican derechas (lo normal en todos) y el shader
+      // las lee con la v invertida (PHOTO_UV en shaders.ts).
+      const bmp = await createImageBitmap(blob, { premultiplyAlpha: 'none' });
       tex = new Texture(bmp as unknown as HTMLImageElement);
-      tex.flipY = false;
     } else {
       const img = new Image();
       img.decoding = 'async';
@@ -90,6 +92,9 @@ export class TextureLoader {
       await img.decode();
       tex = new Texture(img);
     }
+    // TODAS las texturas de foto, derechas y sin voltear en la subida (ni ImageBitmap ni UNPACK_FLIP_Y): el volteo
+    // lo hace siempre el shader, igual en todos los navegadores
+    tex.flipY = false;
     tex.colorSpace = NoColorSpace;
     tex.generateMipmaps = true;
     tex.minFilter = LinearMipmapLinearFilter;

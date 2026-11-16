@@ -1,5 +1,5 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 16/11/2026 (chat web 4, 3.º: fotos lavadas/al revés al deslizar en móvil; chat web 4: sin ISO/velocidad/diafragma, foto de Raúl, sin foco, portadas enteras; chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
+_Última actualización: 16/11/2026 (chat web 4, 4.º: fotos boca abajo al volver; chat web 4, 3.º: fotos lavadas/al revés al deslizar en móvil; chat web 4: sin ISO/velocidad/diafragma, foto de Raúl, sin foco, portadas enteras; chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 ## 1. Álvaro (datos confirmados)
 - 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha. Antes: **Grado Medio de Técnico en Vídeo Disc-jockey y Sonido, Campus FP Arganda** (dato de Marlon, 10/11/2026; puesto en /sobre de la web 2).
 - Quiere fotoperiodismo, calle, reportaje y actualidad. También eventos, conciertos y bodas, en segundo plano. Vídeo no.
@@ -144,6 +144,11 @@ Ahora (mismo criterio que la web 2):
 - Comprobado: build ok, `check:js` ok, `photos:check` sin errores, `astro check` 0 errores.
 - **Lighthouse móvil de `/` y `/en/` FALLA (36–41, LCP 6–12 s) también con el código ya publicado antes de este chat** (medido igual en d0dcebd): no lo causa este cambio, viene de §3j/§3k, que no repitieron Lighthouse. Pendiente para un chat propio.
 
+## 3m. Web 4 — fotos boca abajo al volver atrás (16/11/2026, 4.º chat del día)
+- Marlon: tras avanzar y retroceder, **algunas** fotos salen boca abajo (sigue pasando tras §3l). El volteo dependía de `createImageBitmap(..., { imageOrientation: 'flipY' })`, que no es fiable en todos los navegadores (a veces devuelve la imagen sin voltear; las fotos que se descargan y se vuelven a cargar al retroceder son las que tienen más papeletas).
+- **Ahora no depende de ningún navegador:** todas las texturas de foto se decodifican derechas, sin `imageOrientation` ni `UNPACK_FLIP_Y` (`tex.flipY = false` en `textures.ts`), y el volteo lo hace siempre el shader (`PHOTO_UV`/`photoUv()` en `shaders.ts`: foto, nube de puntos y reflejo del suelo en `street.ts`). Rótulos, placas y títulos (texturas de canvas) no cambian.
+- Comprobado (Chromium, ruta normal y ruta WebKit simulada, 390×844 a 2× y escritorio gama alta): la foto WebGL coincide con la foto nativa (diferencia media 1,0/255; volteada sería 41); avanzar 2→3→9→14 y volver: mismas fotos y misma orientación. `check:js` ok, `photos:check` sin errores, `astro check` 0 errores. **Sin probar en el móvil de Marlon:** que lo confirme.
+
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.
@@ -204,7 +209,7 @@ Herramientas en `herramientas/` del repo:
 - **WebGL solo probado con renderizado por software:** fps reales sin medir en una GPU.
 - **Web 4:**
   - Lighthouse móvil de `/` y `/en/` por debajo de 90 (36–41, LCP 6–12 s) desde §3j/§3k: investigar (portadas `contain`, foto de fondo de la intro…).
-  - Foto al revés al volver atrás en móvil: arreglo para WebKit sin probar en iPhone real (§3l).
+  - Fotos boca abajo al volver atrás: volteo pasado al shader (§3m), pendiente de que Marlon lo confirme en su móvil.
   - Calle nueva: medir fps en GPU real (portátil normal y móvil). Si va justa, bajar edificios de la 2ª fila, lluvia o reflejos (ya se apagan solos al degradar).
   - En móvil, la foto siguiente asoma como rectángulo oscuro bajo la actual (eje recto).
   - Auditoría de accesibilidad y rendimiento sin repetir tras el rediseño.

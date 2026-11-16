@@ -22,7 +22,7 @@ import {
   Vector4,
   ZeroFactor,
 } from 'three';
-import { SPOT_FRAG, SPOT_VERT } from './shaders';
+import { PHOTO_UV, SPOT_FRAG, SPOT_VERT } from './shaders';
 
 /**
  * «La calle de los recuerdos»: la ciudad de noche que une las estaciones.
@@ -840,6 +840,7 @@ export const REFL_VERT = /* glsl */ `
   }
 `;
 export const REFL_FRAG = /* glsl */ `
+  ${PHOTO_UV}
   uniform sampler2D uTex;
   uniform float uHasTex;
   uniform vec2 uMargin;
@@ -861,7 +862,7 @@ export const REFL_FRAG = /* glsl */ `
     inner.x += (vnoise(P * 3.0 + vec2(0.0, uTime * 0.7)) - 0.5) * 0.025 * (1.0 - inRoom);
     vec3 col = vec3(0.0);
     if (uHasTex > 0.5 && inner.x > 0.0 && inner.x < 1.0 && inner.y > 0.0 && inner.y < 1.0) {
-      for (int i = 0; i < 5; i++) col += texture2D(uTex, clamp(inner + vec2(0.0, (float(i) - 2.0) * 0.012), 0.0, 1.0)).rgb;
+      for (int i = 0; i < 5; i++) col += texture2D(uTex, photoUv(clamp(inner + vec2(0.0, (float(i) - 2.0) * 0.012), 0.0, 1.0))).rgb;
       col /= 5.0;
     }
     float depth = fy - vWorld.y;

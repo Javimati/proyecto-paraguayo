@@ -4,6 +4,10 @@
  * "da ambiente" (niebla, haz, grano, viñeta) va fuera de la foto o se aplica solo cuando la foto está lejos.
  */
 
+/** Las texturas de foto llegan derechas (fila 0 = arriba) y sin UNPACK_FLIP_Y: se leen con la v invertida.
+ *  Así ningún navegador puede dejarlas boca abajo (antes dependía de createImageBitmap 'flipY'). */
+export const PHOTO_UV = /* glsl */ `vec2 photoUv(vec2 uv) { return vec2(uv.x, 1.0 - uv.y); }`;
+
 /* ───────── Foto: plano sin iluminación con marco fino ───────── */
 export const PHOTO_VERT = /* glsl */ `
   varying vec2 vUv;
@@ -17,6 +21,7 @@ export const PHOTO_VERT = /* glsl */ `
 `;
 
 export const PHOTO_FRAG = /* glsl */ `
+  ${PHOTO_UV}
   uniform sampler2D uTex;
   uniform float uHasTex;
   uniform float uReveal;     // 0..1 aparición del plano (tras la nube de puntos)
@@ -47,7 +52,7 @@ export const PHOTO_FRAG = /* glsl */ `
       // interior de la foto: SIEMPRE sus píxeles tal cual, desde que aparece (decisión de Marlon, 16/11/2026).
       // Antes se desenfocaba («recuerdo»), se atenuaba (uLum), se revelaba desde papel claro y se le aplicaba
       // niebla hasta llegar: se veía distinta (más brillante y lavada) y cambiaba al pararse delante.
-      col = uHasTex > 0.5 ? texture2D(uTex, inner).rgb : vec3(0.02);
+      col = uHasTex > 0.5 ? texture2D(uTex, photoUv(inner)).rgb : vec3(0.02);
     } else {
       // marco: papel muy oscuro con un filo de luz en el borde exterior
       vec2 e = min(vUv, 1.0 - vUv) / uMargin;       // 0 en el borde exterior, 1 en el interior
@@ -76,6 +81,7 @@ export const PHOTO_FRAG = /* glsl */ `
 
 /* ───────── Nube de puntos que muestrea la foto y se condensa en ella ───────── */
 export const POINTS_VERT = /* glsl */ `
+  ${PHOTO_UV}
   attribute vec2 aGrid;
   attribute vec4 aRand;
   uniform sampler2D uTex;
@@ -101,7 +107,7 @@ export const POINTS_VERT = /* glsl */ `
     gl_Position = projectionMatrix * mv;
     float px = uCell * projectionMatrix[1][1] * uViewportH * 0.5 / max(-mv.z, 0.01);
     gl_PointSize = clamp(mix(px * 0.35, px * 1.15, e), 1.0, 64.0);
-    vColor = texture2D(uTex, aGrid).rgb;
+    vColor = texture2D(uTex, photoUv(aGrid)).rgb;
     vAlpha = smoothstep(0.0, 0.15, p) * (1.0 - smoothstep(0.82, 1.0, uProgress));
   }
 `;
