@@ -1,5 +1,5 @@
 # ESTADO — Portfolio de Álvaro Rodríguez Valverde
-_Última actualización: 16/11/2026 (chat web 4, 4.º: fotos boca abajo al volver; chat web 4, 3.º: fotos lavadas/al revés al deslizar en móvil; chat web 4: sin ISO/velocidad/diafragma, foto de Raúl, sin foco, portadas enteras; chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
+_Última actualización: 16/11/2026 (chat web 4, 5.º: fotos boca abajo al azar en Chrome Android → texturas con <img>; chat web 4, 4.º: fotos boca abajo al volver; chat web 4, 3.º: fotos lavadas/al revés al deslizar en móvil; chat web 4: sin ISO/velocidad/diafragma, foto de Raúl, sin foco, portadas enteras; chat 4: web 4 «la calle de los recuerdos»; chat 3: webs 2 y 4 en Cloudflare Pages; chat 2: fotos reales y peticiones de Álvaro en la web 2)._ Se actualiza al final de cada chat **en el repo** (commit + push a `main`), junto con los cambios de código.
 ## 1. Álvaro (datos confirmados)
 - 20 años, vive en Arganda del Rey (Madrid). 2º del Grado Superior de Iluminación, Captación y Tratamiento de Imagen, Campus FP Atocha. Antes: **Grado Medio de Técnico en Vídeo Disc-jockey y Sonido, Campus FP Arganda** (dato de Marlon, 10/11/2026; puesto en /sobre de la web 2).
 - Quiere fotoperiodismo, calle, reportaje y actualidad. También eventos, conciertos y bodas, en segundo plano. Vídeo no.
@@ -149,6 +149,12 @@ Ahora (mismo criterio que la web 2):
 - **Ahora no depende de ningún navegador:** todas las texturas de foto se decodifican derechas, sin `imageOrientation` ni `UNPACK_FLIP_Y` (`tex.flipY = false` en `textures.ts`), y el volteo lo hace siempre el shader (`PHOTO_UV`/`photoUv()` en `shaders.ts`: foto, nube de puntos y reflejo del suelo en `street.ts`). Rótulos, placas y títulos (texturas de canvas) no cambian.
 - Comprobado (Chromium, ruta normal y ruta WebKit simulada, 390×844 a 2× y escritorio gama alta): la foto WebGL coincide con la foto nativa (diferencia media 1,0/255; volteada sería 41); avanzar 2→3→9→14 y volver: mismas fotos y misma orientación. `check:js` ok, `photos:check` sin errores, `astro check` 0 errores. **Sin probar en el móvil de Marlon:** que lo confirme.
 
+## 3n. Web 4 — fotos boca abajo al azar en Chrome de Android (16/11/2026, 5.º chat del día)
+- Sigue pasando tras §3m, en cualquier foto y al azar (captura de Marlon: Chrome Android, foto 003/026 `01-desde-madrid/03`). Medido sobre la captura: es **espejo vertical exacto** del original (diferencia 2,6/255; girada 180° daría 14,9) → fallo de subida de la textura WebGL, no de cámara ni de la capa nativa. Comprobado que la web publicada ya llevaba §3m (`photoUv` en el bundle).
+- Causa: `createImageBitmap` en Chrome Android (la imagen puede quedar en GPU y la subida cambia de origen). **Eliminado del todo:** todas las texturas de foto se cargan con `<img>` + `decode()` (ruta estándar de WebGL), derechas y sin volteo en la subida; el shader voltea (`photoUv`). `textures.ts` ya no usa ImageBitmap.
+- Comprobado aquí (Chromium): WebGL = foto nativa (1,0/255; volteada 41), avanzar y volver sin cambios. No reproducible sin su móvil: **que Marlon lo confirme** (recargar la página antes).
+- Pendiente aparte: en su captura, con la foto parada, la capa nativa (foto real encima) no tapaba la textura; revisar si en móvil tarda o no llega a mostrarse.
+
 ## 4. PRIORIDAD ACTUAL → Web 2 (setlist)
 - Ya tiene solo 3 secciones, en orden fijo: **Fiesta Naranja** (`fiesta-naranja`), **Supernoventeros** (`supernoventeros`) y **Más trabajos** (`mas-trabajos`; EN «More work»). Rutas `/eventos/<slug>/` y `/en/events/<slug>/`.
 - Lugar y fecha opcionales: se muestran «pendiente» si faltan. Más trabajos = «Varios lugares · Varias fechas», con lugar y fecha por foto.
@@ -209,7 +215,7 @@ Herramientas en `herramientas/` del repo:
 - **WebGL solo probado con renderizado por software:** fps reales sin medir en una GPU.
 - **Web 4:**
   - Lighthouse móvil de `/` y `/en/` por debajo de 90 (36–41, LCP 6–12 s) desde §3j/§3k: investigar (portadas `contain`, foto de fondo de la intro…).
-  - Fotos boca abajo al volver atrás: volteo pasado al shader (§3m), pendiente de que Marlon lo confirme en su móvil.
+  - Fotos boca abajo al azar (Chrome Android): texturas con <img> (§3n), pendiente de que Marlon lo confirme. Capa nativa que no tapa la textura en móvil parado: revisar.
   - Calle nueva: medir fps en GPU real (portátil normal y móvil). Si va justa, bajar edificios de la 2ª fila, lluvia o reflejos (ya se apagan solos al degradar).
   - En móvil, la foto siguiente asoma como rectángulo oscuro bajo la actual (eje recto).
   - Auditoría de accesibilidad y rendimiento sin repetir tras el rediseño.
